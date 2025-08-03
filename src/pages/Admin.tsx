@@ -9,9 +9,6 @@ import {
   LogOut,
   Mail,
   MessageSquare,
-  Eye,
-  Heart,
-  Calendar,
   TrendingUp,
   Shield,
   AlertCircle,
@@ -23,31 +20,14 @@ import {
   Trash2,
   Plus,
   Search,
-  Filter,
-  Download,
   Upload,
   Globe,
   Image,
-  Code,
-  Database,
   Activity,
-  PieChart,
-  BarChart,
-  LineChart,
   MapPin,
   Clock,
-  Tag,
-  Bookmark,
-  Archive,
-  Send,
-  UserCheck,
-  UserX,
   ThumbsUp,
-  ThumbsDown,
-  ExternalLink,
-  Copy,
-  Save,
-  X
+  ThumbsDown
 } from 'lucide-react';
 import { supabase, checkAdminAuthorization, getGitHubUserData } from '../lib/supabase';
 import EmailValidator from '../components/admin/EmailValidator';
@@ -141,9 +121,9 @@ const Admin: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState('all');
 
   // Modal state
-  const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState<'edit' | 'view' | 'delete'>('view');
-  const [selectedItem, setSelectedItem] = useState<any>(null);
+  const [_showModal, setShowModal] = useState(false);
+  const [_modalType, setModalType] = useState<'edit' | 'view' | 'delete'>('view');
+  const [_selectedItem, setSelectedItem] = useState<any>(null);
 
   // Bulletproof state update function
   const updateAuthState = (updates: Partial<AuthState>) => {
@@ -395,6 +375,8 @@ const Admin: React.FC = () => {
   };
 
   // Delete item
+  // Commented out as not currently used - can be re-enabled when modal functionality is implemented
+  /*
   const deleteItem = async (table: string, id: string) => {
     try {
       const { error } = await supabase
@@ -416,6 +398,7 @@ const Admin: React.FC = () => {
       toast.error('Failed to delete item');
     }
   };
+  */
 
   // Bulletproof authentication check with comprehensive error handling
   const checkAuth = async () => {
@@ -581,7 +564,7 @@ const Admin: React.FC = () => {
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event: any, session: any) => {
         console.log('🔄 Auth state changed:', event);
         
         try {
@@ -939,7 +922,7 @@ const Admin: React.FC = () => {
                   {/* Top Pages */}
                   <div className="bg-white/5 p-4 rounded-lg">
                     <h3 className="text-white font-semibold mb-3 flex items-center space-x-2">
-                      <BarChart size={16} />
+                      <BarChart3 size={16} />
                       <span>Top Pages</span>
                     </h3>
                     <div className="space-y-2">

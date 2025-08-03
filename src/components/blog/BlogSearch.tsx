@@ -1,14 +1,11 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, 
   X, 
   Calendar, 
-  Clock, 
-  Tag, 
   ArrowRight, 
   Eye, 
-  Heart, 
   Filter,
   Loader,
   TrendingUp,
@@ -16,7 +13,6 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import { searchPosts, getAllCategories, type BlogPost } from '../../data/blogData';
-import GlassCard from '../ui/GlassCard';
 
 interface BlogSearchProps {
   onSearchResults?: (results: BlogPost[]) => void;
@@ -488,7 +484,7 @@ const BlogSearch: React.FC<BlogSearchProps> = ({ onSearchResults, className = ''
               ) : results.length > 0 ? (
                 /* Search Results */
                 <div className="p-2">
-                  {results.map((post, index) => (
+                  {results.map((post) => (
                     <Link
                       key={post.id}
                       to={`/blog/${post.id}`}

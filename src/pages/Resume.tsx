@@ -10,7 +10,6 @@ import {
   Phone, 
   MapPin,
   ExternalLink,
-  Calendar,
   Star,
   ArrowDown
 } from 'lucide-react';

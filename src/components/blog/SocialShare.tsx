@@ -4,7 +4,6 @@ import {
   Share2, 
   Facebook, 
   Linkedin, 
-  Link, 
   Copy, 
   CheckCircle,
   Mail

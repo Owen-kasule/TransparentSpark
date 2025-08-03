@@ -7,7 +7,6 @@ import {
   ArrowLeft, 
   BookOpen, 
   Tag, 
-  User, 
   Eye,
   Heart,
   MessageCircle,
@@ -26,7 +25,7 @@ import { useAnalytics } from '../hooks/useAnalytics';
 import { getBlogPostById, getRelatedPosts, getAllPosts, type BlogPost } from '../data/blogData';
 import { blogService } from '../lib/blogService';
 
-const BlogPost: React.FC = () => {
+const BlogPostPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const [post, setPost] = useState<BlogPost | null>(null);
@@ -735,4 +734,4 @@ const BlogPost: React.FC = () => {
   );
 };
 
-export default BlogPost;
+export default BlogPostPage;

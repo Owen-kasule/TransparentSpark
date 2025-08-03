@@ -55,16 +55,16 @@ const BlogDebug = () => {
 
       if (error) {
         console.error('Insert error:', error);
-        setDebugInfo(prev => ({ ...prev, insertError: error }));
+        setDebugInfo((prev: any) => ({ ...prev, insertError: error }));
       } else {
         console.log('Data inserted successfully:', data);
-        setDebugInfo(prev => ({ ...prev, insertSuccess: true }));
+        setDebugInfo((prev: any) => ({ ...prev, insertSuccess: true }));
         // Refresh the page to see the new data
         window.location.reload();
       }
     } catch (err) {
       console.error('Insert failed:', err);
-      setDebugInfo(prev => ({ ...prev, insertError: err }));
+      setDebugInfo((prev: any) => ({ ...prev, insertError: err }));
     } finally {
       setIsInserting(false);
     }
