@@ -145,9 +145,9 @@ const Home: React.FC = () => {
                     src="/images/profile/owen-profile.webp"
                     alt="Owen - Full Stack Developer"
                     className="w-full h-full object-cover object-center"
-                    onError={(e) => {
+                    onError={(_e) => {
                       // Fallback to placeholder if image doesn't exist
-                      const target = e.target as HTMLImageElement;
+                      // const target = e.target as HTMLImageElement;
                       // target.src = "https://photos.app.goo.gl/zL893vdr3UnAp2n7A"; // Placeholder image URL
                     }}
                   />

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Send, User, Calendar, Mail, AlertCircle, CheckCircle, Loader, Heart, Reply, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { MessageCircle, Send, Calendar, AlertCircle, CheckCircle, Loader, Heart, Reply, ChevronDown, ChevronUp } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import validator from 'validator';
 import { supabase } from '../../lib/supabase';
@@ -54,7 +54,7 @@ interface CommentSectionProps {
   onCommentCountChange?: (count: number) => void;
 }
 
-const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle, onCommentCountChange }) => {
+const CommentSection: React.FC<CommentSectionProps> = ({ postId, onCommentCountChange }) => {
   const [comments, setComments] = useState<DBComment[]>([]);
   const [replies, setReplies] = useState<DBReply[]>([]);
   const [dummyComments, setDummyComments] = useState<any[]>([]);
@@ -79,7 +79,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle, onCo
   });
 
   const { register, handleSubmit, reset, formState: { errors }, watch } = useForm<CommentFormData>();
-  const { register: registerReply, handleSubmit: handleReplySubmit, reset: resetReply, formState: { errors: replyErrors } } = useForm<ReplyFormData>();
+  const { reset: resetReply } = useForm<ReplyFormData>();
 
   useEffect(() => {
     loadComments();
@@ -140,7 +140,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle, onCo
   useEffect(() => {
     const commentSub = supabase
       .channel('public:blog_comments')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'blog_comments' }, payload => {
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'blog_comments' }, (payload: any) => {
         const updated = payload.new;
         setComments(prev => prev.map(c => c.id === updated.id ? { ...c, likes: updated.likes } : c));
       })
@@ -148,7 +148,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle, onCo
 
     const replySub = supabase
       .channel('public:comment_replies')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'comment_replies' }, payload => {
+      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'comment_replies' }, (payload: any) => {
         const updated = payload.new;
         setReplies(prev => prev.map(r => r.id === updated.id ? { ...r, likes: updated.likes } : r));
       })
@@ -1011,7 +1011,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle, onCo
         ) : (
           <>
             {/* Dummy Comments */}
-            {dummyComments.map((comment, index) => (
+            {dummyComments.map((comment) => (
               <div key={comment.id}>
                 {renderComment(comment)}
                 
@@ -1056,7 +1056,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle, onCo
             ))}
             
             {/* Real Comments from Supabase */}
-            {comments.map((comment, index) => (
+            {comments.map((comment) => (
               renderComment(comment)
             ))}
           </>

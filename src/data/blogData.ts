@@ -15,7 +15,7 @@ interface Comment {
   replies?: Comment[];
 }
 
-export const getCommentsForPost = (postId: string): Comment[] => {
+export const getCommentsForPost = (_postId: string): Comment[] => {
   // Return empty array for all posts (no dummy data)
   return [];
 };

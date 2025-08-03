@@ -291,7 +291,7 @@ class BlogService {
         return [];
       }
 
-      const categories = [...new Set(data?.map(post => post.category) || [])];
+      const categories = [...new Set(data?.map((post: BlogPost) => post.category) || [])] as string[];
       return categories;
     } catch (error) {
       console.error('Error in getAllCategories:', error);
@@ -378,8 +378,8 @@ class BlogService {
 
       // Sort by relevance score and return top results
       return scoredResults
-        .filter(post => (post as any).searchScore > 0)
-        .sort((a, b) => (b as any).searchScore - (a as any).searchScore)
+        .filter((post: any) => post.searchScore > 0)
+        .sort((a: any, b: any) => b.searchScore - a.searchScore)
         .slice(0, 20);
         
     } catch (error) {

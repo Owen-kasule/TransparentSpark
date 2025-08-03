@@ -46,7 +46,7 @@ const RelatedPosts: React.FC<RelatedPostsProps> = ({
                 {/* Image */}
                 <div className="aspect-video relative overflow-hidden">
                   <img 
-                    src={post.imageUrl} 
+                    src={post.image_url} 
                     alt={post.title}
                     className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
                   />
@@ -78,7 +78,7 @@ const RelatedPosts: React.FC<RelatedPostsProps> = ({
                     </div>
                     <div className="flex items-center space-x-1">
                       <Clock size={12} />
-                      <span>{post.readTime}</span>
+                      <span>{post.read_time}</span>
                     </div>
                   </div>
 
