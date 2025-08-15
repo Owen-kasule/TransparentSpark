@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import ProgressiveImage from '../ui/ProgressiveImage';
 import { Outlet, useLocation } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
@@ -26,17 +27,25 @@ const Layout: React.FC = () => {
       {/* Background Images */}
       <div className="fixed inset-0 z-0">
         <div className="absolute inset-0 dark:opacity-100 opacity-0 transition-opacity duration-500">
-          <img 
-            src="/hero-dark.jpg" 
-            alt="Dark background" 
-            className="w-full h-full object-cover"
+          <ProgressiveImage 
+            src="/hero-dark.jpg"
+            alt="Dark background"
+            wrapperClassName="w-full h-full"
+            className="object-cover"
+            initialBlur
+            skeleton
+            lazy={false}
           />
         </div>
         <div className="absolute inset-0 dark:opacity-0 opacity-100 transition-opacity duration-500">
-          <img 
-            src="/hero-light.jpg" 
-            alt="Light background" 
-            className="w-full h-full object-cover"
+          <ProgressiveImage 
+            src="/hero-light.jpg"
+            alt="Light background"
+            wrapperClassName="w-full h-full"
+            className="object-cover"
+            initialBlur
+            skeleton
+            lazy={false}
           />
         </div>
         {/* Overlay */}

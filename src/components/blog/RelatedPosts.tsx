@@ -1,4 +1,5 @@
 import React from 'react';
+import ProgressiveImage from '../ui/ProgressiveImage';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import { Calendar, Clock, ArrowRight, Eye, Heart, BookOpen } from 'lucide-react';
@@ -45,10 +46,14 @@ const RelatedPosts: React.FC<RelatedPostsProps> = ({
               <div className="bg-white/5 rounded-lg overflow-hidden hover:bg-white/10 transition-all duration-300 h-full flex flex-col group-hover:scale-105">
                 {/* Image */}
                 <div className="aspect-video relative overflow-hidden">
-                  <img 
-                    src={post.imageUrl} 
+                  <ProgressiveImage
+                    src={(post as any).image_url || (post as any).imageUrl || post.imageUrl || ''}
                     alt={post.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    wrapperClassName="w-full h-full"
+                    className="object-cover group-hover:scale-110 transition-transform duration-300"
+                    initialBlur
+                    skeleton
+                    lazy
                   />
                   
                   {/* Category Badge */}
@@ -78,7 +83,7 @@ const RelatedPosts: React.FC<RelatedPostsProps> = ({
                     </div>
                     <div className="flex items-center space-x-1">
                       <Clock size={12} />
-                      <span>{post.readTime}</span>
+                      <span>{(post as any).read_time || (post as any).readTime || post.readTime}</span>
                     </div>
                   </div>
 

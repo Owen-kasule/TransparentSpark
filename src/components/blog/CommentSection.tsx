@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { MessageCircle, Send, User, Calendar, Mail, AlertCircle, CheckCircle, Loader, Heart, Reply, X, ChevronDown, ChevronUp } from 'lucide-react';
+import { MessageCircle, Send, Calendar, AlertCircle, CheckCircle, Loader, Heart, Reply, ChevronDown, ChevronUp } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import validator from 'validator';
 import { supabase } from '../../lib/supabase';
@@ -54,7 +54,7 @@ interface CommentSectionProps {
   onCommentCountChange?: (count: number) => void;
 }
 
-const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle, onCommentCountChange }) => {
+const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unusedPostTitle, onCommentCountChange }) => {
   const [comments, setComments] = useState<DBComment[]>([]);
   const [replies, setReplies] = useState<DBReply[]>([]);
   const [dummyComments, setDummyComments] = useState<any[]>([]);
@@ -79,7 +79,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle, onCo
   });
 
   const { register, handleSubmit, reset, formState: { errors }, watch } = useForm<CommentFormData>();
-  const { register: registerReply, handleSubmit: handleReplySubmit, reset: resetReply, formState: { errors: replyErrors } } = useForm<ReplyFormData>();
+  const { reset: resetReply } = useForm<ReplyFormData>();
 
   useEffect(() => {
     loadComments();
@@ -140,7 +140,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle, onCo
   useEffect(() => {
     const commentSub = supabase
       .channel('public:blog_comments')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'blog_comments' }, payload => {
+  .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'blog_comments' }, (payload: any) => {
         const updated = payload.new;
         setComments(prev => prev.map(c => c.id === updated.id ? { ...c, likes: updated.likes } : c));
       })
@@ -148,7 +148,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle, onCo
 
     const replySub = supabase
       .channel('public:comment_replies')
-      .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'comment_replies' }, payload => {
+  .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'comment_replies' }, (payload: any) => {
         const updated = payload.new;
         setReplies(prev => prev.map(r => r.id === updated.id ? { ...r, likes: updated.likes } : r));
       })
@@ -614,20 +614,18 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle, onCo
       <div className="flex items-start space-x-4">
         <div className="w-10 h-10 bg-azure-500/20 rounded-full flex items-center justify-center text-azure-400 font-semibold text-sm flex-shrink-0 overflow-hidden">
           {comment.avatar ? (
-            <img 
-              src={comment.avatar} 
-              alt={comment.author_name} 
-              className="w-full h-full rounded-full object-cover"
+            <img
+              src={comment.avatar}
+              alt={comment.author_name}
+              className="w-full h-full rounded-full object-cover blur-sm scale-105 transition-[filter,transform] duration-700"
+              onLoad={(e) => {
+                const t = e.currentTarget; t.classList.remove('blur-sm','scale-105');
+              }}
               onError={(e) => {
-                // Fallback to initials if image fails to load
-                const target = e.target as HTMLImageElement;
-                target.style.display = 'none';
-                target.parentElement!.innerHTML = getInitials(comment.author_name);
+                const target = e.currentTarget; target.style.display='none'; target.parentElement!.innerHTML = getInitials(comment.author_name);
               }}
             />
-          ) : (
-            getInitials(comment.author_name)
-          )}
+          ) : (getInitials(comment.author_name))}
         </div>
         
         <div className="flex-1">
@@ -1011,7 +1009,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle, onCo
         ) : (
           <>
             {/* Dummy Comments */}
-            {dummyComments.map((comment, index) => (
+            {dummyComments.map((comment) => (
               <div key={comment.id}>
                 {renderComment(comment)}
                 
@@ -1056,7 +1054,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle, onCo
             ))}
             
             {/* Real Comments from Supabase */}
-            {comments.map((comment, index) => (
+            {comments.map((comment) => (
               renderComment(comment)
             ))}
           </>
@@ -1064,16 +1062,23 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle, onCo
       </div>
 
       {/* Comment Guidelines */}
-      <div className="mt-6 p-4 bg-azure-500/10 border border-azure-500/20 rounded-lg">
-        <h4 className="text-azure-400 font-medium mb-2">💬 Comment Guidelines</h4>
-        <ul className="text-white/60 text-sm space-y-1">
-          <li>• Be respectful and constructive in your comments</li>
-          <li>• Your email will be validated but never published</li>
-          <li>• Comments are moderated and may take time to appear</li>
-          <li>• Spam and inappropriate content will be removed</li>
-          <li>• You can reply to comments to start discussions</li>
-          <li>• Click "Show replies" to view responses to comments</li>
-        </ul>
+      <div className="mt-6">
+        <details className="group bg-azure-500/5 border border-azure-500/10 rounded-lg">
+          <summary className="cursor-pointer list-none select-none px-4 py-3 flex items-center justify-between text-sm text-azure-400 font-medium">
+            <span className="flex items-center gap-2">💬 Comment Guidelines</span>
+            <span className="text-white/40 group-open:hidden">(show)</span>
+            <span className="text-white/40 hidden group-open:inline">(hide)</span>
+          </summary>
+          <div className="px-4 pb-4 -mt-1 text-white/60 text-xs leading-relaxed space-y-1">
+            <p className="font-medium text-white/70">Keep it constructive:</p>
+            <ul className="space-y-1">
+              <li>• Be respectful and helpful</li>
+              <li>• No spam or abusive content</li>
+              <li>• Replies keep discussions tidy</li>
+              <li>• Email is never published</li>
+            </ul>
+          </div>
+        </details>
       </div>
     </GlassCard>
   );

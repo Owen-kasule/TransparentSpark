@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import ProgressiveImage from '../components/ui/ProgressiveImage';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Download, Award, Users, Coffee, ArrowDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -245,10 +246,14 @@ const About: React.FC = () => {
                 >
                   <GlassCard className={`p-6 h-full hover:scale-105 transition-transform duration-300 ${isPaused ? 'ring-2 ring-azure-400/50' : ''}`}>
                     <div className="flex items-center mb-4">
-                      <img 
-                        src={testimonial.avatar} 
+                      <ProgressiveImage 
+                        src={testimonial.avatar}
                         alt={testimonial.name}
-                        className="w-12 h-12 rounded-full mr-4"
+                        wrapperClassName="w-12 h-12 rounded-full mr-4 overflow-hidden"
+                        className="object-cover"
+                        initialBlur
+                        skeleton
+                        lazy
                       />
                       <div>
                         <h4 className="text-white font-semibold text-sm">{testimonial.name}</h4>

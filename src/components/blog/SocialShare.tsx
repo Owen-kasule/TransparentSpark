@@ -4,7 +4,6 @@ import {
   Share2, 
   Facebook, 
   Linkedin, 
-  Link, 
   Copy, 
   CheckCircle,
   Mail
@@ -29,13 +28,15 @@ interface SocialShareProps {
   title: string;
   description: string;
   className?: string;
+  compact?: boolean; // new optional compact variant
 }
 
 const SocialShare: React.FC<SocialShareProps> = ({ 
   url, 
   title, 
   description, 
-  className = '' 
+  className = '',
+  compact = false
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -96,7 +97,6 @@ const SocialShare: React.FC<SocialShareProps> = ({
       'share-dialog',
       'width=600,height=400,resizable=yes,scrollbars=yes'
     );
-    
     toast.success(`Opening ${platform.name}...`);
     setIsOpen(false);
   };
@@ -106,23 +106,44 @@ const SocialShare: React.FC<SocialShareProps> = ({
       await navigator.clipboard.writeText(url);
       setCopied(true);
       toast.success('Link copied to clipboard!');
-      
-      setTimeout(() => {
-        setCopied(false);
-      }, 2000);
+      setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       console.error('Failed to copy:', error);
       toast.error('Failed to copy link');
     }
   };
 
+  // Compact variant (used inside external dropdowns / menus)
+  if (compact) {
+    return (
+      <div className={`flex flex-wrap gap-2 ${className}`} aria-label="Share options">
+        {socialPlatforms.map(platform => (
+          <button
+            key={platform.name}
+            onClick={() => handleSocialShare(platform)}
+            className="w-9 h-9 rounded-md bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors text-white/70 hover:text-white"
+            title={`Share on ${platform.name}`}
+          >
+            <platform.icon size={16} />
+          </button>
+        ))}
+        <button
+          onClick={handleCopyLink}
+            className="w-9 h-9 rounded-md bg-white/10 hover:bg-white/20 flex items-center justify-center transition-colors"
+          title="Copy Link"
+          aria-label="Copy link"
+        >
+          {copied ? <CheckCircle size={16} className="text-green-400" /> : <Copy size={16} className="text-white/70" />}
+        </button>
+      </div>
+    );
+  }
+
   return (
     <div className={`relative ${className}`}>
       {/* Desktop: Horizontal Icons Layout */}
       <div className="hidden lg:flex items-center space-x-3">
         <span className="text-white/60 text-sm font-medium">Share:</span>
-        
-        {/* Social Platform Icons - All Same Color */}
         {socialPlatforms.map((platform) => (
           <button
             key={platform.name}
@@ -133,8 +154,6 @@ const SocialShare: React.FC<SocialShareProps> = ({
             <platform.icon size={18} className="group-hover:scale-110 transition-transform duration-300" />
           </button>
         ))}
-
-        {/* Copy Link Button - Same Color */}
         <button
           onClick={handleCopyLink}
           className="w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all duration-300 group"
@@ -150,7 +169,6 @@ const SocialShare: React.FC<SocialShareProps> = ({
 
       {/* Mobile: Dropdown Menu */}
       <div className="lg:hidden">
-        {/* Share Button */}
         <button
           onClick={handleNativeShare}
           className="flex items-center space-x-2 px-4 py-2 bg-azure-500/20 text-azure-400 rounded-lg hover:bg-azure-500/30 transition-colors duration-300"
@@ -158,8 +176,6 @@ const SocialShare: React.FC<SocialShareProps> = ({
           <Share2 size={16} />
           <span>Share</span>
         </button>
-
-        {/* Share Menu - Vertical Layout for Mobile */}
         <AnimatePresence>
           {isOpen && (
             <motion.div
@@ -173,8 +189,6 @@ const SocialShare: React.FC<SocialShareProps> = ({
                   <Share2 size={16} />
                   <span>Share this post</span>
                 </h4>
-                
-                {/* Social Platform Buttons - Vertical Layout with Icons and Names */}
                 <div className="space-y-2 mb-4">
                   {socialPlatforms.map((platform) => (
                     <button
@@ -187,8 +201,6 @@ const SocialShare: React.FC<SocialShareProps> = ({
                     </button>
                   ))}
                 </div>
-
-                {/* Copy Link */}
                 <div className="border-t border-white/20 pt-3">
                   <button
                     onClick={handleCopyLink}
@@ -207,8 +219,6 @@ const SocialShare: React.FC<SocialShareProps> = ({
                     )}
                   </button>
                 </div>
-
-                {/* Close Button */}
                 <button
                   onClick={() => setIsOpen(false)}
                   className="absolute top-2 right-2 text-white/60 hover:text-white transition-colors duration-300"
@@ -219,8 +229,6 @@ const SocialShare: React.FC<SocialShareProps> = ({
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Backdrop */}
         {isOpen && (
           <div
             className="fixed inset-0 z-40"

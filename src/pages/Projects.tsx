@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import ProgressiveImage from '../components/ui/ProgressiveImage';
 import { motion } from 'framer-motion';
 import { ExternalLink, Github, Filter, Download, ArrowDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
@@ -112,10 +113,14 @@ const Projects: React.FC = () => {
             >
               <GlassCard className="h-full group hover:scale-105 transition-transform duration-300 p-4">
                 <div className="aspect-video rounded-xl overflow-hidden mb-4 relative">
-                  <img 
-                    src={project.imageUrl} 
+                  <ProgressiveImage 
+                    src={project.imageUrl}
                     alt={project.title}
-                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                    wrapperClassName="w-full h-full"
+                    className="object-cover group-hover:scale-110 transition-transform duration-300"
+                    initialBlur
+                    skeleton
+                    lazy
                   />
                   {project.featured && (
                     <div className="absolute top-2 right-2 bg-azure-500 text-white px-2 py-1 rounded-full text-xs font-medium">

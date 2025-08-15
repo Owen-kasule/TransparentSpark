@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowDown, Code, Database, Globe } from 'lucide-react';
+import ProgressiveImage from '../components/ui/ProgressiveImage';
 import GlassCard from '../components/ui/GlassCard';
 import SocialLinks from '../components/ui/SocialLinks';
 import { projects } from '../data/portfolio';
@@ -141,15 +142,12 @@ const Home: React.FC = () => {
                   transition={{ duration: 0.4, ease: "easeOut" }}
                   className="relative z-10 w-full h-full rounded-2xl overflow-hidden shadow-2xl"
                 >
-                  <img 
+                  <ProgressiveImage
                     src="/images/profile/owen-profile.webp"
                     alt="Owen - Full Stack Developer"
-                    className="w-full h-full object-cover object-center"
-                    onError={(e) => {
-                      // Fallback to placeholder if image doesn't exist
-                      const target = e.target as HTMLImageElement;
-                      // target.src = "https://photos.app.goo.gl/zL893vdr3UnAp2n7A"; // Placeholder image URL
-                    }}
+                    wrapperClassName="w-full h-full"
+                    className="object-cover object-center"
+                    aspectClass="w-full h-full"
                   />
                   
                   {/* Subtle Overlay */}
@@ -233,10 +231,12 @@ const Home: React.FC = () => {
             {featuredProjects.map((project, index) => (
               <GlassCard key={project.id} delay={1.3 + index * 0.2} className="p-6">
                 <div className="aspect-video rounded-xl overflow-hidden mb-4">
-                  <img 
-                    src={project.imageUrl} 
+                  <ProgressiveImage
+                    src={project.imageUrl}
                     alt={project.title}
-                    className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                    wrapperClassName="w-full h-full"
+                    className="object-cover hover:scale-105 transition-transform duration-300"
+                    aspectClass="w-full h-full"
                   />
                 </div>
                 <h3 className="text-lg font-bold text-white mb-2">{project.title}</h3>

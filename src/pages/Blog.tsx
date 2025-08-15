@@ -8,6 +8,8 @@ import BlogSearch from '../components/blog/BlogSearch';
 import SEO from '../components/SEO';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { getFeaturedPosts, getRecentPosts, getAllCategories, getAllPosts, type BlogPost } from '../data/blogData';
+import ProgressiveImage from '../components/ui/ProgressiveImage';
+import BlogCardCarousel from '../components/blog/BlogCardCarousel';
 import { supabase } from '../lib/supabase';
 
 const Blog: React.FC = () => {
@@ -29,6 +31,19 @@ const Blog: React.FC = () => {
 
   // Track page visit
   useAnalytics('blog');
+
+  // Consistent excerpt / description truncation (character-based for uniformity)
+  const EXCERPT_MAX_CHARS = 120; // adjust as desired
+  const truncateExcerpt = (text: string, max: number = EXCERPT_MAX_CHARS) => {
+    if (!text) return '';
+    if (text.length <= max) return text;
+    return text.slice(0, max).trimEnd() + '…';
+  };
+  
+  // Responsive uniform card heights (mobile -> desktop) for consistent grid alignment
+  const CARD_HEIGHT_BASE = 'h-[360px]'; // mobile base height
+  const CARD_HEIGHT_RESP = 'md:h-[400px] lg:h-[420px]'; // scale up on larger screens
+  const cardHeightClass = `${CARD_HEIGHT_BASE} ${CARD_HEIGHT_RESP} flex flex-col`; // applied to outer card
 
   useEffect(() => {
     loadBlogData();
@@ -380,12 +395,16 @@ const Blog: React.FC = () => {
                       transition={{ duration: 0.5, delay: index * 0.1 }}
                       className="group"
                     >
-                      <div className="bg-white/5 rounded-lg overflow-hidden hover:bg-white/10 transition-all duration-300 h-full flex flex-col group-hover:scale-105 border border-white/10">
-                        <div className="aspect-video rounded-lg overflow-hidden mb-3 relative">
-                          <img 
-                            src={post.image_url} 
+                      <div className={`bg-white/5 rounded-lg overflow-hidden hover:bg-white/10 transition-all duration-300 group-hover:scale-105 border border-white/10 ${cardHeightClass}`}>
+                        <div className="rounded-lg overflow-hidden mb-3 relative h-[140px] md:h-[160px] lg:h-[180px]">
+                          <ProgressiveImage
+                            src={post.image_url}
                             alt={post.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            wrapperClassName="w-full h-full"
+                            className="object-cover group-hover:scale-110 transition-transform duration-300"
+                            initialBlur
+                            skeleton
+                            lazy
                           />
                           {post.featured && (
                             <div className="absolute top-2 right-2 bg-azure-500 text-white px-2 py-1 rounded-full text-xs font-medium">
@@ -395,7 +414,7 @@ const Blog: React.FC = () => {
                         </div>
                         
                         <div className="p-4 flex-1 flex flex-col">
-                          <div className="flex items-center space-x-3 mb-2">
+                          <div className="flex items-center space-x-3 mb-2 h-[28px]">
                             <span className="px-2 py-1 bg-azure-400/20 text-azure-400 rounded-full text-xs">
                               {post.category}
                             </span>
@@ -405,13 +424,13 @@ const Blog: React.FC = () => {
                             </div>
                           </div>
                           
-                          <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-azure-400 transition-colors duration-300 flex-1">
+                          <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-azure-400 transition-colors duration-300 h-[44px]">
                             {post.title}
                           </h3>
                           
-                          <p className="text-white/70 text-sm mb-3 line-clamp-2">{post.excerpt}</p>
+                          <p className="text-white/70 text-sm mb-3 line-clamp-2 h-[40px]">{truncateExcerpt(post.excerpt)}</p>
                           
-                          <div className="flex items-center justify-between mt-auto">
+                          <div className="flex items-center justify-between mt-auto h-[24px]">
                             <div className="flex items-center space-x-4 text-white/60 text-xs">
                               <div className="flex items-center">
                                 <Clock size={12} className="mr-1" />
@@ -480,18 +499,17 @@ const Blog: React.FC = () => {
                 return filteredFeaturedPosts.length > 0 ? (
                   filteredFeaturedPosts.slice(0, 3).map((post, index) => (
                     <Link key={post.id} to={`/blog/${post.id}`}>
-                      <GlassCard delay={0.5 + index * 0.1} className="p-4 group hover:scale-105 transition-transform duration-300">
-                        <div className="aspect-video rounded-lg overflow-hidden mb-3 relative">
-                          <img 
-                            src={post.image_url} 
+                      <GlassCard delay={0.5 + index * 0.1} className={`p-4 group hover:scale-105 transition-transform duration-300 ${cardHeightClass}`}>
+                        <div className="rounded-lg overflow-hidden mb-3 relative h-[140px] md:h-[160px] lg:h-[180px]">
+                          <BlogCardCarousel
+                            images={post.images}
+                            fallback={post.image_url}
                             alt={post.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            badge={<div className="absolute top-2 right-2 bg-azure-500 text-white px-2 py-1 rounded-full text-xs font-medium">Featured</div>}
+                            className="h-full"
                           />
-                          <div className="absolute top-2 right-2 bg-azure-500 text-white px-2 py-1 rounded-full text-xs font-medium">
-                            Featured
-                          </div>
                         </div>
-                        <div className="flex items-center space-x-3 mb-2">
+                        <div className="flex items-center space-x-3 mb-2 h-[28px]">
                           <span className="px-2 py-1 bg-azure-400/20 text-azure-400 rounded-full text-xs">
                             {post.category}
                           </span>
@@ -500,11 +518,11 @@ const Blog: React.FC = () => {
                             {new Date(post.date).toLocaleDateString()}
                           </div>
                         </div>
-                        <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-azure-400 transition-colors duration-300">
+                        <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-azure-400 transition-colors duration-300 h-[44px]">
                           {post.title}
                         </h3>
-                        <p className="text-white/70 text-sm mb-3 line-clamp-2">{post.excerpt}</p>
-                        <div className="flex items-center justify-between">
+                        <p className="text-white/70 text-sm mb-3 line-clamp-2 h-[40px]">{truncateExcerpt(post.excerpt)}</p>
+                        <div className="flex items-center justify-between h-[24px] mt-auto">
                           <div className="flex items-center space-x-4 text-white/60 text-xs">
                             <div className="flex items-center">
                               <Clock size={12} className="mr-1" />
@@ -570,15 +588,16 @@ const Blog: React.FC = () => {
                 return filteredRecentPosts.length > 0 ? (
                   filteredRecentPosts.slice(0, 3).map((post, index) => (
                     <Link key={post.id} to={`/blog/${post.id}`}>
-                      <GlassCard delay={0.7 + index * 0.1} className="p-4 group hover:scale-105 transition-transform duration-300">
-                        <div className="aspect-video rounded-lg overflow-hidden mb-3">
-                          <img 
-                            src={post.image_url} 
+                      <GlassCard delay={0.7 + index * 0.1} className={`p-4 group hover:scale-105 transition-transform duration-300 ${cardHeightClass}`}>
+                        <div className="aspect-video rounded-lg overflow-hidden mb-3 relative">
+                          <BlogCardCarousel
+                            images={post.images}
+                            fallback={post.image_url}
                             alt={post.title}
-                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                            className="h-full"
                           />
                         </div>
-                        <div className="flex items-center space-x-3 mb-2">
+                        <div className="flex items-center space-x-3 mb-2 h-[28px]">
                           <span className="px-2 py-1 bg-white/10 text-white/70 rounded-full text-xs">
                             {post.category}
                           </span>
@@ -587,11 +606,11 @@ const Blog: React.FC = () => {
                             {new Date(post.date).toLocaleDateString()}
                           </div>
                         </div>
-                        <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-azure-400 transition-colors duration-300">
+                        <h3 className="text-lg font-bold text-white mb-2 line-clamp-2 group-hover:text-azure-400 transition-colors duration-300 h-[44px]">
                           {post.title}
                         </h3>
-                        <p className="text-white/70 text-sm mb-3 line-clamp-2">{post.excerpt}</p>
-                        <div className="flex items-center justify-between">
+                        <p className="text-white/70 text-sm mb-3 line-clamp-2 h-[40px]">{truncateExcerpt(post.excerpt)}</p>
+                        <div className="flex items-center justify-between h-[24px] mt-auto">
                           <div className="flex items-center space-x-4 text-white/60 text-xs">
                             <div className="flex items-center">
                               <Clock size={12} className="mr-1" />
@@ -699,16 +718,17 @@ const Blog: React.FC = () => {
                         transition={{ duration: 0.5, delay: 1.1 + index * 0.1 }}
                         className="group"
                       >
-                        <GlassCard className="p-4 hover:scale-105 transition-transform duration-300 h-full">
-                          <div className="aspect-video rounded-lg overflow-hidden mb-3">
-                            <img 
-                              src={post.image_url} 
+                        <GlassCard className={`p-4 hover:scale-105 transition-transform duration-300 h-full ${cardHeightClass}`}> 
+                          <div className="rounded-lg overflow-hidden mb-3 h-[140px] md:h-[160px] lg:h-[180px] relative">
+                            <BlogCardCarousel
+                              images={post.images}
+                              fallback={post.image_url}
                               alt={post.title}
-                              className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-300"
+                              className="h-full"
                             />
                           </div>
                           
-                          <div className="flex items-center space-x-2 mb-2">
+                          <div className="flex items-center space-x-2 mb-2 h-[28px]">
                             <span className="px-2 py-1 bg-white/10 text-white/70 rounded-full text-xs">
                               {post.category}
                             </span>
@@ -721,15 +741,13 @@ const Blog: React.FC = () => {
                             </div>
                           </div>
                           
-                          <h3 className="text-base font-bold text-white mb-2 line-clamp-2 group-hover:text-azure-400 transition-colors duration-300">
+                          <h3 className="text-base font-bold text-white mb-2 line-clamp-2 group-hover:text-azure-400 transition-colors duration-300 h-[44px]">
                             {post.title}
                           </h3>
                           
-                          <p className="text-white/70 text-sm mb-3 line-clamp-2">
-                            {post.excerpt}
-                          </p>
+                          <p className="text-white/70 text-sm mb-3 line-clamp-2 h-[40px]">{truncateExcerpt(post.excerpt)}</p>
                           
-                          <div className="flex items-center justify-between text-xs">
+                          <div className="flex items-center justify-between text-xs h-[24px] mt-auto">
                             <div className="flex items-center space-x-3 text-white/60">
                               <div className="flex items-center">
                                 <Clock size={10} className="mr-1" />

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import ProgressiveImage from '../ui/ProgressiveImage';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   Search, 
@@ -497,10 +498,14 @@ const BlogSearch: React.FC<BlogSearchProps> = ({ onSearchResults, className = ''
                     >
                       <div className="flex items-start space-x-3">
                         <div className="w-16 h-12 bg-white/10 rounded-lg overflow-hidden flex-shrink-0">
-                          <img 
-                            src={post.image_url} 
+                          <ProgressiveImage 
+                            src={post.image_url}
                             alt={post.title}
-                            className="w-full h-full object-cover"
+                            wrapperClassName="w-full h-full"
+                            className="object-cover"
+                            initialBlur
+                            skeleton
+                            lazy
                           />
                         </div>
                         
