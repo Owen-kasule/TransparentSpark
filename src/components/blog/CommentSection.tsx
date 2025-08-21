@@ -1060,26 +1060,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
           </>
         )}
       </div>
-
-      {/* Comment Guidelines */}
-      <div className="mt-6">
-        <details className="group bg-azure-500/5 border border-azure-500/10 rounded-lg">
-          <summary className="cursor-pointer list-none select-none px-4 py-3 flex items-center justify-between text-sm text-azure-400 font-medium">
-            <span className="flex items-center gap-2">💬 Comment Guidelines</span>
-            <span className="text-white/40 group-open:hidden">(show)</span>
-            <span className="text-white/40 hidden group-open:inline">(hide)</span>
-          </summary>
-          <div className="px-4 pb-4 -mt-1 text-white/60 text-xs leading-relaxed space-y-1">
-            <p className="font-medium text-white/70">Keep it constructive:</p>
-            <ul className="space-y-1">
-              <li>• Be respectful and helpful</li>
-              <li>• No spam or abusive content</li>
-              <li>• Replies keep discussions tidy</li>
-              <li>• Email is never published</li>
-            </ul>
-          </div>
-        </details>
-      </div>
     </GlassCard>
   );
 };

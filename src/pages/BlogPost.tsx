@@ -5,7 +5,6 @@ import {
   Calendar, 
   Clock, 
   ArrowLeft, 
-  BookOpen, 
   Eye,
   Heart,
   MessageCircle,
@@ -29,6 +28,33 @@ const BlogPost: React.FC = () => {
   const navigate = useNavigate();
   const [post, setPost] = useState<BlogPost | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
+
+  // Generate streamlined fallback content
+  const generateFallbackContent = (p: BlogPost) => {
+    const hasSubstantialContent = p.content && p.content.trim().length > 600;
+    if (hasSubstantialContent) return '';
+    
+    return `# ${p.title}
+
+This ${p.category.toLowerCase()} article covers essential concepts and practical implementation details for modern web development. Below you'll find key insights, code examples, and actionable takeaways.
+
+**In this article:** ${p.tags.slice(0, 3).join(', ')} • ${p.read_time} • ${p.category}
+
+## Implementation Example
+
+\`\`\`ts
+// Sample implementation pattern
+function createHandler(config: Config) {
+  return async (request: Request) => {
+    const result = await processRequest(request, config);
+    return new Response(JSON.stringify(result));
+  };
+}
+\`\`\`
+
+**What's Next:** Continue exploring these concepts by implementing similar patterns in your own projects. This placeholder content will be replaced when the full article is added.`;
+  };
+
   const [additionalRelatedPosts, setAdditionalRelatedPosts] = useState<BlogPost[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
@@ -244,8 +270,6 @@ const BlogPost: React.FC = () => {
       .replace(/[^a-z0-9\s-]/g, '')
       .replace(/\s+/g, '-');
 
-  const generateFallbackContent = (p: BlogPost) => `# ${p.title}\n\n**Overview**\n\nThis article placeholder was auto-generated because no body content was supplied for *${p.title}*. It demonstrates the rendering pipeline, headings, code blocks, lists, and inline formatting.\n\n## Key Points\n\n- Category: **${p.category}**\n- Estimated read time: ${p.read_time}\n- Tags: ${p.tags.slice(0,5).join(', ')}\n\n## Sample Code\n\n\`\`\`ts\nfunction greet(name: string) {\n  return \`Hello ${'${'}name${'}'}\`;\n}\nconsole.log(greet('World'));\n\`\`\`\n\n## Next Steps\n\n1. Edit this post in the admin panel.\n2. Paste real markdown content.\n3. Save & publish to replace this placeholder.\n\n### Notes\n\nInline code like \`npm run build\` and **bold emphasis** both work.\n`;
-
   const convertMarkdownToHtml = (markdown: string): string => {
     const processed = markdown
       .replace(/^### (.*$)/gim, '<h3>$1</h3>')
@@ -335,20 +359,20 @@ const BlogPost: React.FC = () => {
         pre.appendChild(btn);
       }
 
-      // Collapsible long code blocks
-      if (lineCount > 18 && !pre.querySelector('button.toggle-collapse')) {
+      // Collapsible long code blocks - more aggressive threshold
+      if (lineCount > 12 && !pre.querySelector('button.toggle-collapse')) {
         pre.classList.add('collapsible-code', 'collapsed');
         const toggle = document.createElement('button');
         toggle.type = 'button';
-        toggle.innerText = 'Expand code';
-        toggle.className = 'toggle-collapse absolute bottom-2 left-1/2 -translate-x-1/2 bg-azure-500/80 hover:bg-azure-500 text-white text-xs px-3 py-1 rounded-full shadow transition';
+        toggle.innerText = `Show ${lineCount - 8} more lines`;
+        toggle.className = 'toggle-collapse absolute bottom-2 left-1/2 -translate-x-1/2 bg-azure-500/90 hover:bg-azure-500 text-white text-xs px-4 py-2 rounded-full shadow-lg transition-all hover:scale-105';
         toggle.onclick = () => {
           if (pre.classList.contains('collapsed')) {
             pre.classList.remove('collapsed');
-            toggle.innerText = 'Collapse code';
+            toggle.innerText = 'Show less';
           } else {
             pre.classList.add('collapsed');
-            toggle.innerText = 'Expand code';
+            toggle.innerText = `Show ${lineCount - 8} more lines`;
           }
         };
         pre.appendChild(toggle);
@@ -392,10 +416,11 @@ const BlogPost: React.FC = () => {
       const style = document.createElement('style');
       style.id = 'blogpost-extra-styles';
       style.textContent = `
-        pre.collapsible-code { position: relative; }
-        pre.collapsible-code.collapsed { max-height: 260px; overflow: hidden; }
-        pre.collapsible-code.collapsed:after { content: ''; position: absolute; left:0; right:0; bottom:0; height:80px; background: linear-gradient(to bottom, rgba(17,17,27,0), rgba(17,17,27,0.9)); pointer-events:none; }
+        pre.collapsible-code { position: relative; transition: max-height 0.3s ease-in-out; }
+        pre.collapsible-code.collapsed { max-height: 200px; overflow: hidden; }
+        pre.collapsible-code.collapsed:after { content: ''; position: absolute; left:0; right:0; bottom:0; height:60px; background: linear-gradient(to bottom, rgba(17,17,27,0), rgba(17,17,27,0.95)); pointer-events:none; }
         pre code { font-size: 0.85rem; line-height: 1.3; }
+        .toggle-collapse { backdrop-filter: blur(4px); }
         .md-inline-img { transition: filter .4s ease, transform .6s ease; filter: blur(6px); transform: scale(1.02); }
         .md-inline-img:not([data-src]) { filter: blur(0); transform: scale(1); }
       `;
@@ -624,9 +649,27 @@ const BlogPost: React.FC = () => {
                     revealScale={false}
                   />
                 </div>
-                <div className="leading-tight">
-                  <h3 className="text-white font-medium text-sm">{post.author_name}</h3>
-                  <p className="text-white/50 text-xs">{post.author_bio}</p>
+                <div className="flex-1">
+                  <div className="leading-tight mb-2">
+                    <h3 className="text-white font-medium text-sm">{post.author_name}</h3>
+                    <p className="text-white/50 text-xs">{post.author_bio}</p>
+                  </div>
+                  {/* Tags inline with author */}
+                  <div className="flex flex-wrap gap-1">
+                    {post.tags.slice(0, 4).map((tag) => (
+                      <span 
+                        key={tag}
+                        className="px-2 py-1 bg-azure-400/15 text-azure-300 rounded-full text-[10px] hover:bg-azure-400/25 transition-colors"
+                      >
+                        {tag}
+                      </span>
+                    ))}
+                    {post.tags.length > 4 && (
+                      <span className="text-white/40 text-[10px] px-2 py-1">
+                        +{post.tags.length - 4} more
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
@@ -678,8 +721,8 @@ const BlogPost: React.FC = () => {
             </div>
           </GlassCard>
 
-          {/* Article Content + Tags merged when real content present */}
-          <GlassCard className="p-8 space-y-10">
+          {/* Article Content */}
+          <GlassCard className="p-8">
             <div 
               ref={contentRef}
               className="prose prose-invert max-w-none"
@@ -687,19 +730,6 @@ const BlogPost: React.FC = () => {
                 __html: displayHtml
               }}
             />
-            <div className="pt-4 border-t border-white/10">
-              <h3 className="text-sm font-semibold text-white/70 mb-3 tracking-wide uppercase">Tags</h3>
-              <div className="flex flex-wrap gap-2">
-                {post.tags.map((tag) => (
-                  <span 
-                    key={tag}
-                    className="px-3 py-1 bg-azure-400/15 text-azure-300 rounded-full text-xs hover:bg-azure-400/25 transition-colors"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
           </GlassCard>
 
           {/* Comments Section with Ref */}
@@ -711,34 +741,39 @@ const BlogPost: React.FC = () => {
             />
           </div>
 
-          {/* Consolidated Related Articles (horizontal scroll) */}
+          {/* Related Articles */}
           {(relatedPosts.length > 0 || additionalRelatedPosts.length > 0) && (
             <GlassCard className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-bold text-white flex items-center gap-2">Related Articles</h3>
-                <Link to="/blog" className="text-xs text-azure-400 hover:text-azure-300">View All</Link>
+              <div className="flex items-center justify-between mb-6">
+                <h3 className="text-lg font-bold text-white">You might also like</h3>
+                <Link to="/blog" className="text-sm text-azure-400 hover:text-azure-300 transition-colors">
+                  View all posts
+                </Link>
               </div>
-              <div className="flex gap-4 overflow-x-auto pb-2 snap-x snap-mandatory scrollbar-thin scrollbar-thumb-white/10 scrollbar-track-transparent">
-                {(relatedPosts.concat(additionalRelatedPosts).slice(0,8)).map((rp) => (
-                  <Link key={rp.id} to={`/blog/${rp.id}`} className="min-w-[240px] max-w-[240px] snap-start">
-                    <div className="bg-white/5 hover:bg-white/10 transition-colors rounded-lg overflow-hidden border border-white/10 flex flex-col h-full">
-                      <div className="aspect-video overflow-hidden relative">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                {(relatedPosts.concat(additionalRelatedPosts).slice(0,3)).map((rp) => (
+                  <Link key={rp.id} to={`/blog/${rp.id}`} className="group">
+                    <div className="bg-white/5 hover:bg-white/10 transition-all duration-300 rounded-lg overflow-hidden border border-white/10 h-full group-hover:border-azure-400/30">
+                      <div className="aspect-[16/10] overflow-hidden relative">
                         <ProgressiveImage
                           src={rp.image_url}
                           alt={rp.title}
                           wrapperClassName="w-full h-full"
-                          className="object-cover hover:scale-110 transition-transform duration-300"
+                          className="object-cover group-hover:scale-105 transition-transform duration-300"
                           aspectClass="w-full h-full"
                         />
-                        <span className="absolute top-2 left-2 text-[10px] px-2 py-1 rounded-full bg-azure-500/80 text-white font-medium">{rp.category}</span>
-                        {rp.featured && <span className="absolute top-2 right-2 text-[10px] px-2 py-1 rounded-full bg-yellow-500 text-black font-medium">Featured</span>}
+                        <span className="absolute top-2 left-2 text-[10px] px-2 py-1 rounded-full bg-azure-500/90 text-white font-medium">
+                          {rp.category}
+                        </span>
                       </div>
-                      <div className="p-3 flex flex-col flex-1">
-                        <h4 className="text-white text-sm font-semibold mb-1 line-clamp-2">{rp.title}</h4>
-                        <p className="text-white/60 text-xs line-clamp-2 mb-2">{rp.excerpt}</p>
-                        <div className="mt-auto flex items-center justify-between text-[10px] text-white/50">
+                      <div className="p-4">
+                        <h4 className="text-white text-sm font-semibold mb-2 line-clamp-2 group-hover:text-azure-300 transition-colors">
+                          {rp.title}
+                        </h4>
+                        <p className="text-white/60 text-xs line-clamp-2 mb-3">{rp.excerpt}</p>
+                        <div className="flex items-center justify-between text-[10px] text-white/50">
                           <span>{rp.read_time}</span>
-                          <span>{rp.views > 1000 ? `${(rp.views/1000).toFixed(1)}k` : rp.views} • {rp.likes}</span>
+                          <span>{rp.views > 1000 ? `${(rp.views/1000).toFixed(1)}k` : rp.views} views</span>
                         </div>
                       </div>
                     </div>
@@ -749,22 +784,13 @@ const BlogPost: React.FC = () => {
           )}
 
           {/* Navigation */}
-          <div className="flex justify-between items-center">
+          <div className="text-center">
             <Link
               to="/blog"
-              className="bg-white/10 hover:bg-white/20 text-white px-6 py-3 rounded-lg transition-colors duration-300 flex items-center space-x-2"
+              className="bg-azure-500 hover:bg-azure-600 text-white px-8 py-3 rounded-lg transition-colors duration-300 inline-flex items-center space-x-2"
             >
               <ArrowLeft size={16} />
-              <span>All Posts</span>
-            </Link>
-            
-            <Link
-              to="/blog"
-              className="bg-azure-500 hover:bg-azure-600 text-white px-6 py-3 rounded-lg transition-colors duration-300 flex items-center space-x-2"
-            >
-              <BookOpen size={16} />
-              <span>More Articles</span>
-              <ArrowRight size={16} />
+              <span>Back to All Posts</span>
             </Link>
           </div>
         </motion.article>

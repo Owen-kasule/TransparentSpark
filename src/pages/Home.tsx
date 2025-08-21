@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { ArrowDown, Code, Database, Globe } from 'lucide-react';
 import ProgressiveImage from '../components/ui/ProgressiveImage';
 import GlassCard from '../components/ui/GlassCard';
+import GlassCTA from '../components/ui/GlassCTA';
 import SocialLinks from '../components/ui/SocialLinks';
 import { projects } from '../data/portfolio';
 import { useAnalytics } from '../hooks/useAnalytics';
@@ -87,7 +88,7 @@ const Home: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.9 }}
-                  className="flex justify-center lg:justify-start space-x-8 mb-6"
+                  className="flex justify-center lg:justify-start space-x-8 mb-8"
                 >
                   <motion.div 
                     whileHover={{ scale: 1.1, y: -2 }}
@@ -112,11 +113,16 @@ const Home: React.FC = () => {
                   </motion.div>
                 </motion.div>
 
+                {/* Glassmorphism CTA Component */}
+                <div className="mb-6">
+                  <GlassCTA delay={1.1} />
+                </div>
+
                 {/* Mobile Social Links */}
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 1.1 }}
+                  transition={{ duration: 0.6, delay: 1.3 }}
                   className="lg:hidden"
                 >
                   <SocialLinks />
@@ -132,7 +138,7 @@ const Home: React.FC = () => {
               className="relative order-1 lg:order-2 flex justify-center lg:justify-end lg:col-span-2"
             >
               {/* Image Container - Increased Height for more dominance */}
-              <div className="relative w-80 h-[500px]">
+              <div className="relative w-96 h-[690px]">
                 {/* Background Glow Effect */}
                 <div className="absolute inset-0 bg-gradient-to-br from-azure-400/15 via-transparent to-azure-600/8 rounded-2xl blur-2xl transform scale-110"></div>
                 
@@ -143,7 +149,7 @@ const Home: React.FC = () => {
                   className="relative z-10 w-full h-full rounded-2xl overflow-hidden shadow-2xl"
                 >
                   <ProgressiveImage
-                    src="/images/profile/owen-profile.webp"
+                    src="/images/profile/OwenProfile.png"
                     alt="Owen - Full Stack Developer"
                     wrapperClassName="w-full h-full"
                     className="object-cover object-center"

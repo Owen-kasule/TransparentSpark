@@ -26,6 +26,18 @@ const Contact: React.FC = () => {
   // Track page visit
   useAnalytics('contact');
 
+  // Pre-fill email from URL parameters
+  useEffect(() => {
+    const urlParams = new URLSearchParams(window.location.search);
+    const emailFromUrl = urlParams.get('email');
+    if (emailFromUrl) {
+      setFormData(prev => ({
+        ...prev,
+        email: emailFromUrl
+      }));
+    }
+  }, []);
+
   // Debounced email validation
   const debouncedEmailValidation = useCallback(
     (() => {
