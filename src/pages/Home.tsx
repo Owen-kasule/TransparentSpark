@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { ArrowDown, Code, Database, Globe } from 'lucide-react';
 import ProgressiveImage from '../components/ui/ProgressiveImage';
@@ -9,6 +9,85 @@ import { projects } from '../data/portfolio';
 import { useAnalytics } from '../hooks/useAnalytics';
 
 const Home: React.FC = () => {
+  // Measure subtitle width so the inline blue bar matches it
+  const subtitleRefSm = useRef<HTMLParagraphElement | null>(null);
+  const subtitleRefLg = useRef<HTMLParagraphElement | null>(null);
+  const owenRefSm = useRef<HTMLHeadingElement | null>(null);
+  const owenRefLg = useRef<HTMLHeadingElement | null>(null);
+  const nameRowSmRef = useRef<HTMLDivElement | null>(null);
+  const nameRowLgRef = useRef<HTMLDivElement | null>(null);
+  const barRefSm = useRef<HTMLSpanElement | null>(null);
+  const barRefLg = useRef<HTMLSpanElement | null>(null);
+  const hiImRefLg = useRef<HTMLParagraphElement | null>(null);
+  const hiImRowLgRef = useRef<HTMLDivElement | null>(null);
+  const fullNameRefLg = useRef<HTMLDivElement | null>(null);
+  const muherezeRefLg = useRef<HTMLSpanElement | null>(null); // New ref for "Muhereze" only
+
+  const [barWidthSm, setBarWidthSm] = useState<number>(0);
+  const [barWidthLg, setBarWidthLg] = useState<number>(0);
+
+  console.log('🎯 Current bar widths:', { barWidthSm, barWidthLg });
+
+  useEffect(() => {
+    const parseGap = (el: HTMLElement | null): number => {
+      if (!el) return 0;
+      const style = getComputedStyle(el);
+      // Try gap first, then column-gap for compatibility
+      const gapStr = (style as any).gap || (style as any).columnGap || '0px';
+      const num = parseFloat(String(gapStr));
+      return Number.isFinite(num) ? num : 0;
+    };
+
+  const update = () => {
+      console.log('🔵 Update called');
+      // Small layout: bar width = subtitle width - (OWEN width + gap)
+      if (subtitleRefSm.current) {
+        const subW = subtitleRefSm.current.getBoundingClientRect().width;
+        const nameW = owenRefSm.current?.getBoundingClientRect().width ?? 0;
+        const gap = parseGap(nameRowSmRef.current);
+        const raw = (subW - nameW - gap) - 1; // epsilon for rounding
+        const barW = raw <= 0 ? 6 : raw; // avoid total disappearance on very tight widths
+        const finalWidth = Math.max(0, Math.round(barW));
+        console.log('📱 Small bar:', { subW, nameW, gap, raw, finalWidth });
+        setBarWidthSm(finalWidth);
+      }
+      // Large layout: bar width = (end of "Muhereze") - (end of "HI I'M" + gap)
+      if (hiImRefLg.current && hiImRowLgRef.current && muherezeRefLg.current) {
+        const hiImEndX = hiImRefLg.current.getBoundingClientRect().right;
+        const gap = parseGap(hiImRowLgRef.current);
+        const barLeftX = hiImEndX + gap; // bar starts after HI I'M plus the flex gap
+        const muherezeEndX = muherezeRefLg.current.getBoundingClientRect().right;
+
+        const rawWidth = muherezeEndX - barLeftX;
+        const finalWidth = Math.max(0, Math.round(rawWidth - 1)); // small epsilon to avoid overshoot
+        console.log('💻 Large bar:', { hiImEndX, gap, barLeftX, muherezeEndX, rawWidth, finalWidth });
+        setBarWidthLg(finalWidth);
+      }
+    };
+    // Defer to next frame to measure after first paint, then set widths for animation
+    requestAnimationFrame(update);
+
+    // After fonts load, recompute to ensure accurate widths and animate if needed
+    const anyDoc: any = document as any;
+    if (anyDoc.fonts && typeof anyDoc.fonts.ready?.then === 'function') {
+      anyDoc.fonts.ready.then(() => {
+        requestAnimationFrame(() => {
+          update();
+        });
+      });
+    }
+  const roSm = subtitleRefSm.current ? new ResizeObserver(update) : null;
+  const roLg = subtitleRefLg.current ? new ResizeObserver(update) : null;
+    if (subtitleRefSm.current && roSm) roSm.observe(subtitleRefSm.current);
+    if (subtitleRefLg.current && roLg) roLg.observe(subtitleRefLg.current);
+    window.addEventListener('resize', update);
+    return () => {
+      window.removeEventListener('resize', update);
+  roSm?.disconnect();
+  roLg?.disconnect();
+  // no timers to clear
+    };
+  }, []);
   const featuredProjects = projects.filter(project => project.featured).slice(0, 2);
   
   // Track page visit
@@ -45,9 +124,26 @@ const Home: React.FC = () => {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.8, delay: 0.4 }}
                 >
-                  <p className="text-azure-400 text-lg font-medium mb-6 tracking-wider">
-                    HI I'M
-                  </p>
+                  <div className="hidden lg:block mb-1">
+                    <div ref={hiImRowLgRef} className="flex items-center gap-3 mb-1">
+                      <p ref={hiImRefLg} className="text-azure-400 text-lg font-medium tracking-wider">HI I'M</p>
+                      <motion.span
+                        ref={barRefLg}
+                        aria-hidden="true"
+                        className="inline-block bg-azure-400/80 rounded align-middle hero-name-bar-lg shrink-0"
+                        key={`lg-${barWidthLg}`}
+                        initial={{ width: 0 }}
+                        animate={{ width: barWidthLg }}
+                        transition={{ duration: 0.8, ease: 'easeOut', delay: 0.5 }}
+                        style={{ height: '1.125rem', minWidth: '2px' }}
+                        onAnimationStart={() => console.log('🎬 Large bar animation started')}
+                        onAnimationComplete={() => console.log('✅ Large bar animation complete')}
+                      />
+                    </div>
+                    <h1 ref={fullNameRefLg} className="font-bold text-white text-4xl lg:text-5xl leading-tight">
+                      OWEN <span className="mx-1">K.</span><span ref={muherezeRefLg} className="capitalize">muhereze</span>
+                    </h1>
+                  </div>
                   
                   {/* Small/Medium: Inline image + name/title row */}
                   <div className="lg:hidden">
@@ -55,7 +151,7 @@ const Home: React.FC = () => {
                       {/* Inline profile image */}
                       <div className="relative w-20 h-20 rounded-full overflow-hidden border border-white/20 bg-white/5 shadow">
                         <ProgressiveImage
-                          src="/images/profile/OwenProfile.png"
+                          src="/images/profile/owen-profile.png"
                           alt="Owen - Full Stack Developer"
                           wrapperClassName="w-full h-full"
                           className="w-full h-full object-cover"
@@ -63,37 +159,31 @@ const Home: React.FC = () => {
                         />
                       </div>
                       <div className="text-left">
-                        <h1 className="fluid-h2 font-bold text-white leading-tight">OWEN</h1>
-                        <p className="text-azure-400 fluid-body font-medium uppercase tracking-[0.2em] mt-1">A FULL STACK DEVELOPER</p>
+                        <p className="text-azure-400 text-sm font-medium tracking-wider mb-1 lg:hidden">HI I'M</p>
+                        <div ref={nameRowSmRef} className="flex items-center gap-3 fluid-h2 leading-tight">
+                          <h1 ref={owenRefSm} className="font-bold text-white leading-tight">OWEN</h1>
+                          {/* Inline blue bar matching subtitle width and OWEN height */}
+                          <motion.span
+                            ref={barRefSm}
+                            aria-hidden="true"
+                            className="inline-block bg-azure-400/80 rounded align-middle hero-name-bar shrink-0"
+                            key={`sm-${barWidthSm}`}
+                            initial={{ width: 0 }}
+                            animate={{ width: barWidthSm }}
+                            transition={{ duration: 0.8, ease: 'easeOut', delay: 0.5 }}
+                            style={{ height: '1em', minWidth: '2px' }}
+                            onAnimationStart={() => console.log('🎬 Small bar animation started')}
+                            onAnimationComplete={() => console.log('✅ Small bar animation complete')}
+                          />
+                        </div>
+                        <p className="text-azure-400 font-medium uppercase whitespace-nowrap tracking-[0.12em] text-[11px] sm:text-xs md:text-sm mt-1"><span ref={subtitleRefSm} className="inline-block">A FULL STACK DEVELOPER</span></p>
                       </div>
-                    </div>
-                    {/* Decorative line under name area */}
-                    <div className="flex items-center justify-center lg:justify-start mb-4">
-                      <motion.div 
-                        initial={{ width: 0 }}
-                        animate={{ width: 140 }}
-                        transition={{ duration: 0.8, delay: 0.8 }}
-                        className="h-1 bg-azure-400"
-                      />
                     </div>
                   </div>
 
-                  {/* Large screens: original stacked name + line + subtitle */}
+                  {/* Large screens: subtitle under name with minimal spacing */}
                   <div className="hidden lg:block">
-                    <div className="relative mb-8">
-                      <h1 className="fluid-h1 font-bold text-white mb-3">OWEN</h1>
-                      <div className="flex items-center justify-center lg:justify-start">
-                        <motion.div 
-                          initial={{ width: 0 }}
-                          animate={{ width: 140 }}
-                          transition={{ duration: 0.8, delay: 0.8 }}
-                          className="h-1 bg-azure-400"
-                        />
-                      </div>
-                    </div>
-                    <p className="text-azure-400 fluid-body font-medium tracking-wider mb-5 uppercase tracking-[0.2em]">
-                      A FULL STACK DEVELOPER
-                    </p>
+                    <p className="text-azure-400 fluid-body font-medium tracking-wider mb-2 uppercase tracking-[0.2em]"><span ref={subtitleRefLg} className="inline-block">A FULL STACK DEVELOPER</span></p>
                   </div>
                 </motion.div>
 
@@ -177,7 +267,7 @@ const Home: React.FC = () => {
                 >
                   <div className="relative h-full max-h-full flex">
                     <ProgressiveImage
-                      src="/images/profile/OwenProfile.png"
+                      src="/images/profile/owen-profile.png"
                       alt="Owen - Full Stack Developer"
                       wrapperClassName="h-full max-h-full w-auto"
                       className="h-full w-auto max-h-full object-contain"

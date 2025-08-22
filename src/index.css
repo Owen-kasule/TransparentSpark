@@ -3,6 +3,12 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Default CSS variables so bars start at 0 width, enabling entrance animation */
+:root {
+  --hero-bar-sm: 0px;
+  --hero-bar-lg: 0px;
+}
+
 @layer base {
   * {
     @apply border-gray-800;
@@ -145,6 +151,20 @@
     filter: blur(2px);
     animation: glass-rotate 15s linear infinite;
   }
+
+  /* Inline hero name bar sized via CSS variables set in Home.tsx */
+  .hero-name-bar,
+  .hero-name-bar-lg {
+    display: inline-block;
+    vertical-align: middle;
+  height: 1em; /* Match current text size when parent sets font-size */
+  /* Framer Motion controls width; no transform scaling here */
+  }
+
+  /* width controlled by Framer Motion */
+
+
+  /* width controlled by Framer Motion */
   
   .container {
     @apply max-w-7xl mx-auto;
