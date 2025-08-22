@@ -141,7 +141,7 @@ const Home: React.FC = () => {
                       />
                     </div>
                     <h1 ref={fullNameRefLg} className="font-bold text-white text-4xl lg:text-5xl leading-tight">
-                      OWEN <span className="mx-1">K.</span><span ref={muherezeRefLg} className="capitalize">muhereze</span>
+                      OWEN <span className="mx-1">K. </span><span ref={muherezeRefLg} className="capitalize">muhereze</span>
                     </h1>
                   </div>
                   
