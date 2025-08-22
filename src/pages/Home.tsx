@@ -25,6 +25,7 @@ const Home: React.FC = () => {
 
   const [barWidthSm, setBarWidthSm] = useState<number>(0);
   const [barWidthLg, setBarWidthLg] = useState<number>(0);
+  const subtitleWrapLgRef = useRef<HTMLDivElement | null>(null);
 
   console.log('🎯 Current bar widths:', { barWidthSm, barWidthLg });
 
@@ -52,16 +53,26 @@ const Home: React.FC = () => {
         setBarWidthSm(finalWidth);
       }
       // Large layout: bar width = (end of "Muhereze") - (end of "HI I'M" + gap)
-      if (hiImRefLg.current && hiImRowLgRef.current && muherezeRefLg.current) {
+      if (hiImRefLg.current && hiImRowLgRef.current && muherezeRefLg.current && fullNameRefLg.current) {
         const hiImEndX = hiImRefLg.current.getBoundingClientRect().right;
         const gap = parseGap(hiImRowLgRef.current);
         const barLeftX = hiImEndX + gap; // bar starts after HI I'M plus the flex gap
         const muherezeEndX = muherezeRefLg.current.getBoundingClientRect().right;
+        const fullNameStartX = fullNameRefLg.current.getBoundingClientRect().left;
 
+        // Bar width from end of HI I'M to end of Muhereze
         const rawWidth = muherezeEndX - barLeftX;
         const finalWidth = Math.max(0, Math.round(rawWidth - 1)); // small epsilon to avoid overshoot
-        console.log('💻 Large bar:', { hiImEndX, gap, barLeftX, muherezeEndX, rawWidth, finalWidth });
         setBarWidthLg(finalWidth);
+
+        // Name width for aligning subtitle to end at Muhereze (apply imperatively to avoid inline style lint)
+        const rawNameWidth = muherezeEndX - fullNameStartX;
+        const finalNameWidth = Math.max(0, Math.round(rawNameWidth));
+        if (subtitleWrapLgRef.current) {
+          subtitleWrapLgRef.current.style.width = `${finalNameWidth}px`;
+        }
+
+        console.log('💻 Large metrics:', { hiImEndX, gap, barLeftX, muherezeEndX, fullNameStartX, rawWidth, finalWidth, rawNameWidth, finalNameWidth });
       }
     };
     // Defer to next frame to measure after first paint, then set widths for animation
@@ -181,9 +192,11 @@ const Home: React.FC = () => {
                     </div>
                   </div>
 
-                  {/* Large screens: subtitle under name with minimal spacing */}
+                  {/* Large screens: subtitle under name with minimal spacing and right-aligned to name end */}
                   <div className="hidden lg:block">
-                    <p className="text-azure-400 fluid-body font-medium tracking-wider mb-2 uppercase tracking-[0.2em]"><span ref={subtitleRefLg} className="inline-block">A FULL STACK DEVELOPER</span></p>
+                    <div ref={subtitleWrapLgRef} className="flex justify-end">
+                      <p className="text-azure-400 fluid-body font-medium tracking-wider mb-2 uppercase tracking-[0.2em] text-right"><span ref={subtitleRefLg} className="inline-block">A FULL STACK DEVELOPER</span></p>
+                    </div>
                   </div>
                 </motion.div>
 
