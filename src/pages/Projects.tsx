@@ -26,7 +26,7 @@ const Projects: React.FC = () => {
     <div className="min-h-screen pt-24 pb-12 relative">
       {/* Social Links on all pages */}
       <div className="hidden lg:block">
-        <SocialLinks vertical className="fixed left-8 bottom-32 transform" />
+  <SocialLinks vertical className="fixed left-8 bottom-32 transform z-[60]" />
       </div>
 
       {/* Scroll Indicator */}
@@ -53,7 +53,7 @@ const Projects: React.FC = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-12"
         >
-          <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6">
+          <h1 className="fluid-h1 font-bold text-white mb-5">
             PROJECTS
           </h1>
           <div className="flex items-center justify-center mb-6">
@@ -174,7 +174,7 @@ const Projects: React.FC = () => {
 
         {/* Interactive Resume Section */}
         <GlassCard delay={0.8} className="text-center p-6">
-          <h2 className="text-2xl font-bold text-white mb-3">Want to See More?</h2>
+          <h2 className="fluid-h3 font-bold text-white mb-3">Want to See More?</h2>
           <p className="text-white/70 mb-4 text-sm">
             View my interactive resume for a complete overview of my experience and skills.
           </p>

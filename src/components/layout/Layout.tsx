@@ -3,6 +3,8 @@ import ProgressiveImage from '../ui/ProgressiveImage';
 import { Outlet, useLocation } from 'react-router-dom';
 import Header from './Header';
 import Footer from './Footer';
+import MobileBottomNav from './MobileBottomNav';
+import SocialLinks from '../ui/SocialLinks';
 import { motion } from 'framer-motion';
 
 const Layout: React.FC = () => {
@@ -61,11 +63,23 @@ const Layout: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3, ease: 'easeInOut' }}
-          className="flex-1 pt-0"
+          className="flex-1 pt-0 pb-28 md:pb-0" /* extra space for bottom nav on mobile */
         >
           <Outlet />
         </motion.main>
+        {/* Mobile social links bar positioned just above footer */}
+  <div className="lg:hidden px-6 pb-4 pt-2">
+          <div className="max-w-sm mx-auto flex justify-center">
+            <SocialLinks />
+          </div>
+        </div>
+        {/* Footer placed before mobile nav so it's fully visible; add bottom margin for spacing */}
         <Footer />
+        {/* Mobile Bottom Navigation */}
+        <div className="md:hidden" aria-hidden="true">
+          <div className="h-0" />
+        </div>
+        <MobileBottomNav />
       </div>
     </div>
   );

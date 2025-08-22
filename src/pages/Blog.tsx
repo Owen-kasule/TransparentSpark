@@ -180,7 +180,7 @@ const Blog: React.FC = () => {
       <div className="min-h-screen pt-20 pb-12 relative">
         {/* Social Links on all pages */}
         <div className="hidden lg:block">
-          <SocialLinks vertical className="fixed left-8 bottom-32 transform" />
+          <SocialLinks vertical className="fixed left-8 bottom-32 transform z-[60]" />
         </div>
 
         <div className="container mx-auto px-6">
@@ -191,7 +191,7 @@ const Blog: React.FC = () => {
             transition={{ duration: 0.8 }}
             className="text-center mb-8"
           >
-            <h1 className="text-5xl lg:text-6xl font-bold text-white mb-4">
+            <h1 className="fluid-h1 font-bold text-white mb-4">
               BLOG
             </h1>
             <div className="flex items-center justify-center mb-4">
@@ -247,7 +247,7 @@ const Blog: React.FC = () => {
       
       {/* Social Links on all pages */}
       <div className="hidden lg:block">
-        <SocialLinks vertical className="fixed left-8 bottom-32 transform" />
+  <SocialLinks vertical className="fixed left-8 bottom-32 transform z-[60]" />
       </div>
 
       {/* Scroll Indicator */}
@@ -274,7 +274,7 @@ const Blog: React.FC = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-8"
         >
-          <h1 className="text-5xl lg:text-6xl font-bold text-white mb-4">
+            <h1 className="fluid-h1 font-bold text-white mb-4">
             BLOG
           </h1>
           <div className="flex items-center justify-center mb-4">
@@ -367,7 +367,7 @@ const Blog: React.FC = () => {
           >
             <GlassCard className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-bold text-white">
+                <h2 className="fluid-h3 font-bold text-white">
                   Search Results ({searchResults.length})
                 </h2>
                 <div className="flex items-center space-x-4">
@@ -466,7 +466,7 @@ const Blog: React.FC = () => {
             className="mb-8"
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-white">
+              <h2 className="fluid-h3 font-bold text-white">
                 {selectedCategory === 'all' ? 'Featured Posts' : `Featured Posts in ${selectedCategory}`}
               </h2>
               {selectedCategory !== 'all' && (
@@ -563,7 +563,7 @@ const Blog: React.FC = () => {
             className="mb-8"
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-white">
+              <h2 className="fluid-h3 font-bold text-white">
                 {selectedCategory === 'all' ? 'Recent Posts' : `Recent Posts in ${selectedCategory}`}
               </h2>
             </div>
@@ -651,7 +651,7 @@ const Blog: React.FC = () => {
             className="mb-8"
           >
             <div className="text-center mb-6">
-              <h2 className="text-2xl font-bold text-white mb-2">
+              <h2 className="fluid-h3 font-bold text-white mb-2">
                 {moreArticlesCategory === 'all' ? 'More Articles' : `More Articles in ${moreArticlesCategory}`}
               </h2>
               <p className="text-white/60 text-sm mb-4">Discover more insights and tutorials</p>

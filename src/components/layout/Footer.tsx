@@ -42,15 +42,25 @@ const Footer: React.FC = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6, delay: 0.3 }}
-      className="relative z-10 bg-black/20 backdrop-blur-sm"
+  className="relative z-10 bg-black/20 backdrop-blur-sm mb-[72px] md:mb-0" /* reserve space equal to nav height on mobile */
     >
       <div className="container mx-auto px-6">
         {/* Contained border line */}
         <div className="border-t border-white/10"></div>
         
         <div className="py-4">
-          <div className="flex flex-col md:flex-row justify-center items-center space-y-2 md:space-y-0 md:space-x-8">
-            <div className="flex items-center space-x-8 text-sm text-white/60">
+          <div className="flex flex-col md:flex-row justify-center items-center md:space-y-0 md:space-x-8">
+            {/* Mobile layout */}
+            <div className="flex flex-col items-center md:hidden space-y-1">
+              {lastModified && (
+                <span className="text-white/40 text-[10px] leading-tight">
+                  Last modified: {formatDateTime(lastModified)}
+                </span>
+              )}
+              <span className="font-medium text-xs text-white/60">TECHROOOT © {currentYear}</span>
+            </div>
+            {/* Desktop layout */}
+            <div className="hidden md:flex items-center space-x-8 text-sm text-white/60">
               <span className="font-medium">TECHROOOT © {currentYear}</span>
               <Link 
                 to="/contact" 

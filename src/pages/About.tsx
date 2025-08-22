@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import ProgressiveImage from '../components/ui/ProgressiveImage';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { Download, Award, Users, Coffee, ArrowDown } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import GlassCard from '../components/ui/GlassCard';
@@ -89,7 +89,7 @@ const About: React.FC = () => {
     <div className="min-h-screen pt-24 pb-12 relative">
       {/* Social Links on all pages */}
       <div className="hidden lg:block">
-        <SocialLinks vertical className="fixed left-8 bottom-32 transform" />
+  <SocialLinks vertical className="fixed left-8 bottom-32 transform z-[60]" />
       </div>
 
       {/* Scroll Indicator */}
@@ -116,7 +116,7 @@ const About: React.FC = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-12"
         >
-          <h1 className="text-5xl lg:text-6xl font-bold text-white mb-6">
+          <h1 className="fluid-h1 font-bold text-white mb-5">
             ABOUT ME
           </h1>
           <div className="flex items-center justify-center mb-6">
@@ -127,7 +127,7 @@ const About: React.FC = () => {
         <div className="grid lg:grid-cols-2 gap-8 mb-12">
           {/* Bio Section */}
           <GlassCard delay={0.2} className="p-6">
-            <h2 className="text-2xl font-bold text-white mb-4">My Story</h2>
+            <h2 className="fluid-h3 font-bold text-white mb-4">My Story</h2>
             <div className="space-y-3 text-white/80 leading-relaxed text-sm">
               <p>
                 I'm Owen, a passionate full-stack developer with over 5 years of experience 

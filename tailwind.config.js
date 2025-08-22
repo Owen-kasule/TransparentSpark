@@ -1,3 +1,4 @@
+import plugin from 'tailwindcss/plugin';
 /** @type {import('tailwindcss').Config} */
 export default {
   content: [
@@ -59,5 +60,32 @@ export default {
       }
     },
   },
-  plugins: [],
+  plugins: [
+    plugin(function({ addUtilities }) {
+      const newUtilities = {
+        '.fluid-h1': {
+          fontSize: 'clamp(1.9rem, 5.5vw + 0.2rem, 4.5rem)',
+          lineHeight: '1.05',
+          fontWeight: '700',
+          letterSpacing: '-0.02em'
+        },
+        '.fluid-h2': {
+          fontSize: 'clamp(1.5rem, 4.2vw + 0.2rem, 3rem)',
+          lineHeight: '1.15',
+          fontWeight: '700',
+          letterSpacing: '-0.01em'
+        },
+        '.fluid-h3': {
+          fontSize: 'clamp(1.25rem, 3.2vw + 0.2rem, 2.25rem)',
+          lineHeight: '1.25',
+          fontWeight: '600'
+        },
+        '.fluid-body': {
+          fontSize: 'clamp(0.95rem, 1.2vw + 0.5rem, 1.125rem)',
+          lineHeight: '1.6'
+        }
+      };
+      addUtilities(newUtilities, ['responsive']);
+    })
+  ],
 }

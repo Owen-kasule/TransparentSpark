@@ -21,7 +21,7 @@ const Home: React.FC = () => {
         <div className="flex items-center justify-center min-h-[calc(100vh-6rem)] relative">
           {/* Left Side - Social Links (positioned lower) */}
           <div className="hidden lg:block">
-            <SocialLinks vertical className="fixed left-8 bottom-32 transform" />
+            <SocialLinks vertical className="fixed left-8 bottom-32 transform z-[60]" />
           </div>
 
           {/* Main Content - Two Column Grid with Wider Left Column */}
@@ -49,25 +49,52 @@ const Home: React.FC = () => {
                     HI I'M
                   </p>
                   
-                  {/* Name with decorative line */}
-                  <div className="relative mb-8">
-                    <h1 className="text-5xl lg:text-7xl font-bold text-white mb-4 leading-none">
-                      OWEN
-                    </h1>
-                    {/* Decorative line */}
-                    <div className="flex items-center justify-center lg:justify-start">
+                  {/* Small/Medium: Inline image + name/title row */}
+                  <div className="lg:hidden">
+                    <div className="flex items-center gap-5 mb-4">
+                      {/* Inline profile image */}
+                      <div className="relative w-20 h-20 rounded-full overflow-hidden border border-white/20 bg-white/5 shadow">
+                        <ProgressiveImage
+                          src="/images/profile/OwenProfile.png"
+                          alt="Owen - Full Stack Developer"
+                          wrapperClassName="w-full h-full"
+                          className="w-full h-full object-cover"
+                          aspectClass="w-full h-full"
+                        />
+                      </div>
+                      <div className="text-left">
+                        <h1 className="fluid-h2 font-bold text-white leading-tight">OWEN</h1>
+                        <p className="text-azure-400 fluid-body font-medium uppercase tracking-[0.2em] mt-1">A FULL STACK DEVELOPER</p>
+                      </div>
+                    </div>
+                    {/* Decorative line under name area */}
+                    <div className="flex items-center justify-center lg:justify-start mb-4">
                       <motion.div 
                         initial={{ width: 0 }}
                         animate={{ width: 140 }}
                         transition={{ duration: 0.8, delay: 0.8 }}
                         className="h-1 bg-azure-400"
-                      ></motion.div>
+                      />
                     </div>
                   </div>
-                  
-                  <p className="text-azure-400 text-xl font-medium tracking-wider mb-6">
-                    A FULL STACK DEVELOPER
-                  </p>
+
+                  {/* Large screens: original stacked name + line + subtitle */}
+                  <div className="hidden lg:block">
+                    <div className="relative mb-8">
+                      <h1 className="fluid-h1 font-bold text-white mb-3">OWEN</h1>
+                      <div className="flex items-center justify-center lg:justify-start">
+                        <motion.div 
+                          initial={{ width: 0 }}
+                          animate={{ width: 140 }}
+                          transition={{ duration: 0.8, delay: 0.8 }}
+                          className="h-1 bg-azure-400"
+                        />
+                      </div>
+                    </div>
+                    <p className="text-azure-400 fluid-body font-medium tracking-wider mb-5 uppercase tracking-[0.2em]">
+                      A FULL STACK DEVELOPER
+                    </p>
+                  </div>
                 </motion.div>
 
                 {/* Introduction Text */}
@@ -77,7 +104,7 @@ const Home: React.FC = () => {
                   transition={{ duration: 0.6, delay: 0.7 }}
                   className="mb-6"
                 >
-                  <p className="text-white/90 text-lg leading-relaxed">
+                  <p className="text-white/90 fluid-body">
                     I craft digital experiences that blend beautiful design with powerful functionality. 
                     Specializing in modern web technologies, I build scalable applications that make a difference.
                   </p>
@@ -135,26 +162,28 @@ const Home: React.FC = () => {
               initial={{ opacity: 0, scale: 0.9, x: 50 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
               transition={{ duration: 1.2, ease: "easeOut", delay: 0.2 }}
-              className="relative order-1 lg:order-2 flex justify-center lg:justify-end lg:col-span-2"
+              className="relative order-1 lg:order-2 hidden lg:flex justify-center lg:justify-end lg:col-span-2 h-full"
             >
-              {/* Image Container - Increased Height for more dominance */}
-              <div className="relative w-96 h-[690px]">
+              {/* Image Container - Responsive, scales to always show full image */}
+              <div className="relative h-full max-h-[420px] md:max-h-[calc(100vh-140px)] flex items-center">
                 {/* Background Glow Effect */}
-                <div className="absolute inset-0 bg-gradient-to-br from-azure-400/15 via-transparent to-azure-600/8 rounded-2xl blur-2xl transform scale-110"></div>
+                <div className="absolute inset-0 bg-gradient-to-br from-azure-400/15 via-transparent to-azure-600/8 rounded-2xl blur-2xl transform scale-105"></div>
                 
                 {/* Owen's Image - Direct without glass container */}
                 <motion.div
-                  whileHover={{ scale: 1.03, y: -5 }}
-                  transition={{ duration: 0.4, ease: "easeOut" }}
-                  className="relative z-10 w-full h-full rounded-2xl overflow-hidden shadow-2xl"
+                  whileHover={{ scale: 1.01, y: -2 }}
+                  transition={{ duration: 0.45, ease: "easeOut" }}
+                  className="relative z-10 h-full max-h-full rounded-2xl overflow-hidden shadow-2xl flex"
                 >
-                  <ProgressiveImage
-                    src="/images/profile/OwenProfile.png"
-                    alt="Owen - Full Stack Developer"
-                    wrapperClassName="w-full h-full"
-                    className="object-cover object-center"
-                    aspectClass="w-full h-full"
-                  />
+                  <div className="relative h-full max-h-full flex">
+                    <ProgressiveImage
+                      src="/images/profile/OwenProfile.png"
+                      alt="Owen - Full Stack Developer"
+                      wrapperClassName="h-full max-h-full w-auto"
+                      className="h-full w-auto max-h-full object-contain"
+                      aspectClass="h-full"
+                    />
+                  </div>
                   
                   {/* Subtle Overlay */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/10 via-transparent to-transparent"></div>
@@ -229,7 +258,7 @@ const Home: React.FC = () => {
           className="pb-20"
         >
           <div className="text-center mb-8">
-            <h2 className="text-3xl font-bold text-white mb-4">Featured Work</h2>
+            <h2 className="fluid-h2 font-bold text-white mb-4">Featured Work</h2>
             <p className="text-white/60">Some of my recent projects</p>
           </div>
 

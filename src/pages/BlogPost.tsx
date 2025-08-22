@@ -447,7 +447,7 @@ function createHandler(config: Config) {
     return (
       <div className="min-h-screen pt-24 pb-12 flex items-center justify-center">
         <GlassCard className="p-8 text-center">
-          <h1 className="text-2xl font-bold text-white mb-4">Post Not Found</h1>
+          <h1 className="fluid-h3 font-bold text-white mb-4">Post Not Found</h1>
           <p className="text-white/70 mb-6">The blog post you're looking for doesn't exist.</p>
           <Link
             to="/blog"
@@ -603,7 +603,7 @@ function createHandler(config: Config) {
           {/* Article Meta (now includes a small thumbnail instead of large hero) */}
           <GlassCard className="p-6 -mt-4 relative z-10">
             <div className="space-y-4">
-              <h1 className="text-3xl lg:text-4xl font-bold text-white leading-tight">
+              <h1 className="fluid-h2 font-bold text-white">
                 {post.title}
               </h1>
               
