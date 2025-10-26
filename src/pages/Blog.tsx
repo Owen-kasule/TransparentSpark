@@ -176,20 +176,20 @@ const Blog: React.FC = () => {
   };
 
   if (isLoading) {
-    return (
-      <div className="min-h-screen pt-20 pb-12 relative">
+      return (
+        <div className="min-h-screen relative pt-4 lg:pt-20 pb-12">
         {/* Social Links on all pages */}
         <div className="hidden lg:block">
           <SocialLinks vertical className="fixed left-8 bottom-32 transform z-[60]" />
         </div>
 
-        <div className="container mx-auto px-6">
+        <div className="container mx-auto px-6 space-y-4 lg:space-y-0">
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="text-center mb-8"
+              className="text-center mb-4 lg:mb-8"
           >
             <h1 className="fluid-h1 font-bold text-white mb-4">
               BLOG
@@ -215,7 +215,7 @@ const Blog: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen pt-20 pb-12 relative">
+    <div className="min-h-screen pt-0.2 lg:pt-20 pb-12 relative">
       <SEO 
         title="Blog - Insights & Tutorials"
         description="Explore insights, tutorials, and thoughts on modern web development. Learn React, TypeScript, CSS, and more."
@@ -266,13 +266,13 @@ const Blog: React.FC = () => {
         </motion.div>
       </div>
 
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-6 space-y-4 lg:space-y-0">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-8"
+          className="text-center mb-4 lg:mb-8"
         >
             <h1 className="fluid-h1 font-bold text-white mb-4">
             BLOG
@@ -794,10 +794,7 @@ const Blog: React.FC = () => {
           </motion.section>
         )}
 
-        {/* Mobile Social Links */}
-        <div className="lg:hidden text-center mb-8">
-          <SocialLinks />
-        </div>
+        {/* Mobile Social Links removed - footer handles will be used on small screens */}
       </div>
     </div>
   );

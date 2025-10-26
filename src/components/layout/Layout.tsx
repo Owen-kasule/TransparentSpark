@@ -28,8 +28,22 @@ const Layout: React.FC = () => {
     <div className="min-h-screen relative overflow-hidden">
       {/* Background Images */}
       <div className="fixed inset-0 z-0">
-        <div className="absolute inset-0 dark:opacity-100 opacity-0 transition-opacity duration-500">
-          <ProgressiveImage 
+        {/* Mobile background (small screens) */}
+        <div className="absolute inset-0 lg:hidden">
+          <ProgressiveImage
+            src="/mobilebg.png"
+            alt="Mobile background"
+            wrapperClassName="w-full h-full"
+            className="object-cover"
+            initialBlur
+            skeleton
+            lazy={false}
+          />
+        </div>
+
+        {/* Desktop backgrounds (lg and up) */}
+        <div className="absolute inset-0 hidden lg:block dark:opacity-100 opacity-0 transition-opacity duration-500">
+          <ProgressiveImage
             src="/hero-dark.jpg"
             alt="Dark background"
             wrapperClassName="w-full h-full"
@@ -39,8 +53,8 @@ const Layout: React.FC = () => {
             lazy={false}
           />
         </div>
-        <div className="absolute inset-0 dark:opacity-0 opacity-100 transition-opacity duration-500">
-          <ProgressiveImage 
+        <div className="absolute inset-0 hidden lg:block dark:opacity-0 opacity-100 transition-opacity duration-500">
+          <ProgressiveImage
             src="/hero-light.jpg"
             alt="Light background"
             wrapperClassName="w-full h-full"
@@ -50,6 +64,7 @@ const Layout: React.FC = () => {
             lazy={false}
           />
         </div>
+
         {/* Overlay */}
         <div className="absolute inset-0 bg-black/20 dark:bg-black/40"></div>
       </div>
@@ -63,7 +78,7 @@ const Layout: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3, ease: 'easeInOut' }}
-          className="flex-1 pt-0 pb-28 md:pb-0" /* extra space for bottom nav on mobile */
+          className="flex-1 pt-0 pb-8 md:pb-0" /* reduced bottom space for mobile: enough for nav but tighter layout */
         >
           <Outlet />
         </motion.main>

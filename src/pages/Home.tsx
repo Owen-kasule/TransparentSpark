@@ -105,10 +105,10 @@ const Home: React.FC = () => {
   useAnalytics('home');
 
   return (
-    <div className="min-h-screen relative pt-24">
+    <div className="min-h-screen relative pt-4 lg:pt-24">
       <div className="container mx-auto px-6">
         {/* Hero Section - Two Column Layout */}
-        <div className="flex items-center justify-center min-h-[calc(100vh-6rem)] relative">
+        <div className="flex items-center justify-center min-h-[60vh] lg:min-h-[calc(100vh-6rem)] relative">
           {/* Left Side - Social Links (positioned lower) */}
           <div className="hidden lg:block">
             <SocialLinks vertical className="fixed left-8 bottom-32 transform z-[60]" />
@@ -122,14 +122,14 @@ const Home: React.FC = () => {
               initial={{ opacity: 0, scale: 0.95, x: -50 }}
               animate={{ opacity: 1, scale: 1, x: 0 }}
               transition={{ duration: 1.2, ease: "easeOut" }}
-              className="hero-glass-container rounded-3xl p-8 lg:p-12 relative order-2 lg:order-1 min-h-[400px] lg:min-h-[450px] flex flex-col justify-center lg:col-span-3"
+              className="hero-glass-container rounded-3xl p-8 lg:p-12 relative order-2 lg:order-1 min-h-[320px] lg:min-h-[450px] flex flex-col justify-center lg:col-span-3"
             >
               {/* Wavy Glass Effect Layers */}
               <div className="wavy-glass-effect"></div>
               <div className="glass-distortion"></div>
               
               {/* Content */}
-              <div className="relative z-10 text-center lg:text-left">
+              <div className="relative z-10 text-center lg:text-left space-y-4 lg:space-y-0">
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -158,11 +158,11 @@ const Home: React.FC = () => {
                   
                   {/* Small/Medium: Inline image + name/title row */}
                   <div className="lg:hidden">
-                    <div className="flex items-center gap-5 mb-4">
+                    <div className="flex items-center gap-4 mb-3">
                       {/* Inline profile image */}
                       <div className="relative w-20 h-20 rounded-full overflow-hidden border border-white/20 bg-white/5 shadow">
                         <ProgressiveImage
-                          src="/images/profile/owen-profile.png"
+                          src="/images/profile/OwenProfile-Mobile.png"
                           alt="Owen - Full Stack Developer"
                           wrapperClassName="w-full h-full"
                           className="w-full h-full object-cover"
@@ -205,7 +205,7 @@ const Home: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.7 }}
-                  className="mb-6"
+                  className="mb-3 lg:mb-6"
                 >
                   <p className="text-white/90 fluid-body">
                     I craft digital experiences that blend beautiful design with powerful functionality. 
@@ -218,45 +218,37 @@ const Home: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.9 }}
-                  className="flex justify-center lg:justify-start space-x-8 mb-8"
+                  className="flex justify-center lg:justify-start flex-wrap gap-4 mb-3 lg:mb-8"
                 >
                   <motion.div 
-                    whileHover={{ scale: 1.1, y: -2 }}
+                    whileHover={{ scale: 1.05, y: -1 }}
                     className="flex items-center space-x-2 text-white/70 hover:text-azure-400 transition-colors duration-300"
                   >
-                    <Code size={20} />
-                    <span className="text-sm font-medium">Frontend</span>
+                    <Code size={16} />
+                    <span className="text-xs font-medium">Frontend</span>
                   </motion.div>
                   <motion.div 
-                    whileHover={{ scale: 1.1, y: -2 }}
+                    whileHover={{ scale: 1.05, y: -1 }}
                     className="flex items-center space-x-2 text-white/70 hover:text-azure-400 transition-colors duration-300"
                   >
-                    <Database size={20} />
-                    <span className="text-sm font-medium">Backend</span>
+                    <Database size={16} />
+                    <span className="text-xs font-medium">Backend</span>
                   </motion.div>
                   <motion.div 
-                    whileHover={{ scale: 1.1, y: -2 }}
+                    whileHover={{ scale: 1.05, y: -1 }}
                     className="flex items-center space-x-2 text-white/70 hover:text-azure-400 transition-colors duration-300"
                   >
-                    <Globe size={20} />
-                    <span className="text-sm font-medium">Full Stack</span>
+                    <Globe size={16} />
+                    <span className="text-xs font-medium">Full Stack</span>
                   </motion.div>
                 </motion.div>
 
                 {/* Glassmorphism CTA Component */}
-                <div className="mb-6">
+                <div className="mb-3 lg:mb-6">
                   <GlassCTA delay={1.1} />
                 </div>
 
-                {/* Mobile Social Links */}
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.6, delay: 1.3 }}
-                  className="lg:hidden"
-                >
-                  <SocialLinks />
-                </motion.div>
+                {/* Mobile Social Links removed - footer handles will be used on small screens */}
               </div>
             </motion.div>
 
@@ -280,7 +272,7 @@ const Home: React.FC = () => {
                 >
                   <div className="relative h-full max-h-full flex">
                     <ProgressiveImage
-                      src="/images/profile/owen-profile.png"
+                      src="/images/profile/OwenProfile.png"
                       alt="Owen - Full Stack Developer"
                       wrapperClassName="h-full max-h-full w-auto"
                       className="h-full w-auto max-h-full object-contain"
@@ -358,14 +350,14 @@ const Home: React.FC = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1.1 }}
-          className="pb-20"
+          className="pt-4 pb-0.5 lg:pt-0 lg:pb-20"
         >
-          <div className="text-center mb-8">
-            <h2 className="fluid-h2 font-bold text-white mb-4">Featured Work</h2>
+          <div className="text-center mb-0 lg:mb-8">
+            <h2 className="fluid-h2 font-bold text-white mb-1 lg:mb-4">Featured Work</h2>
             <p className="text-white/60">Some of my recent projects</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-6">
+          <div className="grid md:grid-cols-2 gap-4">
             {featuredProjects.map((project, index) => (
               <GlassCard key={project.id} delay={1.3 + index * 0.2} className="p-6">
                 <div className="aspect-video rounded-xl overflow-hidden mb-4">

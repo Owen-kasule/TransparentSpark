@@ -46,8 +46,9 @@ const GlassCTA: React.FC<GlassCTAProps> = ({ delay = 0 }) => {
             whileTap={{ scale: 0.98 }}
             className="group flex-1 bg-white/10 hover:bg-white/15 text-white/90 hover:text-white px-5 xs:px-6 py-2.5 md:py-3 font-medium transition-all duration-300 rounded-r-full flex items-center justify-center space-x-2 border-l border-white/20 whitespace-nowrap md:whitespace-normal text-[13px] xs:text-sm md:text-base lg:text-lg"
           >
-      <span className="block">View My Resume</span>
-            <ArrowRight size={14} className="opacity-60 group-hover:opacity-90 transition-opacity" />
+      <span className="hidden sm:block">View My Resume</span>
+      <span className="block sm:hidden">Resume</span>
+            <ArrowRight size={14} className="opacity-60 group-hover:opacity-90 transition-opacity hidden sm:inline" />
           </motion.button>
         </div>
       </div>

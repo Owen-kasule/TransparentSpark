@@ -464,7 +464,7 @@ function createHandler(config: Config) {
   const currentUrl = window.location.href;
 
   return (
-    <div className="min-h-screen pt-20 pb-12 relative">
+    <div className="min-h-screen relative pt-4 lg:pt-20 pb-12">
       {post && (
         <SEO 
           title={post.title}
@@ -526,7 +526,7 @@ function createHandler(config: Config) {
       {/* Scroll Indicator */}
       {/* Scroll indicator removed for simplicity */}
 
-      <div className="container mx-auto px-6 max-w-4xl">
+      <div className="container mx-auto px-6 max-w-4xl space-y-4 lg:space-y-0">
         {/* Back Button */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
@@ -795,10 +795,7 @@ function createHandler(config: Config) {
           </div>
         </motion.article>
 
-        {/* Mobile Social Links */}
-        <div className="lg:hidden text-center mt-8">
-          <SocialLinks />
-        </div>
+        {/* Mobile Social Links removed - footer handles will be used on small screens */}
       </div>
     </div>
   );

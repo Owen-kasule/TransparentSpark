@@ -23,7 +23,7 @@ const Projects: React.FC = () => {
     : projects.filter(project => project.technologies.includes(filter));
 
   return (
-    <div className="min-h-screen pt-24 pb-12 relative">
+  <div className="min-h-screen relative pt-4 lg:pt-24 pb-12">
       {/* Social Links on all pages */}
       <div className="hidden lg:block">
   <SocialLinks vertical className="fixed left-8 bottom-32 transform z-[60]" />
@@ -45,13 +45,13 @@ const Projects: React.FC = () => {
         </motion.div>
       </div>
 
-      <div className="container mx-auto px-6">
+      <div className="container mx-auto px-6 space-y-4 lg:space-y-0">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-12"
+          className="text-center mb-4 lg:mb-12"
         >
           <h1 className="fluid-h1 font-bold text-white mb-5">
             PROJECTS
@@ -190,10 +190,7 @@ const Projects: React.FC = () => {
           </Link>
         </GlassCard>
 
-        {/* Mobile Social Links */}
-        <div className="lg:hidden text-center mt-8">
-          <SocialLinks />
-        </div>
+        {/* Mobile Social Links removed - footer handles will be used on small screens */}
       </div>
     </div>
   );
