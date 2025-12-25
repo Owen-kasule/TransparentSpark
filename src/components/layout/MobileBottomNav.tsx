@@ -49,24 +49,30 @@ const MobileBottomNav: React.FC = () => {
                       <div
                         className={
                           'relative w-full h-14 min-h-[56px] flex items-center justify-center ' +
-                          'px-2 min-[360px]:px-3 min-[390px]:px-4'
+                          'px-2'
                         }
                       >
                         {/* Active indicator layer (sized to full tab area, not icon). */}
                         {active && (
                           <motion.span
                             layoutId="mobile-nav-active"
-                            className="absolute inset-1 rounded-[1.4rem] bg-white/10 border border-white/15"
+                            className="absolute inset-0.5 rounded-[1.5rem] bg-white/10 border border-white/15 shadow-[0_0_0_1px_rgba(255,255,255,0.04)]"
                             transition={{ type: 'spring', stiffness: 350, damping: 30 }}
                           />
                         )}
 
                         {/* Content layer */}
-                        <div className="relative z-10 flex flex-col items-center justify-center">
-                          <Icon size={20} className="mb-0.5" />
-                          <span className="text-[11px] font-medium leading-none tracking-wide">
-                            {item.label}
-                          </span>
+                        <div className="relative z-10">
+                          {/*
+                            Inner content wrapper adds a visual buffer zone.
+                            Padding scales with viewport width (content shrinks inward on small screens).
+                          */}
+                          <div className="flex flex-col items-center justify-center px-1.5 min-[360px]:px-2.5 min-[390px]:px-3 py-1">
+                            <Icon className="w-[18px] h-[18px] min-[360px]:w-5 min-[360px]:h-5 mb-0.5" />
+                            <span className="text-[10px] min-[360px]:text-[11px] font-medium leading-none tracking-wide">
+                              {item.label}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </NavLink>
