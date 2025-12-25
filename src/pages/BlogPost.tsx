@@ -434,7 +434,7 @@ function createHandler(config: Config) {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen pt-24 pb-12 flex items-center justify-center">
+      <div className="min-h-screen pt-24 pb-0.5 lg:pb-12 flex items-center justify-center">
         <GlassCard className="p-8 text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-azure-400 mx-auto mb-4"></div>
           <p className="text-white/70">Loading blog post...</p>
@@ -445,7 +445,7 @@ function createHandler(config: Config) {
 
   if (!post) {
     return (
-      <div className="min-h-screen pt-24 pb-12 flex items-center justify-center">
+      <div className="min-h-screen pt-24 pb-0.5 lg:pb-12 flex items-center justify-center">
         <GlassCard className="p-8 text-center">
           <h1 className="fluid-h3 font-bold text-white mb-4">Post Not Found</h1>
           <p className="text-white/70 mb-6">The blog post you're looking for doesn't exist.</p>
@@ -464,7 +464,7 @@ function createHandler(config: Config) {
   const currentUrl = window.location.href;
 
   return (
-    <div className="min-h-screen relative pt-4 lg:pt-20 pb-12">
+    <div className="min-h-screen relative pt-4 lg:pt-20 pb-0.5 lg:pb-12">
       {post && (
         <SEO 
           title={post.title}

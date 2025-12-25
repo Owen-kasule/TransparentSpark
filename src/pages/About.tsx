@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import ProgressiveImage from '../components/ui/ProgressiveImage';
 import { motion } from 'framer-motion';
 import { Download, Award, Users, Coffee, ArrowDown } from 'lucide-react';
@@ -14,6 +14,19 @@ const About: React.FC = () => {
   const [hasAnimated, setHasAnimated] = useState(false);
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
+  const [isStoryExpanded, setIsStoryExpanded] = useState(false);
+  const getVisibleFromWidth = (width: number) => {
+    if (width < 768) return 1;
+    if (width < 1024) return 2;
+    if (width < 1440) return 3;
+    return 4;
+  };
+
+  const initialWidth = typeof window !== 'undefined' ? window.innerWidth : 0;
+  const [isMobile, setIsMobile] = useState(initialWidth < 1024);
+  const [storyHeights, setStoryHeights] = useState<{ full: number; collapsed: number }>({ full: 0, collapsed: 0 });
+  const [visibleCount, setVisibleCount] = useState(getVisibleFromWidth(initialWidth));
+  const storyRef = useRef<HTMLDivElement | null>(null);
 
   // Track page visit
   useAnalytics('about');
@@ -55,30 +68,75 @@ const About: React.FC = () => {
     }
   }, [hasAnimated]);
 
+  // Track viewport width to keep desktop layout untouched and clamp story only on mobile
+  useEffect(() => {
+    const measureStory = () => {
+      const width = typeof window !== 'undefined' ? window.innerWidth : 0;
+      setIsMobile(width < 1024);
+      setVisibleCount(getVisibleFromWidth(width));
+
+      if (storyRef.current) {
+        const lineHeight = parseFloat(getComputedStyle(storyRef.current).lineHeight) || 24;
+        const collapsed = Math.max(0, lineHeight * 5 + 4); // 5 lines + breathing room
+        setStoryHeights({
+          full: storyRef.current.scrollHeight,
+          collapsed
+        });
+      }
+    };
+
+    measureStory();
+    window.addEventListener('resize', measureStory);
+    window.addEventListener('orientationchange', measureStory);
+    return () => {
+      window.removeEventListener('resize', measureStory);
+      window.removeEventListener('orientationchange', measureStory);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (storyRef.current) {
+      setStoryHeights(prev => ({
+        ...prev,
+        full: storyRef.current.scrollHeight
+      }));
+    }
+  }, [isStoryExpanded]);
+
   // Testimonials carousel effect - infinite loop in one direction
   useEffect(() => {
-    if (!isPaused) {
-      const interval = setInterval(() => {
-        setCurrentTestimonialIndex((prevIndex) => 
-          (prevIndex + 1) % testimonials.length
-        );
-      }, 3000); // Faster rotation for continuous flow
+    const totalSlides = Math.max(1, Math.ceil(testimonials.length / visibleCount));
+    if (isPaused || testimonials.length === 0) return;
+    const interval = setInterval(() => {
+      setCurrentTestimonialIndex((prevIndex) => 
+        (prevIndex + 1) % totalSlides
+      );
+    }, 3500);
+    return () => clearInterval(interval);
+  }, [isPaused, visibleCount, testimonials.length]);
 
-      return () => clearInterval(interval);
+  // Clamp index when visibleCount changes
+  useEffect(() => {
+    const totalSlides = Math.max(1, Math.ceil(testimonials.length / visibleCount));
+    if (currentTestimonialIndex >= totalSlides) {
+      setCurrentTestimonialIndex(0);
     }
-  }, [isPaused]);
+  }, [visibleCount, testimonials.length]);
 
-  // Get exactly 3 testimonials for the current view
-  const getCurrentTestimonials = () => {
+  const totalSlides = Math.max(1, Math.ceil(testimonials.length / visibleCount));
+
+  // Get testimonials for current view based on visible count
+  const getCurrentTestimonials = (count: number) => {
     const result = [];
-    for (let i = 0; i < 3; i++) {
-      const index = (currentTestimonialIndex + i) % testimonials.length;
+    const start = (currentTestimonialIndex * count) % testimonials.length;
+    for (let i = 0; i < count; i++) {
+      const index = (start + i) % testimonials.length;
       result.push(testimonials[index]);
     }
     return result;
   };
 
-  const currentTestimonials = getCurrentTestimonials();
+  const currentTestimonials = getCurrentTestimonials(visibleCount);
 
   // Handle card click to pause/resume
   const handleCardClick = () => {
@@ -86,7 +144,7 @@ const About: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen relative pt-4 lg:pt-24 pb-12">
+    <div className="min-h-screen relative pt-4 lg:pt-24 pb-0.5 lg:pb-12">
       {/* Social Links on all pages */}
       <div className="hidden lg:block">
   <SocialLinks vertical className="fixed left-8 bottom-32 transform z-[60]" />
@@ -127,8 +185,24 @@ const About: React.FC = () => {
         <div className="grid lg:grid-cols-2 gap-8 mb-12">
           {/* Bio Section */}
           <GlassCard delay={0.2} className="p-6">
-            <h2 className="fluid-h3 font-bold text-white mb-4">My Story</h2>
-            <div className="space-y-3 text-white/80 leading-relaxed text-sm">
+            <h2 className="fluid-h3 font-bold text-white mb-4 text-center lg:text-left">My Story</h2>
+            <motion.div
+              ref={storyRef}
+              initial={false}
+              animate={{
+                maxHeight: isMobile && !isStoryExpanded && storyHeights.collapsed
+                  ? storyHeights.collapsed
+                  : storyHeights.full || 'none'
+              }}
+              transition={{ duration: 0.35, ease: 'easeInOut' }}
+              style={{
+                overflow: 'hidden',
+                display: isMobile && !isStoryExpanded ? ('-webkit-box' as any) : 'block',
+                WebkitLineClamp: isMobile && !isStoryExpanded ? 5 : 'unset',
+                WebkitBoxOrient: 'vertical' as any
+              }}
+              className="space-y-3 text-white/80 leading-relaxed text-sm"
+            >
               <p>
                 I'm Owen, a passionate full-stack developer with over 5 years of experience 
                 creating digital solutions that make a real impact. My journey began with a 
@@ -140,10 +214,20 @@ const About: React.FC = () => {
                 or architecting a scalable backend with Node.js, I bring both technical 
                 expertise and creative problem-solving to every project.
               </p>
-            </div>
+            </motion.div>
+
+            {/* Read more toggle for mobile */}
+            {isMobile && (
+              <button
+                onClick={() => setIsStoryExpanded(prev => !prev)}
+                className="mt-3 text-azure-400 text-sm font-medium flex items-center justify-center gap-2"
+              >
+                {isStoryExpanded ? 'Show less' : 'Read more'}
+              </button>
+            )}
 
             {/* Interactive Resume Link */}
-            <Link to="/resume">
+            <Link to="/resume" className="mt-6 flex justify-center lg:justify-start">
               <motion.button
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
@@ -159,7 +243,7 @@ const About: React.FC = () => {
           <div className="space-y-6">
             {/* Stats with Count-up Animation */}
             <GlassCard delay={0.4} className="p-6">
-              <h3 className="text-xl font-bold text-white mb-4">By the Numbers</h3>
+              <h3 className="text-xl font-bold text-white mb-4 text-center lg:text-left">By the Numbers</h3>
               <div className="grid grid-cols-3 gap-4">
                 {stats.map((stat, index) => (
                   <div key={index} className="text-center">
@@ -183,7 +267,7 @@ const About: React.FC = () => {
 
             {/* Skills */}
             <GlassCard delay={0.6} className="p-6">
-              <h3 className="text-xl font-bold text-white mb-4">Tech Stack</h3>
+              <h3 className="text-xl font-bold text-white mb-4 text-center lg:text-left">Tech Stack</h3>
               <div className="space-y-3">
                 {[
                   { category: 'Frontend', skills: ['React', 'TypeScript', 'Next.js', 'Tailwind CSS'] },
@@ -217,11 +301,15 @@ const About: React.FC = () => {
           className="mb-12"
         >
           <div className="text-center mb-8">
-            <div className="flex items-center justify-center space-x-4 mb-4">
-              <h2 className="text-3xl font-bold text-white">What People Say</h2>
-              <AddReviewButton />
+            <div className="flex flex-col md:flex-row md:flex-nowrap items-center justify-center gap-3 md:gap-3 mb-4 md:mb-2">
+              <h2 className="text-2xl md:text-3xl font-bold text-white text-center md:text-center md:leading-tight">
+                What People Say
+              </h2>
+              <div className="flex-shrink-0 md:ml-2">
+                <AddReviewButton />
+              </div>
             </div>
-            <p className="text-white/60 text-sm mb-4">
+            <p className="text-white/60 text-sm mb-4 text-center">
               Click any card to {isPaused ? 'resume' : 'pause'} the slideshow
             </p>
           </div>
@@ -229,20 +317,32 @@ const About: React.FC = () => {
           <div className="w-full max-w-6xl mx-auto">
             <motion.div 
               key={currentTestimonialIndex}
-              initial={{ opacity: 0, x: 50 }}
+              initial={{ opacity: 0, x: 40 }}
               animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -50 }}
+              exit={{ opacity: 0, x: -40 }}
               transition={{ duration: 0.8, ease: "easeInOut" }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-6"
+              className="grid testimonials-grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-6"
             >
               {currentTestimonials.map((testimonial: any, index: number) => (
                 <motion.div
                   key={`${testimonial.id}-${index}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  initial={{ opacity: 0, x: 30 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -30 }}
+                  transition={{ duration: 0.6, ease: 'easeInOut', delay: isMobile ? 0 : index * 0.1 }}
                   onClick={handleCardClick}
-                  className="cursor-pointer"
+                  className={`cursor-pointer ${isMobile ? 'w-full' : ''}`}
+                  drag={isMobile || visibleCount === 2 ? 'x' : false}
+                  style={{ touchAction: 'pan-y' }}
+                  dragConstraints={{ left: 0, right: 0 }}
+                  onDragEnd={(_, info) => {
+                    if (!(isMobile || visibleCount === 2)) return;
+                    if (info.offset.x < -50) {
+                      setCurrentTestimonialIndex((prev) => (prev + 1) % totalSlides);
+                    } else if (info.offset.x > 50) {
+                      setCurrentTestimonialIndex((prev) => (prev - 1 + totalSlides) % totalSlides);
+                    }
+                  }}
                 >
                   <GlassCard className={`p-6 h-full hover:scale-105 transition-transform duration-300 ${isPaused ? 'ring-2 ring-azure-400/50' : ''}`}>
                     <div className="flex items-center mb-4">
@@ -272,21 +372,28 @@ const About: React.FC = () => {
 
           {/* Smooth Progress Dots */}
           <div className="flex justify-center mt-6 space-x-2">
-            {testimonials.map((_, index) => (
-              <motion.div
-                key={index}
-                className={`w-2 h-2 rounded-full transition-all duration-500 ${
-                  index === currentTestimonialIndex
-                    ? 'bg-azure-400'
-                    : 'bg-white/30'
-                }`}
-                animate={{
-                  scale: index === currentTestimonialIndex ? 1.2 : 1,
-                  opacity: index === currentTestimonialIndex ? 1 : 0.5
-                }}
-                transition={{ duration: 0.3 }}
-              />
-            ))}
+            {Array.from({ length: totalSlides }).map((_, index) => {
+              const isActive = index === currentTestimonialIndex;
+              return (
+                <button
+                  key={index}
+                  onClick={() => setCurrentTestimonialIndex(index)}
+                  className="focus:outline-none"
+                  aria-label={`Go to testimonial ${index + 1}`}
+                >
+                  <motion.div
+                    className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${
+                      isActive ? 'bg-azure-400' : 'bg-white/30'
+                    }`}
+                    animate={{
+                      scale: isActive ? 1.2 : 1,
+                      opacity: isActive ? 1 : 0.5
+                    }}
+                    transition={{ duration: 0.3, ease: 'easeInOut' }}
+                  />
+                </button>
+              );
+            })}
           </div>
 
           {/* Pause/Resume Status */}

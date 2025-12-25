@@ -164,7 +164,7 @@ const AddReviewButton: React.FC = () => {
         onClick={() => setStep('email')}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        className="bg-azure-500 hover:bg-azure-600 text-white px-6 py-3 rounded-xl transition-colors duration-300 font-medium flex items-center space-x-2 shadow-lg"
+        className="bg-azure-500 hover:bg-azure-600 text-white px-6 py-3 rounded-xl transition-colors duration-300 font-medium flex items-center space-x-2 shadow-lg text-sm sm:text-base"
       >
         <Plus size={20} />
         <span>Add Review</span>

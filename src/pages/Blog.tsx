@@ -177,7 +177,7 @@ const Blog: React.FC = () => {
 
   if (isLoading) {
       return (
-        <div className="min-h-screen relative pt-4 lg:pt-20 pb-12">
+        <div className="min-h-screen relative pt-4 lg:pt-20 pb-0.5 lg:pb-12">
         {/* Social Links on all pages */}
         <div className="hidden lg:block">
           <SocialLinks vertical className="fixed left-8 bottom-32 transform z-[60]" />
@@ -215,7 +215,7 @@ const Blog: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen pt-0.2 lg:pt-20 pb-12 relative">
+    <div className="min-h-screen pt-0.2 lg:pt-20 pb-0.5 lg:pb-12 relative">
       <SEO 
         title="Blog - Insights & Tutorials"
         description="Explore insights, tutorials, and thoughts on modern web development. Learn React, TypeScript, CSS, and more."
