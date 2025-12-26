@@ -13,9 +13,7 @@ const Home: React.FC = () => {
   const subtitleRefSm = useRef<HTMLParagraphElement | null>(null);
   const subtitleRefLg = useRef<HTMLParagraphElement | null>(null);
   const owenRefSm = useRef<HTMLHeadingElement | null>(null);
-  const owenRefLg = useRef<HTMLHeadingElement | null>(null);
   const nameRowSmRef = useRef<HTMLDivElement | null>(null);
-  const nameRowLgRef = useRef<HTMLDivElement | null>(null);
   const barRefSm = useRef<HTMLSpanElement | null>(null);
   const barRefLg = useRef<HTMLSpanElement | null>(null);
   const hiImRefLg = useRef<HTMLParagraphElement | null>(null);
@@ -160,14 +158,16 @@ const Home: React.FC = () => {
                   <div className="lg:hidden">
                     <div className="flex items-center gap-4 mb-3">
                       {/* Inline profile image */}
-                      <div className="relative w-20 h-20 rounded-full overflow-hidden border border-white/20 bg-white/5 shadow">
-                        <ProgressiveImage
-                          src="/images/profile/OwenProfile-Mobile.png"
-                          alt="Owen - Full Stack Developer"
-                          wrapperClassName="w-full h-full"
-                          className="w-full h-full object-cover"
-                          aspectClass="w-full h-full"
-                        />
+                      <div className="flex-none shrink-0">
+                        <div className="relative rounded-full overflow-hidden border border-white/20 bg-white/5 shadow w-20 h-20 min-[360px]:w-[84px] min-[360px]:h-[84px] min-[390px]:w-24 min-[390px]:h-24">
+                          <ProgressiveImage
+                            src="/images/profile/OwenProfile-Mobile.png"
+                            alt="Owen - Full Stack Developer"
+                            wrapperClassName="absolute inset-0"
+                            className="w-full h-full object-cover object-center"
+                            aspectClass="w-full h-full"
+                          />
+                        </div>
                       </div>
                       <div className="text-left">
                         <p className="text-azure-400 text-sm font-medium tracking-wider mb-1 lg:hidden">HI I'M</p>
