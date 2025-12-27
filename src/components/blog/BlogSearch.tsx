@@ -21,6 +21,7 @@ import GlassCard from '../ui/GlassCard';
 
 interface BlogSearchProps {
   onSearchResults?: (results: BlogPost[]) => void;
+  onCategoryChange?: (category: string) => void;
   className?: string;
 }
 
@@ -30,7 +31,7 @@ interface SearchFilters {
   timeRange: 'all' | 'week' | 'month' | 'year';
 }
 
-const BlogSearch: React.FC<BlogSearchProps> = ({ onSearchResults, className = '' }) => {
+const BlogSearch: React.FC<BlogSearchProps> = ({ onSearchResults, onCategoryChange, className = '' }) => {
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<BlogPost[]>([]);
   const [categories, setCategories] = useState<string[]>([]);
@@ -278,6 +279,11 @@ const BlogSearch: React.FC<BlogSearchProps> = ({ onSearchResults, className = ''
   const handleFilterChange = (key: keyof SearchFilters, value: string) => {
     const newFilters = { ...filters, [key]: value };
     setFilters(newFilters);
+
+    // If there is no query, treat category selection as a page-level filter (mobile uses this).
+    if (key === 'category' && onCategoryChange && !query.trim()) {
+      onCategoryChange(value);
+    }
     
     if (query.trim()) {
       handleSearch(query);
@@ -328,6 +334,8 @@ const BlogSearch: React.FC<BlogSearchProps> = ({ onSearchResults, className = ''
             {query && (
               <button
                 onClick={clearSearch}
+                aria-label="Clear search"
+                title="Clear search"
                 className="p-2 text-white/60 hover:text-white transition-colors duration-200 rounded-lg hover:bg-white/10"
               >
                 <X size={18} />
@@ -336,6 +344,8 @@ const BlogSearch: React.FC<BlogSearchProps> = ({ onSearchResults, className = ''
             
             <button
               onClick={() => setShowFilters(!showFilters)}
+              aria-label={showFilters ? 'Hide filters' : 'Show filters'}
+              title={showFilters ? 'Hide filters' : 'Show filters'}
               className={`p-2 rounded-lg transition-colors duration-200 ${
                 showFilters 
                   ? 'text-azure-400 bg-azure-400/20' 
@@ -362,13 +372,8 @@ const BlogSearch: React.FC<BlogSearchProps> = ({ onSearchResults, className = ''
                   <select
                     value={filters.category}
                     onChange={(e) => handleFilterChange('category', e.target.value)}
+                    aria-label="Category"
                     className="w-full px-3 py-2 bg-black/80 border border-white/20 rounded-lg text-white focus:outline-none focus:border-azure-400 appearance-none"
-                    style={{
-                      backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                      backgroundPosition: 'right 0.5rem center',
-                      backgroundRepeat: 'no-repeat',
-                      backgroundSize: '1.5em 1.5em'
-                    }}
                   >
                     <option value="all" className="bg-black text-white">All Categories</option>
                     {categories.map(category => (
@@ -382,13 +387,8 @@ const BlogSearch: React.FC<BlogSearchProps> = ({ onSearchResults, className = ''
                   <select
                     value={filters.sortBy}
                     onChange={(e) => handleFilterChange('sortBy', e.target.value)}
+                    aria-label="Sort by"
                     className="w-full px-3 py-2 bg-black/80 border border-white/20 rounded-lg text-white focus:outline-none focus:border-azure-400 appearance-none"
-                    style={{
-                      backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                      backgroundPosition: 'right 0.5rem center',
-                      backgroundRepeat: 'no-repeat',
-                      backgroundSize: '1.5em 1.5em'
-                    }}
                   >
                     <option value="relevance" className="bg-black text-white">Relevance</option>
                     <option value="date" className="bg-black text-white">Date</option>
@@ -402,13 +402,8 @@ const BlogSearch: React.FC<BlogSearchProps> = ({ onSearchResults, className = ''
                   <select
                     value={filters.timeRange}
                     onChange={(e) => handleFilterChange('timeRange', e.target.value)}
+                    aria-label="Time range"
                     className="w-full px-3 py-2 bg-black/80 border border-white/20 rounded-lg text-white focus:outline-none focus:border-azure-400 appearance-none"
-                    style={{
-                      backgroundImage: `url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='m6 8 4 4 4-4'/%3e%3c/svg%3e")`,
-                      backgroundPosition: 'right 0.5rem center',
-                      backgroundRepeat: 'no-repeat',
-                      backgroundSize: '1.5em 1.5em'
-                    }}
                   >
                     <option value="all" className="bg-black text-white">All Time</option>
                     <option value="week" className="bg-black text-white">Past Week</option>

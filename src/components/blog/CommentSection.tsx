@@ -52,9 +52,10 @@ interface CommentSectionProps {
   postId: string;
   postTitle: string;
   onCommentCountChange?: (count: number) => void;
+  autoOpenForm?: boolean;
 }
 
-const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unusedPostTitle, onCommentCountChange }) => {
+const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unusedPostTitle, onCommentCountChange, autoOpenForm = false }) => {
   const [comments, setComments] = useState<DBComment[]>([]);
   const [replies, setReplies] = useState<DBReply[]>([]);
   const [dummyComments, setDummyComments] = useState<any[]>([]);
@@ -62,10 +63,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isValidatingEmail, setIsValidatingEmail] = useState(false);
   const [showCommentForm, setShowCommentForm] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [isMobileExpanded, setIsMobileExpanded] = useState(false);
+  const [mobileVisibleCount, setMobileVisibleCount] = useState(3);
   const [likedComments, setLikedComments] = useState<Set<string>>(new Set());
   const [replyingTo, setReplyingTo] = useState<string | null>(null);
   const [replyFormData, setReplyFormData] = useState<{ [key: string]: string }>({});
   const [expandedReplies, setExpandedReplies] = useState<Set<string>>(new Set());
+  const autoOpenHandledRef = useRef<string | null>(null);
 
   // Add a ref to prevent duplicate like requests
   const likeRequestInProgress = useRef<{[id: string]: boolean}>({});
@@ -84,6 +89,49 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
   useEffect(() => {
     loadComments();
   }, [postId]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(max-width: 639px)');
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+
+  useEffect(() => {
+    // Desktop/tablet: always expanded.
+    if (!isMobile) {
+      setIsMobileExpanded(true);
+      setMobileVisibleCount(3);
+      return;
+    }
+    // Mobile: start collapsed.
+    setIsMobileExpanded(false);
+    setMobileVisibleCount(3);
+    setShowCommentForm(false);
+  }, [isMobile, postId]);
+
+  useEffect(() => {
+    autoOpenHandledRef.current = null;
+  }, [postId]);
+
+  useEffect(() => {
+    if (!autoOpenForm) return;
+    if (autoOpenHandledRef.current === postId) return;
+    autoOpenHandledRef.current = postId;
+
+    // Ensure the section is visible and the form is open.
+    setIsMobileExpanded(true);
+    setShowCommentForm(true);
+
+    // Focus the textarea once the form is mounted.
+    window.setTimeout(() => {
+      const textarea = document.querySelector('textarea[name="content"]') as HTMLTextAreaElement | null;
+      textarea?.focus();
+      textarea?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 250);
+  }, [autoOpenForm, postId]);
 
   // Debounced email validation for real-time feedback
   const debouncedEmailValidation = useCallback(
@@ -580,13 +628,19 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
+    const d = new Date(dateString);
+    if (Number.isNaN(d.getTime())) return '';
+
+    const datePart = d.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric'
+    });
+    const timePart = d.toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit'
     });
+
+    return `${datePart} · ${timePart}`;
   };
 
   const getInitials = (name: string) => {
@@ -609,9 +663,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className={`bg-white/5 rounded-lg p-4 border border-white/10 ${isReply ? 'ml-8 mt-3' : ''}`}
+      className={`w-full max-w-full bg-white/5 rounded-lg p-3 sm:p-4 border border-white/10 overflow-hidden ${
+        isReply ? 'mt-3 border-l border-l-white/15 pl-3 sm:pl-4 sm:ml-6 sm:w-[calc(100%-1.5rem)]' : ''
+      }`}
     >
-      <div className="flex items-start space-x-4">
+      <div className="flex items-start gap-4 min-w-0">
         <div className="w-10 h-10 bg-azure-500/20 rounded-full flex items-center justify-center text-azure-400 font-semibold text-sm flex-shrink-0 overflow-hidden">
           {comment.avatar ? (
             <img
@@ -628,18 +684,20 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
           ) : (getInitials(comment.author_name))}
         </div>
         
-        <div className="flex-1">
-          <div className="flex items-center space-x-3 mb-2">
-            <h4 className="text-white font-semibold text-sm">{comment.author || comment.author_name}</h4>
-            <div className="flex items-center space-x-1 text-white/60 text-xs">
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 mb-2 min-w-0">
+            <h4 className="text-white font-semibold text-sm min-w-0 max-w-full truncate">
+              {comment.author || comment.author_name}
+            </h4>
+            <div className="flex items-center gap-1 text-white/60 text-xs min-w-0">
               <Calendar size={12} />
-              <span>{formatDate(comment.date || comment.created_at)}</span>
+              <span className="min-w-0 truncate">{formatDate(comment.date || comment.created_at)}</span>
             </div>
           </div>
           
-          <p className="text-white/80 leading-relaxed text-sm mb-3">{comment.content}</p>
+          <p className="text-white/80 leading-relaxed text-sm mb-3 break-words whitespace-pre-wrap">{comment.content}</p>
           
-          <div className="flex items-center space-x-4">
+          <div className="flex flex-wrap items-center gap-4">
             <button
               onClick={() => handleLikeComment(comment.id, isReply)}
               className={`flex items-center space-x-1 text-xs transition-colors duration-200 hover:scale-105 ${
@@ -661,7 +719,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
             {!isReply && (
               <button 
                 onClick={() => handleReplyClick(comment.id)}
-                className={`flex items-center space-x-1 transition-colors duration-200 text-xs hover:scale-105 ${
+                className={`flex items-center space-x-1 transition-colors duration-200 text-xs hover:scale-105 whitespace-nowrap ${
                   replyingTo === comment.id 
                     ? 'text-azure-400' 
                     : 'text-white/60 hover:text-azure-400'
@@ -681,13 +739,13 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
                 animate={{ opacity: 1, height: 'auto' }}
                 exit={{ opacity: 0, height: 0 }}
                 transition={{ duration: 0.3 }}
-                className="mt-4 p-4 bg-white/5 rounded-lg border border-white/10"
+                className="mt-3 sm:mt-4 p-3 sm:p-4 bg-white/5 rounded-lg border border-white/10"
               >
-                <div className="flex items-start space-x-3">
+                <div className="flex items-start gap-3 min-w-0">
                   <div className="w-8 h-8 bg-azure-500/20 rounded-full flex items-center justify-center text-azure-400 font-semibold text-xs flex-shrink-0">
                     You
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <textarea
                       value={replyFormData[comment.id] || ''}
                       onChange={(e) => handleReplyInputChange(comment.id, e.target.value)}
@@ -695,11 +753,11 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
                       rows={3}
                       className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-azure-400 transition-colors duration-300 resize-none text-sm"
                     />
-                    <div className="flex items-center justify-between mt-2">
+                    <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
                       <p className="text-white/40 text-xs">
                         {(replyFormData[comment.id] || '').length}/500 characters
                       </p>
-                      <div className="flex space-x-2">
+                      <div className="flex flex-wrap gap-2 sm:justify-end">
                         <button
                           onClick={() => handleReplyClick(comment.id)}
                           className="px-3 py-1 text-white/60 hover:text-white transition-colors duration-200 text-xs"
@@ -709,7 +767,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
                         <button
                           onClick={() => handleReplySubmission(comment.id)}
                           disabled={!replyFormData[comment.id] || replyFormData[comment.id].trim().length < 10}
-                          className="bg-azure-500 hover:bg-azure-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 py-1 rounded text-xs transition-colors duration-200 flex items-center space-x-1"
+                          className="bg-azure-500 hover:bg-azure-600 disabled:opacity-50 disabled:cursor-not-allowed text-white px-3 py-1 rounded text-xs transition-colors duration-200 flex items-center space-x-1 whitespace-nowrap"
                         >
                           <Send size={12} />
                           <span>Reply</span>
@@ -774,39 +832,91 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
 
   const totalComments = comments.length + replies.length + getTotalDummyCommentCount();
 
+  const totalTopLevelCount = dummyComments.length + comments.length;
+  const showAllOnThisViewport = !isMobile || isMobileExpanded;
+  const visibleDummy = showAllOnThisViewport ? dummyComments : dummyComments.slice(0, mobileVisibleCount);
+  const remainingSlots = showAllOnThisViewport ? comments.length : Math.max(0, mobileVisibleCount - visibleDummy.length);
+  const visibleReal = showAllOnThisViewport ? comments : comments.slice(0, remainingSlots);
+  const canShowMore = isMobile && isMobileExpanded && totalTopLevelCount > (visibleDummy.length + visibleReal.length);
+
   return (
-    <GlassCard className="p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div className="flex items-center space-x-3">
-          <MessageCircle className="text-azure-400" size={24} />
-          <h3 className="text-xl font-bold text-white">
-            Comments ({totalComments})
-          </h3>
-        </div>
-        
-        {!showCommentForm && (
+    <GlassCard className="p-4 sm:p-6">
+      <div className="flex items-center justify-between mb-4 sm:mb-6">
+        {isMobile ? (
+          isMobileExpanded ? (
+            <button
+              type="button"
+              aria-expanded="true"
+              onClick={() => {
+                setIsMobileExpanded(false);
+                setShowCommentForm(false);
+              }}
+              className="flex items-center gap-2 sm:gap-3 text-left"
+            >
+              <MessageCircle className="text-azure-400" size={20} />
+              <h3 className="text-base sm:text-xl font-bold text-white">
+                Comments ({totalComments})
+              </h3>
+              <span className="text-white/60">
+                <ChevronUp size={16} />
+              </span>
+            </button>
+          ) : (
+            <button
+              type="button"
+              aria-expanded="false"
+              onClick={() => setIsMobileExpanded(true)}
+              className="flex items-center gap-2 sm:gap-3 text-left"
+            >
+              <MessageCircle className="text-azure-400" size={20} />
+              <h3 className="text-base sm:text-xl font-bold text-white">
+                Comments ({totalComments})
+              </h3>
+              <span className="text-white/60">
+                <ChevronDown size={16} />
+              </span>
+            </button>
+          )
+        ) : (
+          <div className="flex items-center gap-2 sm:gap-3">
+            <MessageCircle className="text-azure-400" size={20} />
+            <h3 className="text-base sm:text-xl font-bold text-white">
+              Comments ({totalComments})
+            </h3>
+          </div>
+        )}
+
+        {showAllOnThisViewport && !showCommentForm && (
           <button
             onClick={() => setShowCommentForm(true)}
-            className="bg-azure-500 hover:bg-azure-600 text-white px-4 py-2 rounded-lg transition-colors duration-300 flex items-center space-x-2"
+            className="bg-azure-500 hover:bg-azure-600 text-white px-3 sm:px-4 py-2 rounded-lg transition-colors duration-300 flex items-center space-x-2 text-sm"
           >
             <MessageCircle size={16} />
-            <span>Add Comment</span>
+            <span className="hidden sm:inline">Add Comment</span>
+            <span className="sm:hidden">Add</span>
           </button>
         )}
       </div>
 
+      {/* Mobile collapsed hint */}
+      {isMobile && !isMobileExpanded && (
+        <p className="text-white/60 text-sm">
+          Tap to view comments.
+        </p>
+      )}
+
       {/* Comment Form */}
       <AnimatePresence>
-        {showCommentForm && (
+        {showAllOnThisViewport && showCommentForm && (
           <motion.div
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            className="mb-8"
+            className="mb-6 sm:mb-8"
           >
-            <GlassCard className="p-6 bg-white/5">
-              <div className="flex items-center justify-between mb-4">
-                <h4 className="text-lg font-semibold text-white">Leave a Comment</h4>
+            <GlassCard className="p-4 sm:p-6 bg-white/5">
+              <div className="flex items-center justify-between mb-3 sm:mb-4">
+                <h4 className="text-base sm:text-lg font-semibold text-white">Leave a Comment</h4>
                 <button
                   onClick={() => setShowCommentForm(false)}
                   className="text-white/60 hover:text-white transition-colors duration-300"
@@ -815,10 +925,10 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
                 </button>
               </div>
               
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
                 {/* Avatar Preview */}
-                <div className="flex items-center space-x-3 mb-4">
-                  <div className="w-12 h-12 bg-azure-500/20 rounded-full flex items-center justify-center text-azure-400 font-semibold text-sm overflow-hidden">
+                <div className="flex items-center space-x-3 mb-2 sm:mb-4">
+                  <div className="w-10 h-10 sm:w-12 sm:h-12 bg-azure-500/20 rounded-full flex items-center justify-center text-azure-400 font-semibold text-sm overflow-hidden">
                     {watch('email') && watch('name') ? (
                       <img 
                         src={getAvatarUrl(watch('email'), watch('name'), { size: 48 })} 
@@ -835,14 +945,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
                     )}
                   </div>
                   <div>
-                    <p className="text-white/80 text-sm">Your avatar will be generated from your email</p>
-                    <p className="text-white/60 text-xs">Using Gravatar or fallback avatar</p>
+                    <p className="text-white/80 text-sm">Avatar from your email</p>
+                    <p className="hidden sm:block text-white/60 text-xs">Using Gravatar or fallback avatar</p>
                   </div>
                 </div>
                 
-                <div className="grid md:grid-cols-2 gap-4">
+                <div className="grid sm:grid-cols-2 gap-3 sm:gap-4">
                   <div>
-                    <label className="block text-white/80 text-sm font-medium mb-2">
+                    <label className="block text-white/80 text-xs sm:text-sm font-medium mb-1.5 sm:mb-2">
                       Name *
                     </label>
                     <input
@@ -852,7 +962,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
                         minLength: { value: 2, message: 'Name must be at least 2 characters' },
                         maxLength: { value: 50, message: 'Name must be less than 50 characters' }
                       })}
-                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-azure-400 transition-colors duration-300"
+                      className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-azure-400 transition-colors duration-300 text-sm"
                       placeholder="Your name"
                       disabled={isSubmitting}
                     />
@@ -865,7 +975,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
                   </div>
                   
                   <div>
-                    <label className="block text-white/80 text-sm font-medium mb-2">
+                    <label className="block text-white/80 text-xs sm:text-sm font-medium mb-1.5 sm:mb-2">
                       Email * (not published)
                     </label>
                     <div className="relative">
@@ -875,7 +985,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
                           required: 'Email is required',
                           validate: (value) => validator.isEmail(value) || 'Please enter a valid email'
                         })}
-                        className={`w-full px-3 py-2 bg-white/10 border rounded-lg text-white placeholder-white/50 focus:outline-none transition-colors duration-300 pr-10 ${
+                        className={`w-full px-3 py-2 bg-white/10 border rounded-lg text-white placeholder-white/50 focus:outline-none transition-colors duration-300 pr-10 text-sm ${
                           emailValidation.hasBeenTouched
                             ? emailValidation.isValid
                               ? 'border-green-400 focus:border-green-400'
@@ -933,7 +1043,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
                 </div>
 
                 <div>
-                  <label className="block text-white/80 text-sm font-medium mb-2">
+                  <label className="block text-white/80 text-xs sm:text-sm font-medium mb-1.5 sm:mb-2">
                     Comment *
                   </label>
                   <textarea
@@ -942,8 +1052,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
                       minLength: { value: 10, message: 'Comment must be at least 10 characters' },
                       maxLength: { value: 1000, message: 'Comment must be less than 1000 characters' }
                     })}
-                    rows={4}
-                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-azure-400 transition-colors duration-300 resize-none"
+                    rows={isMobile ? 3 : 4}
+                    className="w-full px-3 py-2 bg-white/10 border border-white/20 rounded-lg text-white placeholder-white/50 focus:outline-none focus:border-azure-400 transition-colors duration-300 resize-none text-sm"
                     placeholder="Share your thoughts about this post..."
                     disabled={isSubmitting}
                   />
@@ -960,15 +1070,15 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between">
-                  <p className="text-white/60 text-xs">
-                    Your email will be validated but not published. Comments are moderated.
+                <div className="flex items-center justify-between gap-3">
+                  <p className="hidden sm:block text-white/60 text-xs">
+                    Email is validated but not published. Comments are moderated.
                   </p>
                   
                   <button
                     type="submit"
                     disabled={isSubmitting || isValidatingEmail || (!emailValidation.isValid && emailValidation.hasBeenTouched)}
-                    className={`px-6 py-2 rounded-lg transition-colors duration-300 flex items-center space-x-2 ${
+                    className={`px-4 sm:px-6 py-2 rounded-lg transition-colors duration-300 flex items-center space-x-2 text-sm ${
                       isSubmitting || isValidatingEmail || (!emailValidation.isValid && emailValidation.hasBeenTouched)
                         ? 'bg-gray-500 text-gray-300 cursor-not-allowed'
                         : 'bg-azure-500 hover:bg-azure-600 text-white'
@@ -994,7 +1104,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
       </AnimatePresence>
 
       {/* Comments List */}
-      <div className="space-y-4">
+      {showAllOnThisViewport && (
+        <div className="space-y-4">
         {isLoading ? (
           <div className="text-center py-8">
             <Loader className="animate-spin text-azure-400 mx-auto mb-4" size={32} />
@@ -1009,7 +1120,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
         ) : (
           <>
             {/* Dummy Comments */}
-            {dummyComments.map((comment) => (
+            {visibleDummy.map((comment) => (
               <div key={comment.id}>
                 {renderComment(comment)}
                 
@@ -1054,12 +1165,25 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
             ))}
             
             {/* Real Comments from Supabase */}
-            {comments.map((comment) => (
+            {visibleReal.map((comment) => (
               renderComment(comment)
             ))}
+
+            {canShowMore && (
+              <div className="pt-2">
+                <button
+                  type="button"
+                  onClick={() => setMobileVisibleCount(v => v + 5)}
+                  className="w-full bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 rounded-lg py-2.5 text-sm transition-colors"
+                >
+                  Show more
+                </button>
+              </div>
+            )}
           </>
         )}
-      </div>
+        </div>
+      )}
     </GlassCard>
   );
 };

@@ -334,7 +334,7 @@ const Contact: React.FC = () => {
               </div>
             </GlassCard>
 
-            <GlassCard delay={0.8} className="p-6">
+            <GlassCard delay={0.8} className="p-6 hidden lg:block">
               <h3 className="text-xl font-bold text-white mb-3">Follow Me</h3>
               <p className="text-white/70 mb-4 text-sm">
                 Stay updated with my latest projects and insights

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Calendar, 
@@ -14,7 +14,6 @@ import {
 } from 'lucide-react';
 import ProgressiveImage from '../components/ui/ProgressiveImage';
 import GlassCard from '../components/ui/GlassCard';
-import SocialLinks from '../components/ui/SocialLinks';
 import CommentSection from '../components/blog/CommentSection';
 import SocialShare from '../components/blog/SocialShare';
 import SEO from '../components/SEO';
@@ -26,6 +25,7 @@ import 'prismjs/themes/prism-tomorrow.css';
 const BlogPost: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const location = useLocation();
   const [post, setPost] = useState<BlogPost | null>(null);
   const [relatedPosts, setRelatedPosts] = useState<BlogPost[]>([]);
 
@@ -63,6 +63,7 @@ function createHandler(config: Config) {
   const [isLiking, setIsLiking] = useState(false);
   const [isLikeStatusLoaded, setIsLikeStatusLoaded] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  const [autoOpenCommentForm, setAutoOpenCommentForm] = useState(false);
 
   // Ref for comments section
   const commentsRef = useRef<HTMLDivElement>(null);
@@ -94,6 +95,17 @@ function createHandler(config: Config) {
     };
     loadBlogPost();
   }, [id]);
+
+  useEffect(() => {
+    const openFromLink = location.hash === '#comments' || (location.state as any)?.openComment === true;
+    if (!openFromLink) return;
+    if (isLoading) return;
+
+    setAutoOpenCommentForm(true);
+    requestAnimationFrame(() => {
+      commentsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    });
+  }, [location.hash, location.state, isLoading, post?.id]);
 
   const loadBlogPost = async () => {
     if (!id) return;
@@ -252,13 +264,14 @@ function createHandler(config: Config) {
   };
 
   const handleCommentClick = () => {
-    // Smooth scroll to comments section
-    if (commentsRef.current) {
-      commentsRef.current.scrollIntoView({ 
+    // Smooth scroll to comments section and open the comment form (fewer clicks)
+    setAutoOpenCommentForm(true);
+    requestAnimationFrame(() => {
+      commentsRef.current?.scrollIntoView({
         behavior: 'smooth',
         block: 'start'
       });
-    }
+    });
   };
 
 
@@ -526,17 +539,17 @@ function createHandler(config: Config) {
       {/* Scroll Indicator */}
       {/* Scroll indicator removed for simplicity */}
 
-      <div className="container mx-auto px-6 max-w-4xl space-y-4 lg:space-y-0">
+      <div className="container mx-auto px-4 sm:px-6 max-w-4xl space-y-4 lg:space-y-0">
         {/* Back Button */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ duration: 0.6 }}
-          className="mb-8"
+          className="mb-4 sm:mb-8"
         >
           <Link
             to="/blog"
-            className="inline-flex items-center space-x-2 text-white/70 hover:text-azure-400 transition-colors duration-300"
+            className="inline-flex items-center space-x-2 text-white/70 hover:text-azure-400 transition-colors duration-300 text-sm"
           >
             <ArrowLeft size={16} />
             <span>Back to Blog</span>
@@ -548,11 +561,11 @@ function createHandler(config: Config) {
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="space-y-8"
+          className="space-y-4 sm:space-y-8"
         >
           {/* Hero Image Gallery */}
           {post.images && post.images.length > 0 && (
-            <div className="relative aspect-video rounded-2xl overflow-hidden not-prose">
+            <div className="relative aspect-[16/10] sm:aspect-video rounded-xl sm:rounded-2xl overflow-hidden not-prose">
               <img
                 src={post.images[currentImageIndex]}
                 alt={post.title}
@@ -561,14 +574,15 @@ function createHandler(config: Config) {
               />
               {post.images.length > 1 && (
                 <>
-                  <div className="absolute inset-0 flex items-center justify-between p-4">
+                  <div className="absolute inset-0 flex items-center justify-between p-3 sm:p-4">
                     <button
                       onClick={prevImage}
                       className="p-2 bg-black/50 text-white rounded-full hover:bg-black/70 transition-colors duration-300"
                       aria-label="Previous image"
                       title="Previous image"
                     >
-                      <ChevronLeft size={20} />
+                      <ChevronLeft size={18} className="sm:hidden" />
+                      <ChevronLeft size={20} className="hidden sm:inline" />
                     </button>
                     <button
                       onClick={nextImage}
@@ -576,10 +590,11 @@ function createHandler(config: Config) {
                       aria-label="Next image"
                       title="Next image"
                     >
-                      <ChevronRight size={20} />
+                      <ChevronRight size={18} className="sm:hidden" />
+                      <ChevronRight size={20} className="hidden sm:inline" />
                     </button>
                   </div>
-                  <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
+                  <div className="absolute bottom-3 sm:bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
                     {post.images.map((_, idx) => (
                       <button
                         key={idx}
@@ -592,8 +607,8 @@ function createHandler(config: Config) {
                   </div>
                 </>
               )}
-              <div className="absolute top-4 left-4">
-                <span className="px-3 py-1 bg-azure-500 text-white rounded-full text-sm font-medium">
+              <div className="absolute top-3 sm:top-4 left-3 sm:left-4">
+                <span className="px-3 py-1 bg-azure-500 text-white rounded-full text-xs sm:text-sm font-medium">
                   {post.category}
                 </span>
               </div>
@@ -601,37 +616,37 @@ function createHandler(config: Config) {
           )}
 
           {/* Article Meta (now includes a small thumbnail instead of large hero) */}
-          <GlassCard className="p-6 -mt-4 relative z-10">
+          <GlassCard className="p-4 sm:p-6 -mt-3 sm:-mt-4 relative z-10">
             <div className="space-y-4">
               <h1 className="fluid-h2 font-bold text-white">
                 {post.title}
               </h1>
               
-              <p className="text-white/80 text-lg leading-relaxed">
+              <p className="text-white/80 text-sm sm:text-lg leading-relaxed">
                 {post.excerpt}
               </p>
 
 
               {/* Meta Information */}
-              <div className="flex flex-wrap items-center gap-6 text-white/60 text-sm">
+              <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-white/60 text-xs sm:text-sm">
                 <div className="flex items-center space-x-2">
-                  <Calendar size={16} />
-                  <span>{new Date(post.date).toLocaleDateString('en-US', { 
-                    year: 'numeric', 
-                    month: 'long', 
-                    day: 'numeric' 
-                  })}</span>
+                  <Calendar size={14} className="sm:hidden" />
+                  <Calendar size={16} className="hidden sm:inline" />
+                  <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Clock size={16} />
+                  <Clock size={14} className="sm:hidden" />
+                  <Clock size={16} className="hidden sm:inline" />
                   <span>{post.read_time}</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <Eye size={16} />
-                  <span>{post.views.toLocaleString()} views</span>
+                  <Eye size={14} className="sm:hidden" />
+                  <Eye size={16} className="hidden sm:inline" />
+                  <span>{post.views.toLocaleString()}</span>
                 </div>
                 <div className="flex items-center space-x-2">
-                  <MessageCircle size={16} />
+                  <MessageCircle size={14} className="sm:hidden" />
+                  <MessageCircle size={16} className="hidden sm:inline" />
                   <span>{commentCount}</span>
                 </div>
               </div>
@@ -674,12 +689,12 @@ function createHandler(config: Config) {
               </div>
 
               {/* Action Buttons */}
-              <div className="flex items-center justify-between pt-4 border-t border-white/10">
-                <div className="flex items-center space-x-4">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-white/10">
+                <div className="flex items-center justify-between sm:justify-start gap-3">
                   <button
                     onClick={handleLike}
                     disabled={isLiking || !isLikeStatusLoaded}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-lg transition-all duration-300 ${
+                    className={`flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${
                       isLiked 
                         ? 'bg-red-500/30 text-red-400 border border-red-400/50 hover:bg-red-500/40' 
                         : 'bg-white/10 text-white/70 hover:bg-white/20 border border-white/20'
@@ -698,7 +713,7 @@ function createHandler(config: Config) {
                   </button>
                   <button
                     onClick={handleCommentClick}
-                    className="flex items-center space-x-2 text-white/60 hover:text-azure-400 transition-colors duration-300 px-4 py-2 rounded-lg hover:bg-white/10"
+                    className="flex items-center space-x-2 text-white/60 hover:text-azure-400 transition-colors duration-300 px-3 sm:px-4 py-2 rounded-lg hover:bg-white/10 text-sm"
                     title="Go to comments"
                   >
                     <MessageCircle size={16} />
@@ -706,9 +721,9 @@ function createHandler(config: Config) {
                   </button>
                 </div>
                 {/* Condensed Share Dropdown */}
-                <div className="relative">
+                <div className="relative self-end sm:self-auto">
                   <details className="group">
-                    <summary className="list-none cursor-pointer flex items-center space-x-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg text-white/70 text-sm border border-white/15">
+                    <summary className="list-none cursor-pointer flex items-center space-x-2 bg-white/10 hover:bg-white/20 px-3 sm:px-4 py-2 rounded-lg text-white/70 text-sm border border-white/15">
                       <span>Share</span>
                       <ArrowRight size={14} className="group-open:rotate-90 transition-transform" />
                     </summary>
@@ -722,10 +737,10 @@ function createHandler(config: Config) {
           </GlassCard>
 
           {/* Article Content */}
-          <GlassCard className="p-8">
+          <GlassCard className="p-4 sm:p-8">
             <div 
               ref={contentRef}
-              className="prose prose-invert max-w-none"
+              className="prose prose-invert max-w-none prose-sm sm:prose-base"
               dangerouslySetInnerHTML={{ 
                 __html: displayHtml
               }}
@@ -733,24 +748,43 @@ function createHandler(config: Config) {
           </GlassCard>
 
           {/* Comments Section with Ref */}
-          <div ref={commentsRef} className="scroll-mt-24">
+          <div id="comments" ref={commentsRef} className="scroll-mt-24">
             <CommentSection 
               postId={post.id} 
               postTitle={post.title}
               onCommentCountChange={setCommentCount}
+              autoOpenForm={autoOpenCommentForm}
             />
           </div>
 
           {/* Related Articles */}
           {(relatedPosts.length > 0 || additionalRelatedPosts.length > 0) && (
-            <GlassCard className="p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h3 className="text-lg font-bold text-white">You might also like</h3>
+            <GlassCard className="p-4 sm:p-6">
+              <div className="flex items-center justify-between mb-4 sm:mb-6">
+                <h3 className="text-base sm:text-lg font-bold text-white">You might also like</h3>
                 <Link to="/blog" className="text-sm text-azure-400 hover:text-azure-300 transition-colors">
-                  View all posts
+                  View all
                 </Link>
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+              {/* Mobile: minimal list */}
+              <div className="sm:hidden divide-y divide-white/10">
+                {(relatedPosts.concat(additionalRelatedPosts).slice(0, 3)).map(rp => (
+                  <Link key={rp.id} to={`/blog/${rp.id}`} className="block">
+                    <div className="py-3 flex items-center justify-between gap-3 hover:bg-white/5 transition-colors rounded-lg px-2">
+                      <div className="min-w-0">
+                        <div className="text-[11px] text-azure-300/90 mb-1">{rp.category}</div>
+                        <div className="text-sm font-medium text-white line-clamp-1">{rp.title}</div>
+                        <div className="text-[11px] text-white/60 mt-1">{rp.read_time}</div>
+                      </div>
+                      <ArrowRight size={16} className="text-azure-400 flex-none" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+
+              {/* Desktop: cards */}
+              <div className="hidden sm:grid grid-cols-1 md:grid-cols-3 gap-4">
                 {(relatedPosts.concat(additionalRelatedPosts).slice(0,3)).map((rp) => (
                   <Link key={rp.id} to={`/blog/${rp.id}`} className="group">
                     <div className="bg-white/5 hover:bg-white/10 transition-all duration-300 rounded-lg overflow-hidden border border-white/10 h-full group-hover:border-azure-400/30">
@@ -787,7 +821,7 @@ function createHandler(config: Config) {
           <div className="text-center">
             <Link
               to="/blog"
-              className="bg-azure-500 hover:bg-azure-600 text-white px-8 py-3 rounded-lg transition-colors duration-300 inline-flex items-center space-x-2"
+              className="bg-azure-500 hover:bg-azure-600 text-white px-6 sm:px-8 py-2.5 sm:py-3 rounded-lg transition-colors duration-300 inline-flex items-center space-x-2 text-sm sm:text-base"
             >
               <ArrowLeft size={16} />
               <span>Back to All Posts</span>

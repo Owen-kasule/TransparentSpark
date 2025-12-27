@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Calendar, Clock, ArrowRight, Tag, ArrowDown, Eye, Heart } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Calendar, Clock, Tag, ArrowDown, Eye, Heart, MessageCircle, Sparkles, ArrowRight } from 'lucide-react';
+import { Link, useNavigate } from 'react-router-dom';
 import GlassCard from '../components/ui/GlassCard';
 import SocialLinks from '../components/ui/SocialLinks';
 import BlogSearch from '../components/blog/BlogSearch';
@@ -13,6 +13,7 @@ import BlogCardCarousel from '../components/blog/BlogCardCarousel';
 import { supabase } from '../lib/supabase';
 
 const Blog: React.FC = () => {
+  const navigate = useNavigate();
   const [featuredPosts, setFeaturedPosts] = useState<BlogPost[]>([]);
   const [recentPosts, setRecentPosts] = useState<BlogPost[]>([]);
   const [additionalPosts, setAdditionalPosts] = useState<BlogPost[]>([]);
@@ -22,6 +23,10 @@ const Blog: React.FC = () => {
   const [showSearchResults, setShowSearchResults] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<string>('all');
   const [moreArticlesCategory, setMoreArticlesCategory] = useState<string>('all');
+
+  // Mobile feed controls (X/Twitter-like)
+  const [mobileFeedTab, setMobileFeedTab] = useState<'forYou' | 'latest'>('forYou');
+  const [mobileVisibleCount, setMobileVisibleCount] = useState(10);
   
   // Streaming loading states
   const [featuredLoaded, setFeaturedLoaded] = useState(false);
@@ -44,6 +49,73 @@ const Blog: React.FC = () => {
   const CARD_HEIGHT_BASE = 'h-[360px]'; // mobile base height
   const CARD_HEIGHT_RESP = 'md:h-[400px] lg:h-[420px]'; // scale up on larger screens
   const cardHeightClass = `${CARD_HEIGHT_BASE} ${CARD_HEIGHT_RESP} flex flex-col`; // applied to outer card
+
+  // Mobile: unified, minimal list (avoids clutter from multiple sections)
+  const allPostsMerged = React.useMemo(() => {
+    const byId = new Map<string, BlogPost>();
+    [...featuredPosts, ...recentPosts, ...additionalPosts].forEach(post => {
+      byId.set(post.id, post);
+    });
+    return Array.from(byId.values()).sort(
+      (a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()
+    );
+  }, [featuredPosts, recentPosts, additionalPosts]);
+
+  const mobileSourcePosts = showSearchResults ? searchResults : allPostsMerged;
+  const mobileFilteredPosts = selectedCategory === 'all'
+    ? mobileSourcePosts
+    : mobileSourcePosts.filter(post => post.category === selectedCategory);
+
+  const timeAgo = (dateString: string) => {
+    const date = new Date(dateString);
+    const diffMs = Date.now() - date.getTime();
+    const diffMin = Math.floor(diffMs / 60000);
+    if (Number.isNaN(diffMin)) return '';
+    if (diffMin < 1) return 'now';
+    if (diffMin < 60) return `${diffMin}m`;
+    const diffHr = Math.floor(diffMin / 60);
+    if (diffHr < 24) return `${diffHr}h`;
+    const diffDay = Math.floor(diffHr / 24);
+    if (diffDay < 7) return `${diffDay}d`;
+    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  };
+
+  const toHandle = (name: string) => {
+    if (!name) return '@author';
+    const base = name
+      .toLowerCase()
+      .replace(/[^a-z0-9\s_]/g, '')
+      .trim()
+      .replace(/\s+/g, '_');
+    return `@${base || 'author'}`;
+  };
+
+  const formatCount = (value?: number) => {
+    const n = typeof value === 'number' && Number.isFinite(value) ? value : 0;
+    if (n < 1000) return String(n);
+    if (n < 10_000) return `${(n / 1000).toFixed(1).replace(/\.0$/, '')}k`;
+    if (n < 1_000_000) return `${Math.round(n / 1000)}k`;
+    return `${(n / 1_000_000).toFixed(1).replace(/\.0$/, '')}M`;
+  };
+
+  const goToCommentForm = (postId: string) => {
+    navigate(`/blog/${postId}#comments`, { state: { openComment: true } });
+  };
+
+  const mobileFeedPosts = React.useMemo(() => {
+    const posts = [...mobileFilteredPosts];
+    if (showSearchResults) return posts;
+    if (mobileFeedTab === 'latest') {
+      return posts.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+    }
+    // "For you": lightweight ranking, still minimal
+    return posts.sort((a, b) => {
+      const scoreA = (a.likes ?? 0) * 3 + (a.views ?? 0);
+      const scoreB = (b.likes ?? 0) * 3 + (b.views ?? 0);
+      if (scoreB !== scoreA) return scoreB - scoreA;
+      return new Date(b.date).getTime() - new Date(a.date).getTime();
+    });
+  }, [mobileFilteredPosts, mobileFeedTab, showSearchResults]);
 
   useEffect(() => {
     loadBlogData();
@@ -266,7 +338,7 @@ const Blog: React.FC = () => {
         </motion.div>
       </div>
 
-      <div className="container mx-auto px-6 space-y-4 lg:space-y-0">
+      <div className="container mx-auto px-4 sm:px-6 space-y-4 lg:space-y-0">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -280,7 +352,7 @@ const Blog: React.FC = () => {
           <div className="flex items-center justify-center mb-4">
             <div className="h-1 w-24 bg-azure-400"></div>
           </div>
-          <p className="text-white/70 max-w-2xl mx-auto text-sm mb-8">
+          <p className="text-white/70 max-w-2xl mx-auto text-sm mb-5 sm:mb-8">
             Insights, tutorials, and thoughts on modern web development
           </p>
 
@@ -291,7 +363,7 @@ const Blog: React.FC = () => {
             transition={{ duration: 0.8, delay: 0.2 }}
             className="max-w-2xl mx-auto"
           >
-            <BlogSearch onSearchResults={handleSearchResults} />
+            <BlogSearch onSearchResults={handleSearchResults} onCategoryChange={handleCategorySelect} />
           </motion.div>
 
           {/* Categories Filter */}
@@ -299,71 +371,271 @@ const Blog: React.FC = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="mt-6"
+            className="mt-4 sm:mt-6"
           >
-            <GlassCard className="p-4">
-              <h3 className="text-lg font-bold text-white mb-3 text-center">Categories</h3>
-              <div className="flex flex-wrap justify-center gap-2">
-                {!categoriesLoaded ? (
-                  // Skeleton loading for categories
-                  [...Array(6)].map((_, index) => (
-                    <div key={`category-skeleton-${index}`} className="w-20 h-6 bg-white/10 rounded-full animate-pulse"></div>
-                  ))
-                ) : (
-                  <>
-                    <button 
-                      onClick={() => handleCategorySelect('all')}
-                      className={`px-3 py-1 rounded-full text-sm transition-colors duration-300 cursor-pointer border ${
-                        selectedCategory === 'all' 
-                          ? 'bg-azure-400 text-white border-azure-400' 
-                          : 'bg-azure-400/20 text-azure-400 border-azure-400/30 hover:bg-azure-400/30 hover:border-azure-400/50'
-                      }`}
-                    >
-                      <Tag size={12} className="inline mr-1" />
-                      All
-                      {categoriesLoaded && (
-                        <span className="ml-1 text-xs opacity-70">
-                          ({getCategoryCount('all')})
-                        </span>
+            {/* Desktop: full categories card */}
+            <div className="hidden sm:block">
+              <GlassCard className="p-4">
+                <h3 className="text-lg font-bold text-white mb-3 text-center">Categories</h3>
+                <div className="flex flex-wrap justify-center gap-2">
+                  {!categoriesLoaded ? (
+                    // Skeleton loading for categories
+                    [...Array(6)].map((_, index) => (
+                      <div key={`category-skeleton-${index}`} className="w-20 h-6 bg-white/10 rounded-full animate-pulse"></div>
+                    ))
+                  ) : (
+                    <>
+                      <button 
+                        onClick={() => handleCategorySelect('all')}
+                        className={`px-3 py-1 rounded-full text-sm transition-colors duration-300 cursor-pointer border ${
+                          selectedCategory === 'all' 
+                            ? 'bg-azure-400 text-white border-azure-400' 
+                            : 'bg-azure-400/20 text-azure-400 border-azure-400/30 hover:bg-azure-400/30 hover:border-azure-400/50'
+                        }`}
+                      >
+                        <Tag size={12} className="inline mr-1" />
+                        All
+                        {categoriesLoaded && (
+                          <span className="ml-1 text-xs opacity-70">
+                            ({getCategoryCount('all')})
+                          </span>
+                        )}
+                      </button>
+                      {categories.length > 0 ? (
+                        categories.map((category) => (
+                          <button 
+                            key={category}
+                            onClick={() => handleCategorySelect(category)}
+                            className={`px-3 py-1 rounded-full text-sm transition-colors duration-300 cursor-pointer border ${
+                              selectedCategory === category 
+                                ? 'bg-azure-400 text-white border-azure-400' 
+                                : 'bg-azure-400/20 text-azure-400 border-azure-400/30 hover:bg-azure-400/30 hover:border-azure-400/50'
+                            }`}
+                          >
+                            <Tag size={12} className="inline mr-1" />
+                            {category}
+                            {categoriesLoaded && (
+                              <span className="ml-1 text-xs opacity-70">
+                                ({getCategoryCount(category)})
+                              </span>
+                            )}
+                          </button>
+                        ))
+                      ) : (
+                        <p className="text-white/60">No categories available</p>
                       )}
-                    </button>
-                    {categories.length > 0 ? (
-                      categories.map((category) => (
-                        <button 
-                          key={category}
-                          onClick={() => handleCategorySelect(category)}
-                          className={`px-3 py-1 rounded-full text-sm transition-colors duration-300 cursor-pointer border ${
-                            selectedCategory === category 
-                              ? 'bg-azure-400 text-white border-azure-400' 
-                              : 'bg-azure-400/20 text-azure-400 border-azure-400/30 hover:bg-azure-400/30 hover:border-azure-400/50'
-                          }`}
-                        >
-                          <Tag size={12} className="inline mr-1" />
-                          {category}
-                          {categoriesLoaded && (
-                            <span className="ml-1 text-xs opacity-70">
-                              ({getCategoryCount(category)})
-                            </span>
-                          )}
-                        </button>
-                      ))
-                    ) : (
-                      <p className="text-white/60">No categories available</p>
-                    )}
-                  </>
-                )}
-              </div>
-            </GlassCard>
+                    </>
+                  )}
+                </div>
+              </GlassCard>
+            </div>
           </motion.div>
         </motion.div>
 
-        {/* Search Results Section */}
+        {/* Mobile: Minimal Articles List */}
+        <motion.section
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.35 }}
+          className="sm:hidden mb-8"
+        >
+          <GlassCard className="p-0 overflow-hidden">
+            {/* Feed top bar */}
+            <div className="sticky top-0 z-10 bg-black/20 backdrop-blur-md border-b border-white/10">
+              <div className="px-3 pt-3 pb-2">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Sparkles className="text-azure-400" size={16} />
+                    <h2 className="text-sm font-semibold text-white">
+                      {showSearchResults ? `Results (${mobileFeedPosts.length})` : 'Reading Feed'}
+                    </h2>
+                  </div>
+                  {showSearchResults && (
+                    <button
+                      onClick={clearSearch}
+                      className="text-white/60 hover:text-white transition-colors duration-200 text-xs"
+                    >
+                      Clear
+                    </button>
+                  )}
+                </div>
+
+                {!showSearchResults && (
+                  <div className="mt-2 grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileFeedTab('forYou');
+                        setMobileVisibleCount(10);
+                      }}
+                      className={`rounded-lg py-2 text-xs font-semibold border transition-colors ${
+                        mobileFeedTab === 'forYou'
+                          ? 'bg-azure-400/15 text-azure-200 border-azure-300/25'
+                          : 'bg-white/5 text-white/70 border-white/10 hover:bg-white/10 hover:text-white'
+                      }`}
+                    >
+                      For you
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setMobileFeedTab('latest');
+                        setMobileVisibleCount(10);
+                      }}
+                      className={`rounded-lg py-2 text-xs font-semibold border transition-colors ${
+                        mobileFeedTab === 'latest'
+                          ? 'bg-azure-400/15 text-azure-200 border-azure-300/25'
+                          : 'bg-white/5 text-white/70 border-white/10 hover:bg-white/10 hover:text-white'
+                      }`}
+                    >
+                      Latest
+                    </button>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Feed items */}
+            <div className="p-3 space-y-3">
+              {mobileFeedPosts.slice(0, mobileVisibleCount).map(post => (
+                <Link key={post.id} to={`/blog/${post.id}`} className="block">
+                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] transition-colors duration-200 p-3">
+                    <div className="flex gap-3 items-start">
+                      {/* Avatar */}
+                      <div className="w-10 h-10 rounded-full overflow-hidden bg-white/5 border border-white/10 flex-none">
+                        {post.author_avatar ? (
+                          <ProgressiveImage
+                            src={post.author_avatar}
+                            alt={post.author_name}
+                            wrapperClassName="w-full h-full"
+                            className="w-full h-full object-cover"
+                            initialBlur
+                            skeleton
+                            lazy
+                          />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-white/70 text-sm font-semibold">
+                            {(post.author_name || 'A').slice(0, 1).toUpperCase()}
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Content */}
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2 text-[12px] text-white/70">
+                          <span className="font-semibold text-white truncate max-w-[9.5rem]">
+                            {post.author_name || 'Author'}
+                          </span>
+                          <span className="text-white/50 truncate">{toHandle(post.author_name)}</span>
+                          <span className="text-white/40">·</span>
+                          <span className="text-white/50 whitespace-nowrap">{timeAgo(post.date)}</span>
+                        </div>
+
+                        <h3 className="mt-1 text-[15px] font-semibold text-white leading-snug line-clamp-2">
+                          {post.title}
+                        </h3>
+
+                        <p className="mt-1 text-[13px] text-white/70 leading-snug line-clamp-2">
+                          {truncateExcerpt(post.excerpt, 150)}
+                        </p>
+
+                        {/* Media (optional, tweet-like) */}
+                        {post.image_url && (
+                          <div className="mt-2 rounded-xl overflow-hidden border border-white/10 bg-white/5">
+                            <ProgressiveImage
+                              src={post.image_url}
+                              alt={post.title}
+                              wrapperClassName="w-full"
+                              className="w-full h-44 object-cover"
+                              initialBlur
+                              skeleton
+                              lazy
+                            />
+                          </div>
+                        )}
+
+                        {/* Meta + actions */}
+                        <div className="mt-2 text-[11px] text-white/55">
+                          <div className="flex flex-wrap items-center gap-x-3 gap-y-2 min-w-0">
+                            <span className="px-2 py-0.5 rounded-full bg-azure-400/10 text-azure-200 border border-azure-300/15 truncate max-w-[10.5rem]">
+                              {post.category}
+                            </span>
+                            <span className="flex items-center gap-1 whitespace-nowrap">
+                              <Clock size={12} />
+                              {post.read_time}
+                            </span>
+                          </div>
+
+                          <div className="mt-2 grid grid-cols-3 gap-2">
+                            <span className="flex items-center justify-center gap-1 whitespace-nowrap">
+                              <Eye size={12} />
+                              {formatCount(post.views)}
+                            </span>
+                            <span className="flex items-center justify-center gap-1 whitespace-nowrap">
+                              <Heart size={12} />
+                              {formatCount(post.likes)}
+                            </span>
+                            <span
+                              role="button"
+                              tabIndex={0}
+                              title="Add a comment"
+                              aria-label="Add a comment"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                goToCommentForm(post.id);
+                              }}
+                              onKeyDown={(e) => {
+                                if (e.key === 'Enter' || e.key === ' ') {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  goToCommentForm(post.id);
+                                }
+                              }}
+                              className="flex items-center justify-center gap-1 whitespace-nowrap cursor-pointer hover:text-azure-300 transition-colors"
+                            >
+                              <MessageCircle size={12} />
+                              {formatCount(post.comments)}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Tags removed on mobile feed for a cleaner card */}
+                      </div>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+
+              {mobileFeedPosts.length === 0 && (
+                <div className="p-6 text-center text-white/60 text-sm rounded-2xl border border-white/10 bg-white/[0.03]">
+                  No posts found.
+                </div>
+              )}
+            </div>
+
+            {/* Load more */}
+            {mobileFeedPosts.length > mobileVisibleCount && (
+              <div className="p-3 border-t border-white/10 bg-white/[0.02]">
+                <button
+                  type="button"
+                  onClick={() => setMobileVisibleCount(v => v + 10)}
+                  className="w-full py-2.5 rounded-lg bg-white/5 hover:bg-white/10 border border-white/10 text-white/80 text-sm transition-colors"
+                >
+                  Show more
+                </button>
+              </div>
+            )}
+          </GlassCard>
+        </motion.section>
+
+        {/* Search Results Section (desktop) */}
         {showSearchResults && (
           <motion.section
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
-            className="mb-8"
+            className="hidden sm:block mb-8"
           >
             <GlassCard className="p-6">
               <div className="flex items-center justify-between mb-6">
@@ -457,13 +729,13 @@ const Blog: React.FC = () => {
           </motion.section>
         )}
 
-        {/* Featured Posts */}
+        {/* Featured Posts (desktop) */}
         {!showSearchResults && (
           <motion.section
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
-            className="mb-8"
+            className="hidden sm:block mb-8"
           >
             <div className="flex items-center justify-between mb-4">
               <h2 className="fluid-h3 font-bold text-white">
@@ -554,13 +826,13 @@ const Blog: React.FC = () => {
           </motion.section>
         )}
 
-        {/* Recent Posts */}
+        {/* Recent Posts (desktop) */}
         {!showSearchResults && (
           <motion.section
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
-            className="mb-8"
+            className="hidden sm:block mb-8"
           >
             <div className="flex items-center justify-between mb-4">
               <h2 className="fluid-h3 font-bold text-white">
@@ -642,13 +914,13 @@ const Blog: React.FC = () => {
           </motion.section>
         )}
 
-        {/* More Articles Snippet */}
+        {/* More Articles Snippet (desktop) */}
         {!showSearchResults && (
           <motion.section
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 1 }}
-            className="mb-8"
+            className="hidden sm:block mb-8"
           >
             <div className="text-center mb-6">
               <h2 className="fluid-h3 font-bold text-white mb-2">

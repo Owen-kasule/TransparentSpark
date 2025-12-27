@@ -133,31 +133,32 @@ const Resume: React.FC = () => {
   ];
 
   const renderExperience = () => (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {resumeData.experience.map((job, index) => (
         <motion.div
           key={job.id}
           variants={itemVariants}
           className="w-full"
         >
-          <GlassCard delay={0.2 + index * 0.1} className="w-full p-6">
-            <div className="flex justify-between items-start mb-4">
+          <GlassCard delay={0.2 + index * 0.1} className="w-full p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3 sm:mb-4">
               <div>
-                <h3 className="text-xl font-semibold text-white mb-1">{job.position}</h3>
-                <p className="text-blue-400 font-medium">{job.company}</p>
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-1">{job.position}</h3>
+                <p className="text-blue-400 font-medium text-sm sm:text-base">{job.company}</p>
               </div>
-              <div className="text-right text-sm text-gray-300">
+              <div className="text-left sm:text-right text-xs sm:text-sm text-gray-300">
                 <p>{job.duration}</p>
                 <p className="flex items-center gap-1 mt-1">
-                  <MapPin size={14} />
+                  <MapPin size={12} className="sm:hidden" />
+                  <MapPin size={14} className="hidden sm:inline" />
                   {job.location}
                 </p>
               </div>
             </div>
             
-            <p className="text-gray-300 mb-4">{job.description}</p>
+            <p className="text-gray-300 text-sm sm:text-base mb-3 sm:mb-4">{job.description}</p>
             
-            <div className="mb-4">
+            <div className="mb-3 sm:mb-4">
               <h4 className="text-white font-medium mb-2">Key Achievements:</h4>
               <ul className="space-y-1">
                 {job.achievements.map((achievement, index) => (
@@ -186,18 +187,18 @@ const Resume: React.FC = () => {
   );
 
   const renderSkills = () => (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {Object.entries(resumeData.skills).map(([category, skills], index) => (
         <motion.div key={category} variants={itemVariants} className="w-full">
-          <GlassCard delay={0.2 + index * 0.1} className="w-full p-6">
-            <h3 className="text-xl font-semibold text-white mb-4 capitalize">
+          <GlassCard delay={0.2 + index * 0.1} className="w-full p-4 sm:p-6">
+            <h3 className="text-lg sm:text-xl font-semibold text-white mb-3 sm:mb-4 capitalize">
               {category} Skills
             </h3>
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap gap-2 sm:gap-3">
               {skills.map((skill) => (
                 <span
                   key={skill}
-                  className="px-3 py-2 bg-azure-400/20 text-azure-400 rounded-lg hover:bg-azure-400/30 transition-colors duration-200"
+                  className="px-2.5 py-1.5 sm:px-3 sm:py-2 bg-azure-400/20 text-azure-400 rounded-lg hover:bg-azure-400/30 transition-colors duration-200 text-xs sm:text-sm"
                 >
                   {skill}
                 </span>
@@ -210,26 +211,27 @@ const Resume: React.FC = () => {
   );
 
   const renderEducation = () => (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {resumeData.education.map((edu, index) => (
         <motion.div key={edu.id} variants={itemVariants} className="w-full">
-          <GlassCard delay={0.2 + index * 0.1} className="w-full p-6">
-            <div className="flex justify-between items-start mb-4">
+          <GlassCard delay={0.2 + index * 0.1} className="w-full p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3 sm:mb-4">
               <div>
-                <h3 className="text-xl font-semibold text-white mb-1">{edu.degree}</h3>
-                <p className="text-blue-400 font-medium">{edu.school}</p>
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-1">{edu.degree}</h3>
+                <p className="text-blue-400 font-medium text-sm sm:text-base">{edu.school}</p>
               </div>
-              <div className="text-right text-sm text-gray-300">
+              <div className="text-left sm:text-right text-xs sm:text-sm text-gray-300">
                 <p>{edu.duration}</p>
                 <p className="flex items-center gap-1 mt-1">
-                  <MapPin size={14} />
+                  <MapPin size={12} className="sm:hidden" />
+                  <MapPin size={14} className="hidden sm:inline" />
                   {edu.location}
                 </p>
               </div>
             </div>
             
-            <div className="mb-4">
-              <p className="text-gray-300">
+            <div className="mb-3 sm:mb-4">
+              <p className="text-gray-300 text-sm sm:text-base">
                 <span className="text-white font-medium">GPA:</span> {edu.gpa}
               </p>
             </div>
@@ -254,17 +256,17 @@ const Resume: React.FC = () => {
   );
 
   const renderProjects = () => (
-    <div className="space-y-6">
+    <div className="space-y-4 sm:space-y-6">
       {resumeData.projects.map((project, index) => (
         <motion.div key={project.id} variants={itemVariants} className="w-full">
-          <GlassCard delay={0.2 + index * 0.1} className="w-full p-6">
-            <div className="flex justify-between items-start mb-4">
+          <GlassCard delay={0.2 + index * 0.1} className="w-full p-4 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-2 mb-3 sm:mb-4">
               <div>
-                <h3 className="text-xl font-semibold text-white mb-1">{project.name}</h3>
-                <p className="text-gray-300">{project.description}</p>
+                <h3 className="text-lg sm:text-xl font-semibold text-white mb-1">{project.name}</h3>
+                <p className="text-gray-300 text-sm sm:text-base">{project.description}</p>
               </div>
               {project.featured && (
-                <span className="px-2 py-1 bg-yellow-500/20 text-yellow-300 text-xs rounded-full border border-yellow-500/30">
+                <span className="px-2 py-1 bg-yellow-500/20 text-yellow-300 text-xs rounded-full border border-yellow-500/30 self-start sm:self-auto">
                   Featured
                 </span>
               )}
@@ -309,7 +311,7 @@ const Resume: React.FC = () => {
     }
   };
 
-    return (
+  return (
     <div className="min-h-screen relative pt-4 lg:pt-24 pb-0.5 lg:pb-12">
       {/* Social Links on all pages */}
       <div className="hidden lg:block">
@@ -332,7 +334,7 @@ const Resume: React.FC = () => {
         </motion.div>
       </div>
 
-      <div className="container mx-auto px-6 space-y-4 lg:space-y-0">
+      <div className="container mx-auto px-4 sm:px-6 space-y-4 lg:space-y-0">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -340,36 +342,36 @@ const Resume: React.FC = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-4 lg:mb-12"
         >
-          <h1 className="fluid-h1 font-bold text-white mb-5">
+          <h1 className="fluid-h1 font-bold text-white mb-4 sm:mb-5">
             RESUME
           </h1>
-          <div className="flex items-center justify-center mb-6">
+          <div className="flex items-center justify-center mb-4 sm:mb-6">
             <div className="h-1 w-24 bg-azure-400"></div>
           </div>
           
           {/* Personal Info Card */}
-          <GlassCard delay={0.2} className="w-full p-6 mb-8">
-            <div className="text-center mb-6">
-              <h2 className="text-3xl font-bold text-white mb-2">{resumeData.personal.name}</h2>
-              <p className="text-xl text-blue-400 mb-4">{resumeData.personal.title}</p>
-              <p className="text-gray-300">{resumeData.personal.summary}</p>
+          <GlassCard delay={0.2} className="w-full p-4 sm:p-6 mb-6 sm:mb-8">
+            <div className="text-center mb-4 sm:mb-6">
+              <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2">{resumeData.personal.name}</h2>
+              <p className="text-base sm:text-lg md:text-xl text-blue-400 mb-3 sm:mb-4">{resumeData.personal.title}</p>
+              <p className="text-gray-300 text-sm sm:text-base">{resumeData.personal.summary}</p>
             </div>
             
-            <div className="flex flex-wrap justify-center gap-6 text-sm">
-              <div className="flex items-center gap-2 text-gray-300">
-                <Mail size={16} className="text-azure-400" />
-                {resumeData.personal.email}
+            <div className="flex flex-col sm:flex-row sm:flex-wrap justify-center items-center gap-3 sm:gap-6 text-xs sm:text-sm">
+              <div className="flex items-center gap-2 text-gray-300 max-w-full break-words">
+                <Mail size={14} className="text-azure-400" />
+                <span className="break-all sm:break-words">{resumeData.personal.email}</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-300">
-                <Phone size={16} className="text-azure-400" />
-                {resumeData.personal.phone}
+              <div className="flex items-center gap-2 text-gray-300 max-w-full break-words">
+                <Phone size={14} className="text-azure-400" />
+                <span>{resumeData.personal.phone}</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-300">
-                <MapPin size={16} className="text-azure-400" />
-                {resumeData.personal.location}
+              <div className="flex items-center gap-2 text-gray-300 max-w-full break-words">
+                <MapPin size={14} className="text-azure-400" />
+                <span>{resumeData.personal.location}</span>
               </div>
-              <div className="flex items-center gap-2 text-gray-300">
-                <ExternalLink size={16} className="text-azure-400" />
+              <div className="flex items-center gap-2 text-gray-300 max-w-full break-words">
+                <ExternalLink size={14} className="text-azure-400" />
                 <a href={`https://${resumeData.personal.linkedin}`} target="_blank" rel="noopener noreferrer" className="hover:text-azure-400 transition-colors">
                   LinkedIn
                 </a>
@@ -379,22 +381,23 @@ const Resume: React.FC = () => {
         </motion.div>
 
         {/* Navigation Tabs */}
-        <GlassCard delay={0.4} className="w-full mb-8 p-4">
+        <GlassCard delay={0.4} className="w-full mb-6 sm:mb-8 p-3 sm:p-4">
           <div className="flex justify-center">
-            <div className="flex space-x-1 bg-white/10 p-1 rounded-lg">
+            <div className="grid grid-cols-2 gap-1 sm:flex sm:gap-0 sm:space-x-1 bg-white/10 p-1 rounded-lg w-full max-w-md sm:max-w-none">
               {sections.map((section) => {
                 const Icon = section.icon;
                 return (
                   <button
                     key={section.id}
                     onClick={() => setActiveSection(section.id)}
-                    className={`flex items-center gap-2 px-4 py-2 rounded-md transition-all duration-200 ${
+                    className={`flex items-center justify-center gap-2 px-3 sm:px-4 py-2 rounded-md transition-all duration-200 text-xs sm:text-sm ${
                       activeSection === section.id
                         ? 'bg-azure-500 text-white shadow-lg'
                         : 'text-white/70 hover:text-white hover:bg-white/20'
                     }`}
                   >
-                    <Icon size={16} />
+                    <Icon size={14} className="sm:hidden" />
+                    <Icon size={16} className="hidden sm:inline" />
                     {section.label}
                   </button>
                 );
@@ -414,16 +417,16 @@ const Resume: React.FC = () => {
         </motion.div>
 
         {/* Certifications Section */}
-        <GlassCard delay={0.8} className="w-full p-6 mb-8">
-          <h3 className="text-2xl font-semibold text-white mb-4 text-center">Certifications</h3>
+        <GlassCard delay={0.8} className="w-full p-4 sm:p-6 mb-6 sm:mb-8">
+          <h3 className="text-xl sm:text-2xl font-semibold text-white mb-3 sm:mb-4 text-center">Certifications</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {resumeData.certifications.map((cert, index) => (
-              <div key={index} className="flex justify-between items-center p-3 bg-white/10 rounded-lg border border-white/20">
+              <div key={index} className="flex justify-between items-center p-2.5 sm:p-3 bg-white/10 rounded-lg border border-white/20">
                 <div>
                   <p className="text-white font-medium text-sm">{cert.name}</p>
                   <p className="text-white/60 text-xs">{cert.issuer}</p>
                 </div>
-                <span className="text-azure-400 text-sm">{cert.date}</span>
+                <span className="text-azure-400 text-xs sm:text-sm">{cert.date}</span>
               </div>
             ))}
           </div>
@@ -436,9 +439,10 @@ const Resume: React.FC = () => {
             download="Owen_Kasule_Muhereza_Resume.pdf"
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="inline-flex bg-azure-500 hover:bg-azure-600 text-white px-6 py-3 rounded-xl transition-colors duration-300 font-medium items-center space-x-2"
+            className="inline-flex bg-azure-500 hover:bg-azure-600 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-xl transition-colors duration-300 font-medium items-center space-x-2 text-sm sm:text-base"
           >
-            <Download size={20} />
+            <Download size={18} className="sm:hidden" />
+            <Download size={20} className="hidden sm:inline" />
             <span>Download PDF Version</span>
           </motion.a>
         </div>
