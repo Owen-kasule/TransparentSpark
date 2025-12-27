@@ -284,13 +284,35 @@ function createHandler(config: Config) {
       .replace(/\s+/g, '-');
 
   const convertMarkdownToHtml = (markdown: string): string => {
+    const escapeHtml = (s: string) => s
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+
+    const codeBlocks: string[] = [];
+
     const processed = markdown
       .replace(/^### (.*$)/gim, '<h3>$1</h3>')
       .replace(/^## (.*$)/gim, '<h2>$1</h2>')
       .replace(/^# (.*$)/gim, '<h1>$1</h1>')
       .replace(/```(\w+)?\n([\s\S]*?)```/g, (_m, lang, code) => {
-        const safe = code.replace(/</g, '&lt;').replace(/>/g, '&gt;');
-        return `<pre><code class="language-${lang || 'text'}">${safe}</code></pre>`;
+        const normalizedLang = (lang || 'text').toString();
+        const safe = escapeHtml(code);
+
+        const idx = codeBlocks.push(
+          `<details class="md-codeblock" data-lang="${escapeHtml(normalizedLang)}">
+            <summary class="md-codeblock__summary">
+              <span class="md-codeblock__label">Show code</span>
+              <span class="md-codeblock__meta">${escapeHtml(normalizedLang)}</span>
+            </summary>
+            <pre><code class="language-${escapeHtml(normalizedLang)}">${safe}</code></pre>
+          </details>`
+        ) - 1;
+
+        // Use a <pre> placeholder so later paragraph logic doesn't wrap it.
+        return `<pre data-codeblock="${idx}"></pre>`;
       })
       .replace(/`([^`]+)`/g, '<code>$1</code>')
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
@@ -298,10 +320,15 @@ function createHandler(config: Config) {
       // paragraphs
       .replace(/\r/g, '')
       .replace(/\n{2,}/g, '</p><p>')
-      .replace(/^((?!<h[1-3]|<pre|<ul|<ol|<li|<p>).+)$/gim, '<p>$1</p>');
+      .replace(/^((?!<h[1-3]|<pre|<ul|<ol|<li|<p>|<details|<summary).+)$/gim, '<p>$1</p>');
+
+    const withCodeBlocks = processed.replace(/<pre data-codeblock="(\d+)"><\/pre>/g, (_m, idx) => {
+      const i = Number(idx);
+      return codeBlocks[i] ?? '';
+    });
 
     // Add IDs to headings
-    return processed.replace(/<h([1-3])>(.*?)<\/h\1>/g, (_m, level, text) => {
+    return withCodeBlocks.replace(/<h([1-3])>(.*?)<\/h\1>/g, (_m, level, text) => {
       const id = slugify(text.replace(/<[^>]+>/g, ''));
       return `<h${level} id="${id}">${text}</h${level}>`;
     });
@@ -350,10 +377,26 @@ function createHandler(config: Config) {
       }
     }).catch(() => {});
 
+    // Code block UX enhancements: copy + optional line collapse, and details label toggling.
+    const detailsEls = Array.from(contentRef.current.querySelectorAll('details.md-codeblock')) as HTMLDetailsElement[];
+    detailsEls.forEach(d => {
+      const summary = d.querySelector('summary');
+      const label = d.querySelector('.md-codeblock__label') as HTMLElement | null;
+      if (!summary || !label) return;
+
+      const update = () => {
+        label.textContent = d.open ? 'Hide code' : 'Show code';
+      };
+      update();
+      d.addEventListener('toggle', update);
+    });
+
     const pres = Array.from(contentRef.current.querySelectorAll('pre')) as HTMLElement[];
     pres.forEach(pre => {
       const codeEl = pre.querySelector('code');
+      if (!codeEl) return;
       const text = codeEl?.textContent || '';
+      if (!text.trim()) return;
       const lineCount = text.split('\n').length;
 
       // Add copy button if not present
@@ -432,8 +475,20 @@ function createHandler(config: Config) {
         pre.collapsible-code { position: relative; transition: max-height 0.3s ease-in-out; }
         pre.collapsible-code.collapsed { max-height: 200px; overflow: hidden; }
         pre.collapsible-code.collapsed:after { content: ''; position: absolute; left:0; right:0; bottom:0; height:60px; background: linear-gradient(to bottom, rgba(17,17,27,0), rgba(17,17,27,0.95)); pointer-events:none; }
-        pre code { font-size: 0.85rem; line-height: 1.3; }
+        pre { margin: 0.6rem 0 0.9rem; }
+        pre code { font-size: 0.85rem; line-height: 1.15; }
         .toggle-collapse { backdrop-filter: blur(4px); }
+
+        /* Code blocks: hidden by default behind a clean details toggle */
+        details.md-codeblock { margin: 0.75rem 0 1rem; border: 1px solid rgba(255,255,255,0.10); border-radius: 12px; background: rgba(255,255,255,0.04); overflow: hidden; }
+        details.md-codeblock > summary { list-style: none; cursor: pointer; display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 10px 12px; color: rgba(255,255,255,0.78); background: rgba(255,255,255,0.04); }
+        details.md-codeblock > summary::-webkit-details-marker { display: none; }
+        details.md-codeblock > summary:hover { color: rgba(255,255,255,0.92); background: rgba(255,255,255,0.06); }
+        .md-codeblock__label { font-size: 0.78rem; font-weight: 600; letter-spacing: 0.01em; }
+        .md-codeblock__meta { font-size: 0.72rem; opacity: 0.75; padding: 2px 8px; border: 1px solid rgba(255,255,255,0.12); border-radius: 999px; }
+        details.md-codeblock pre { margin: 0; border-radius: 0; }
+        details.md-codeblock pre code { line-height: 1.15; }
+
         .md-inline-img { transition: filter .4s ease, transform .6s ease; filter: blur(6px); transform: scale(1.02); }
         .md-inline-img:not([data-src]) { filter: blur(0); transform: scale(1); }
       `;
