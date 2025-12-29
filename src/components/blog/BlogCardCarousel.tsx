@@ -31,6 +31,9 @@ const BlogCardCarousel: React.FC<BlogCardCarouselProps> = ({
     // Filter out empties / nulls defensively
     .filter(Boolean);
 
+  const isVideoSrc = (src: string) => /\.(mp4|webm|ogg|mov|m4v)(\?|#|$)/i.test(src);
+  const hasVideo = effectiveImages.some(isVideoSrc);
+
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const intervalRef = useRef<number | null>(null);
@@ -72,7 +75,8 @@ const BlogCardCarousel: React.FC<BlogCardCarouselProps> = ({
 
   // Auto advance (only when inView, autoRotate enabled, not paused)
   useEffect(() => {
-    if (!autoRotate) return;
+    // If a post uses video, don't auto-rotate (prevents skipping while user plays/loads video).
+    if (!autoRotate || hasVideo) return;
     if (!inView) return;
     if (effectiveImages.length <= 1) return; // nothing to rotate
     if (paused) return;
@@ -135,24 +139,48 @@ const BlogCardCarousel: React.FC<BlogCardCarouselProps> = ({
         const isActive = i === index;
         const isLoaded = loaded[i];
         const shouldRender = inView || i === 0; // render first image immediately; others once in view
+        const isVideo = isVideoSrc(src);
         return (
           <div key={src + i} className={`absolute inset-0 w-full h-full transition-opacity duration-700 ease-in-out ${isActive ? 'opacity-100' : 'opacity-0'}`} data-active={isActive ? 'true' : 'false'}>
             {shouldRender && (
               <>
-                <img
-                  src={src}
-                  alt={`${alt} ${effectiveImages.length > 1 ? `– image ${i + 1} of ${effectiveImages.length}` : ''}`}
-                  className={`w-full h-full object-cover select-none ${!isLoaded ? 'blur-sm scale-105' : 'blur-0 scale-100'} transition-[filter,transform] duration-700`}
-                  loading={i === 0 ? 'eager' : 'lazy'}
-                  draggable={false}
-                  onLoad={() => setLoaded(prev => {
-                    const copy = [...prev];
-                    copy[i] = true;
-                    return copy;
-                  })}
-                />
-                {!isLoaded && (
-                  <div className="absolute inset-0 bg-white/10 animate-pulse" aria-hidden="true" />
+                {isVideo ? (
+                  <>
+                    <video
+                      src={src}
+                      className="w-full h-full object-cover bg-black/40"
+                      playsInline
+                      preload={i === 0 ? 'metadata' : 'none'}
+                      controls={isActive}
+                      muted
+                      onLoadedData={() => setLoaded(prev => {
+                        const copy = [...prev];
+                        copy[i] = true;
+                        return copy;
+                      })}
+                    />
+                    {!isLoaded && (
+                      <div className="absolute inset-0 bg-white/10 animate-pulse" aria-hidden="true" />
+                    )}
+                  </>
+                ) : (
+                  <>
+                    <img
+                      src={src}
+                      alt={`${alt} ${effectiveImages.length > 1 ? `– media ${i + 1} of ${effectiveImages.length}` : ''}`}
+                      className={`w-full h-full object-cover select-none ${!isLoaded ? 'blur-sm scale-105' : 'blur-0 scale-100'} transition-[filter,transform] duration-700`}
+                      loading={i === 0 ? 'eager' : 'lazy'}
+                      draggable={false}
+                      onLoad={() => setLoaded(prev => {
+                        const copy = [...prev];
+                        copy[i] = true;
+                        return copy;
+                      })}
+                    />
+                    {!isLoaded && (
+                      <div className="absolute inset-0 bg-white/10 animate-pulse" aria-hidden="true" />
+                    )}
+                  </>
                 )}
               </>
             )}

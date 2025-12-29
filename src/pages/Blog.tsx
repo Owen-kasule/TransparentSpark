@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Calendar, Clock, Tag, ArrowDown, Eye, Heart, MessageCircle, Sparkles, ArrowRight } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
@@ -11,6 +11,7 @@ import { getFeaturedPosts, getRecentPosts, getAllCategories, getAllPosts, type B
 import ProgressiveImage from '../components/ui/ProgressiveImage';
 import BlogCardCarousel from '../components/blog/BlogCardCarousel';
 import { supabase } from '../lib/supabase';
+import { blogService } from '../lib/blogService';
 
 const Blog: React.FC = () => {
   const navigate = useNavigate();
@@ -102,6 +103,68 @@ const Blog: React.FC = () => {
     navigate(`/blog/${postId}#comments`, { state: { openComment: true } });
   };
 
+  type LikeEntry = { liked: boolean; count: number; busy: boolean; userSet: boolean };
+  const [likeById, setLikeById] = useState<Record<string, LikeEntry>>({});
+  const likeByIdRef = useRef(likeById);
+  useEffect(() => {
+    likeByIdRef.current = likeById;
+  }, [likeById]);
+
+  const seedLikeState = (posts: BlogPost[]) => {
+    if (!posts || posts.length === 0) return;
+    setLikeById(prev => {
+      const next = { ...prev };
+      posts.forEach(p => {
+        const existing = next[p.id];
+        const serverCount = typeof p.likes === 'number' ? p.likes : 0;
+        if (!existing) {
+          next[p.id] = { liked: false, count: serverCount, busy: false, userSet: false };
+          return;
+        }
+        // Keep user-set state; otherwise refresh counts from server.
+        next[p.id] = {
+          ...existing,
+          count: existing.userSet ? existing.count : serverCount
+        };
+      });
+      return next;
+    });
+  };
+
+  const toggleLikeFromList = async (postId: string) => {
+    const before = likeByIdRef.current[postId] ?? { liked: false, count: 0, busy: false, userSet: false };
+    if (before.busy) return;
+
+    const optimisticLiked = !before.liked;
+    const optimisticCount = Math.max(0, before.count + (optimisticLiked ? 1 : -1));
+
+    setLikeById(prev => ({
+      ...prev,
+      [postId]: { liked: optimisticLiked, count: optimisticCount, busy: true, userSet: true }
+    }));
+
+    try {
+      await blogService.toggleLike(postId);
+      setLikeById(prev => ({
+        ...prev,
+        [postId]: { liked: optimisticLiked, count: optimisticCount, busy: false, userSet: true }
+      }));
+    } catch (e) {
+      console.error('Error toggling like:', e);
+      setLikeById(prev => ({
+        ...prev,
+        [postId]: { ...before, busy: false }
+      }));
+    }
+  };
+
+  const isVideoUrl = (url?: string) => !!url && /\.(mp4|webm|ogg|mov|m4v)(\?|#|$)/i.test(url);
+  const getPrimaryMedia = (post: BlogPost) => {
+    const list = (Array.isArray(post.images) ? post.images : []).filter(Boolean);
+    if (list.length > 0) return list[0];
+    return post.image_url || '';
+  };
+
   const mobileFeedPosts = React.useMemo(() => {
     const posts = [...mobileFilteredPosts];
     if (showSearchResults) return posts;
@@ -150,6 +213,7 @@ const Blog: React.FC = () => {
       // Stream 1: Load featured posts immediately (highest priority)
       getFeaturedPosts().then(featured => {
         setFeaturedPosts(featured);
+        seedLikeState(featured);
         setFeaturedLoaded(true);
         setIsLoading(false); // Show page as soon as featured posts load
       }).catch(error => {
@@ -161,6 +225,7 @@ const Blog: React.FC = () => {
       // Stream 2: Load recent posts (second priority)
       getRecentPosts().then(recent => {
         setRecentPosts(recent);
+        seedLikeState(recent);
         setRecentLoaded(true);
       }).catch(error => {
         console.error('Error loading recent posts:', error);
@@ -183,6 +248,7 @@ const Blog: React.FC = () => {
           .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
           .slice(3, 9);
         setAdditionalPosts(additional);
+        seedLikeState(additional);
         setAdditionalLoaded(true);
       }).catch(error => {
         console.error('Error loading additional posts:', error);
@@ -194,6 +260,39 @@ const Blog: React.FC = () => {
       setIsLoading(false);
     }
   };
+
+  // Load initial liked status for the visitor (first batch only to keep it snappy)
+  useEffect(() => {
+    const posts = allPostsMerged.slice(0, 30);
+    if (posts.length === 0) return;
+
+    let cancelled = false;
+    (async () => {
+      const results = await Promise.all(
+        posts.map(p => blogService.hasLiked(p.id).catch(() => false))
+      );
+      if (cancelled) return;
+
+      setLikeById(prev => {
+        const next = { ...prev };
+        posts.forEach((p, idx) => {
+          const existing = next[p.id];
+          if (!existing) {
+            next[p.id] = { liked: results[idx], count: typeof p.likes === 'number' ? p.likes : 0, busy: false, userSet: false };
+            return;
+          }
+          // Don't override a user's optimistic interaction.
+          if (existing.userSet) return;
+          next[p.id] = { ...existing, liked: results[idx] };
+        });
+        return next;
+      });
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [allPostsMerged]);
 
   const handleSearchResults = (results: BlogPost[]) => {
     setSearchResults(results);
@@ -249,7 +348,7 @@ const Blog: React.FC = () => {
 
   if (isLoading) {
       return (
-        <div className="min-h-screen relative pt-4 lg:pt-20 pb-0.5 lg:pb-12">
+        <div className="min-h-screen relative pt-4 lg:pt-24 pb-0.5 lg:pb-12">
         {/* Social Links on all pages */}
         <div className="hidden lg:block">
           <SocialLinks vertical className="fixed left-8 bottom-32 transform z-[60]" />
@@ -287,7 +386,7 @@ const Blog: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen pt-0.2 lg:pt-20 pb-0.5 lg:pb-12 relative">
+    <div className="min-h-screen relative pt-4 lg:pt-24 pb-0.5 lg:pb-12">
       <SEO 
         title="Blog - Insights & Tutorials"
         description="Explore insights, tutorials, and thoughts on modern web development. Learn React, TypeScript, CSS, and more."
@@ -439,10 +538,10 @@ const Blog: React.FC = () => {
           transition={{ duration: 0.6, delay: 0.35 }}
           className="sm:hidden mb-8"
         >
-          <GlassCard className="p-0 overflow-hidden">
-            {/* Feed top bar */}
-            <div className="sticky top-0 z-10 bg-black/20 backdrop-blur-md border-b border-white/10">
-              <div className="px-3 pt-3 pb-2">
+          {/* Feed top bar */}
+          <div className="sticky top-0 z-10 px-3 pt-3">
+            <div className="rounded-2xl overflow-hidden bg-white/5 backdrop-blur-md border border-white/10">
+              <div className="px-3 pt-3 pb-2 border-b border-white/10">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
                     <Sparkles className="text-azure-400" size={16} />
@@ -494,12 +593,13 @@ const Blog: React.FC = () => {
                 )}
               </div>
             </div>
+          </div>
 
-            {/* Feed items */}
-            <div className="p-3 space-y-3">
+          {/* Feed items */}
+          <div className="p-3 space-y-3">
               {mobileFeedPosts.slice(0, mobileVisibleCount).map(post => (
                 <Link key={post.id} to={`/blog/${post.id}`} className="block">
-                  <div className="rounded-2xl border border-white/10 bg-white/[0.03] hover:bg-white/[0.06] transition-colors duration-200 p-3">
+                  <div className="glass-card rounded-2xl p-3">
                     <div className="flex gap-3 items-start">
                       {/* Avatar */}
                       <div className="w-10 h-10 rounded-full overflow-hidden bg-white/5 border border-white/10 flex-none">
@@ -540,17 +640,28 @@ const Blog: React.FC = () => {
                         </p>
 
                         {/* Media (optional, tweet-like) */}
-                        {post.image_url && (
+                        {getPrimaryMedia(post) && (
                           <div className="mt-2 rounded-xl overflow-hidden border border-white/10 bg-white/5">
-                            <ProgressiveImage
-                              src={post.image_url}
-                              alt={post.title}
-                              wrapperClassName="w-full"
-                              className="w-full h-44 object-cover"
-                              initialBlur
-                              skeleton
-                              lazy
-                            />
+                            {isVideoUrl(getPrimaryMedia(post)) ? (
+                              <video
+                                src={getPrimaryMedia(post)}
+                                className="w-full h-44 object-cover bg-black/40"
+                                playsInline
+                                preload="metadata"
+                                controls
+                                muted
+                              />
+                            ) : (
+                              <ProgressiveImage
+                                src={getPrimaryMedia(post)}
+                                alt={post.title}
+                                wrapperClassName="w-full"
+                                className="w-full h-44 object-cover"
+                                initialBlur
+                                skeleton
+                                lazy
+                              />
+                            )}
                           </div>
                         )}
 
@@ -571,10 +682,23 @@ const Blog: React.FC = () => {
                               <Eye size={12} />
                               {formatCount(post.views)}
                             </span>
-                            <span className="flex items-center justify-center gap-1 whitespace-nowrap">
-                              <Heart size={12} />
-                              {formatCount(post.likes)}
-                            </span>
+                            <button
+                              type="button"
+                              aria-label="Like post"
+                              title="Like"
+                              disabled={likeById[post.id]?.busy}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                toggleLikeFromList(post.id);
+                              }}
+                              className={`flex items-center justify-center gap-1 whitespace-nowrap transition-colors ${
+                                (likeById[post.id]?.liked ? 'text-red-400' : 'text-white/55 hover:text-red-400')
+                              } ${likeById[post.id]?.busy ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+                            >
+                              <Heart size={12} fill={likeById[post.id]?.liked ? 'currentColor' : 'none'} />
+                              {formatCount(likeById[post.id]?.count ?? post.likes)}
+                            </button>
                             <span
                               role="button"
                               tabIndex={0}
@@ -608,7 +732,7 @@ const Blog: React.FC = () => {
               ))}
 
               {mobileFeedPosts.length === 0 && (
-                <div className="p-6 text-center text-white/60 text-sm rounded-2xl border border-white/10 bg-white/[0.03]">
+                <div className="glass-card rounded-2xl p-6 text-center text-white/60 text-sm">
                   No posts found.
                 </div>
               )}
@@ -616,7 +740,7 @@ const Blog: React.FC = () => {
 
             {/* Load more */}
             {mobileFeedPosts.length > mobileVisibleCount && (
-              <div className="p-3 border-t border-white/10 bg-white/[0.02]">
+              <div className="px-3 pb-3">
                 <button
                   type="button"
                   onClick={() => setMobileVisibleCount(v => v + 10)}
@@ -626,7 +750,6 @@ const Blog: React.FC = () => {
                 </button>
               </div>
             )}
-          </GlassCard>
         </motion.section>
 
         {/* Search Results Section (desktop) */}
@@ -712,10 +835,23 @@ const Blog: React.FC = () => {
                                 <Eye size={12} className="mr-1" />
                                 {post.views}
                               </div>
-                              <div className="flex items-center">
-                                <Heart size={12} className="mr-1" />
-                                {post.likes}
-                              </div>
+                              <button
+                                type="button"
+                                aria-label="Like post"
+                                title="Like"
+                                disabled={likeById[post.id]?.busy}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  toggleLikeFromList(post.id);
+                                }}
+                                className={`flex items-center transition-colors ${
+                                  (likeById[post.id]?.liked ? 'text-red-400' : 'text-white/60 hover:text-red-400')
+                                } ${likeById[post.id]?.busy ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+                              >
+                                <Heart size={12} className="mr-1" fill={likeById[post.id]?.liked ? 'currentColor' : 'none'} />
+                                {likeById[post.id]?.count ?? post.likes}
+                              </button>
                             </div>
                             <ArrowRight size={16} className="text-azure-400 group-hover:translate-x-1 transition-transform duration-300" />
                           </div>
@@ -804,10 +940,23 @@ const Blog: React.FC = () => {
                               <Eye size={12} className="mr-1" />
                               {post.views}
                             </div>
-                            <div className="flex items-center">
-                              <Heart size={12} className="mr-1" />
-                              {post.likes}
-                            </div>
+                            <button
+                              type="button"
+                              aria-label="Like post"
+                              title="Like"
+                              disabled={likeById[post.id]?.busy}
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                toggleLikeFromList(post.id);
+                              }}
+                              className={`flex items-center transition-colors ${
+                                (likeById[post.id]?.liked ? 'text-red-400' : 'text-white/60 hover:text-red-400')
+                              } ${likeById[post.id]?.busy ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+                            >
+                              <Heart size={12} className="mr-1" fill={likeById[post.id]?.liked ? 'currentColor' : 'none'} />
+                              {likeById[post.id]?.count ?? post.likes}
+                            </button>
                           </div>
                           <ArrowRight size={16} className="text-azure-400 group-hover:translate-x-1 transition-transform duration-300" />
                         </div>
@@ -1029,6 +1178,23 @@ const Blog: React.FC = () => {
                                 <Eye size={10} className="mr-1" />
                                 {post.views > 1000 ? `${(post.views / 1000).toFixed(1)}k` : post.views}
                               </div>
+                              <button
+                                type="button"
+                                aria-label="Like post"
+                                title="Like"
+                                disabled={likeById[post.id]?.busy}
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  e.stopPropagation();
+                                  toggleLikeFromList(post.id);
+                                }}
+                                className={`flex items-center transition-colors ${
+                                  (likeById[post.id]?.liked ? 'text-red-400' : 'text-white/60 hover:text-red-400')
+                                } ${likeById[post.id]?.busy ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
+                              >
+                                <Heart size={10} className="mr-1" fill={likeById[post.id]?.liked ? 'currentColor' : 'none'} />
+                                {formatCount(likeById[post.id]?.count ?? post.likes)}
+                              </button>
                             </div>
                             <ArrowRight size={14} className="text-azure-400 group-hover:translate-x-1 transition-transform duration-300" />
                           </div>
