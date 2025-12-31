@@ -102,7 +102,16 @@ const MobileBottomNav: React.FC = () => {
         <div className="w-full max-w-xl mx-auto">
           {/* All horizontal padding lives inside this frame. */}
           <div className="px-3 min-[360px]:px-4 box-border">
-            <div className="relative flex items-end justify-center gap-3">
+            <div
+              className={
+                'relative flex items-end w-full gap-3 ' +
+                (collapsed
+                  ? leftCollapsedItem
+                    ? 'justify-between'
+                    : 'justify-end'
+                  : 'justify-center')
+              }
+            >
               {/* Main pill menu */}
               <motion.div
                 layout
