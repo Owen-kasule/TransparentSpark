@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { 
   Github, 
   Users, 
@@ -9,9 +10,6 @@ import {
   LogOut,
   Mail,
   MessageSquare,
-  Eye,
-  Heart,
-  Calendar,
   TrendingUp,
   Shield,
   AlertCircle,
@@ -23,30 +21,15 @@ import {
   Trash2,
   Plus,
   Search,
-  Filter,
-  Download,
   Upload,
   Globe,
   Image,
-  Code,
-  Database,
   Activity,
-  PieChart,
   BarChart,
-  LineChart,
   MapPin,
   Clock,
-  Tag,
-  Bookmark,
-  Archive,
-  Send,
-  UserCheck,
-  UserX,
   ThumbsUp,
   ThumbsDown,
-  ExternalLink,
-  Copy,
-  Save,
   X
 } from 'lucide-react';
 import { supabase, checkAdminAuthorization, getGitHubUserData } from '../lib/supabase';
@@ -139,11 +122,6 @@ const Admin: React.FC = () => {
   // Filters and search
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
-
-  // Modal state
-  const [showModal, setShowModal] = useState(false);
-  const [modalType, setModalType] = useState<'edit' | 'view' | 'delete'>('view');
-  const [selectedItem, setSelectedItem] = useState<any>(null);
 
   // Bulletproof state update function
   const updateAuthState = (updates: Partial<AuthState>) => {
@@ -394,28 +372,6 @@ const Admin: React.FC = () => {
     }
   };
 
-  // Delete item
-  const deleteItem = async (table: string, id: string) => {
-    try {
-      const { error } = await supabase
-        .from(table)
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      
-      // Reload appropriate data
-      if (table === 'reviews') await loadReviews();
-      if (table === 'blog_comments') await loadComments();
-      if (table === 'blog_posts') await loadBlogPosts();
-      
-      toast.success('Item deleted successfully');
-      setShowModal(false);
-    } catch (error) {
-      console.error('Error deleting item:', error);
-      toast.error('Failed to delete item');
-    }
-  };
 
   // Bulletproof authentication check with comprehensive error handling
   const checkAuth = async () => {
@@ -581,7 +537,7 @@ const Admin: React.FC = () => {
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
+      async (event: AuthChangeEvent, session: Session | null) => {
         console.log('🔄 Auth state changed:', event);
         
         try {

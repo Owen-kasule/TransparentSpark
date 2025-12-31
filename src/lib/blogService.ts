@@ -291,10 +291,11 @@ class BlogService {
         return [];
       }
 
+      const rows = (data ?? []) as Array<{ category?: unknown }>;
       const categories = Array.from(
         new Set(
-          (data ?? [])
-            .map((post: { category?: unknown }) => post.category)
+          rows
+            .map((post) => post.category)
             .filter((c): c is string => typeof c === 'string' && c.trim().length > 0)
         )
       );
