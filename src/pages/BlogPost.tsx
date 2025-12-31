@@ -64,6 +64,9 @@ function createHandler(config: Config) {
   const [isLikeStatusLoaded, setIsLikeStatusLoaded] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [autoOpenCommentForm, setAutoOpenCommentForm] = useState(false);
+  const [isMobile, setIsMobile] = useState(false);
+  const [showCommentsOnMobile, setShowCommentsOnMobile] = useState(false);
+  const [autoExpandCommentsOnMobile, setAutoExpandCommentsOnMobile] = useState(false);
 
   // Ref for comments section
   const commentsRef = useRef<HTMLDivElement>(null);
@@ -97,10 +100,21 @@ function createHandler(config: Config) {
   }, [id]);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const mq = window.matchMedia('(max-width: 639px)');
+    const update = () => setIsMobile(mq.matches);
+    update();
+    mq.addEventListener('change', update);
+    return () => mq.removeEventListener('change', update);
+  }, []);
+
+  useEffect(() => {
     const openFromLink = location.hash === '#comments' || (location.state as any)?.openComment === true;
     if (!openFromLink) return;
     if (isLoading) return;
 
+    setShowCommentsOnMobile(true);
+    setAutoExpandCommentsOnMobile(true);
     setAutoOpenCommentForm(true);
     requestAnimationFrame(() => {
       commentsRef.current?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -264,14 +278,17 @@ function createHandler(config: Config) {
   };
 
   const handleCommentClick = () => {
-    // Smooth scroll to comments section and open the comment form (fewer clicks)
-    setAutoOpenCommentForm(true);
-    requestAnimationFrame(() => {
+    // Mobile: one tap should reveal comments + the Add button.
+    // Deep-links still auto-open the form.
+    setShowCommentsOnMobile(true);
+    setAutoExpandCommentsOnMobile(true);
+    setAutoOpenCommentForm(false);
+    window.setTimeout(() => {
       commentsRef.current?.scrollIntoView({
         behavior: 'smooth',
         block: 'start'
       });
-    });
+    }, 50);
   };
 
 
@@ -355,7 +372,8 @@ function createHandler(config: Config) {
     : '';
   const processedHtml = rawContent ? convertMarkdownToHtml(rawContent) : '';
   const safeHtml = sanitizeSimple(processedHtml);
-  const contentRef = useRef<HTMLDivElement | null>(null);
+  const contentRefMobile = useRef<HTMLDivElement | null>(null);
+  const contentRefDesktop = useRef<HTMLDivElement | null>(null);
 
   // Ensure article body always shows: add fallback displayHtml and apply prose-invert for visibility.
   const displayHtml = safeHtml && safeHtml.trim().length > 0
@@ -363,22 +381,23 @@ function createHandler(config: Config) {
     : '<p>No article content has been added yet. This post is awaiting full content.</p>';
 
   useEffect(() => {
-    if (!contentRef.current) return;
+    const roots = [contentRefMobile.current, contentRefDesktop.current].filter(Boolean) as HTMLDivElement[];
+    if (roots.length === 0) return;
 
     // Dynamically import Prism for highlighting
     import('prismjs').then(Prism => {
-      if (contentRef.current) {
+      roots.forEach(root => {
         // Highlight all code blocks within content
         // @ts-ignore
         if (Prism && Prism.highlightAllUnder) {
           // @ts-ignore
-            Prism.highlightAllUnder(contentRef.current);
+          Prism.highlightAllUnder(root);
         }
-      }
+      });
     }).catch(() => {});
 
     // Code block UX enhancements: copy + optional line collapse, and details label toggling.
-    const detailsEls = Array.from(contentRef.current.querySelectorAll('details.md-codeblock')) as HTMLDetailsElement[];
+    const detailsEls = roots.flatMap(root => Array.from(root.querySelectorAll('details.md-codeblock'))) as HTMLDetailsElement[];
     detailsEls.forEach(d => {
       const summary = d.querySelector('summary');
       const label = d.querySelector('.md-codeblock__label') as HTMLElement | null;
@@ -391,7 +410,7 @@ function createHandler(config: Config) {
       d.addEventListener('toggle', update);
     });
 
-    const pres = Array.from(contentRef.current.querySelectorAll('pre')) as HTMLElement[];
+    const pres = roots.flatMap(root => Array.from(root.querySelectorAll('pre'))) as HTMLElement[];
     pres.forEach(pre => {
       const codeEl = pre.querySelector('code');
       if (!codeEl) return;
@@ -436,7 +455,7 @@ function createHandler(config: Config) {
     });
 
     // Lazy-load images in markdown
-    const imgs = Array.from(contentRef.current.querySelectorAll('img')) as HTMLImageElement[];
+    const imgs = roots.flatMap(root => Array.from(root.querySelectorAll('img'))) as HTMLImageElement[];
     const io = new IntersectionObserver(entries => {
       entries.forEach(entry => {
         if (entry.isIntersecting) {
@@ -488,6 +507,15 @@ function createHandler(config: Config) {
         .md-codeblock__meta { font-size: 0.72rem; opacity: 0.75; padding: 2px 8px; border: 1px solid rgba(255,255,255,0.12); border-radius: 999px; }
         details.md-codeblock pre { margin: 0; border-radius: 0; }
         details.md-codeblock pre code { line-height: 1.15; }
+
+        /* Tighten article heading spacing (mobile-friendly) */
+        .blogpost-prose-tight :where(h1,h2,h3,h4,h5,h6) {
+          margin-top: 0.45rem;
+          margin-bottom: 0.25rem;
+          line-height: 1.25;
+        }
+        .blogpost-prose-tight :where(p) { margin-top: 0.35rem; margin-bottom: 0.35rem; }
+        .blogpost-prose-tight :where(ul,ol) { margin-top: 0.4rem; margin-bottom: 0.4rem; }
 
         .md-inline-img { transition: filter .4s ease, transform .6s ease; filter: blur(6px); transform: scale(1.02); }
         .md-inline-img:not([data-src]) { filter: blur(0); transform: scale(1); }
@@ -671,145 +699,259 @@ function createHandler(config: Config) {
           )}
 
           {/* Article Meta (now includes a small thumbnail instead of large hero) */}
-          <GlassCard className="p-4 sm:p-6 -mt-3 sm:-mt-4 relative z-10">
-            <div className="space-y-4">
-              <h1 className="fluid-h2 font-bold text-white">
-                {post.title}
-              </h1>
-              
-              <p className="text-white/80 text-sm sm:text-lg leading-relaxed">
-                {post.excerpt}
-              </p>
+          {/* Mobile/tablet: combine author + story into one card, with engagement stats at bottom */}
+          <div className="md:hidden -mt-3 relative z-10">
+            <GlassCard className="p-4">
+              <div className="space-y-2">
+                <h1 className="fluid-h2 font-bold text-white leading-tight">
+                  {post.title}
+                </h1>
 
+                <p className="text-white/80 text-sm leading-relaxed">
+                  {post.excerpt}
+                </p>
 
-              {/* Meta Information */}
-              <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-white/60 text-xs sm:text-sm">
-                <div className="flex items-center space-x-2">
-                  <Calendar size={14} className="sm:hidden" />
-                  <Calendar size={16} className="hidden sm:inline" />
-                  <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Clock size={14} className="sm:hidden" />
-                  <Clock size={16} className="hidden sm:inline" />
-                  <span>{post.read_time}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Eye size={14} className="sm:hidden" />
-                  <Eye size={16} className="hidden sm:inline" />
-                  <span>{post.views.toLocaleString()}</span>
-                </div>
-                <div className="flex items-center space-x-2">
-                  <MessageCircle size={14} className="sm:hidden" />
-                  <MessageCircle size={16} className="hidden sm:inline" />
-                  <span>{commentCount}</span>
-                </div>
-              </div>
-
-              {/* Author Info */}
-              <div className="flex items-center gap-3 pt-4 border-t border-white/10">
-                <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 border border-white/10 bg-white/5">
-                  <ProgressiveImage
-                    src={post.author_avatar}
-                    alt={post.author_name}
-                    wrapperClassName="w-full h-full"
-                    className="object-cover"
-                    aspectClass="w-full h-full"
-                    initialBlur={false}
-                    revealScale={false}
-                  />
-                </div>
-                <div className="flex-1">
-                  <div className="leading-tight mb-2">
-                    <h3 className="text-white font-medium text-sm">{post.author_name}</h3>
-                    <p className="text-white/50 text-xs">{post.author_bio}</p>
-                  </div>
-                  {/* Tags inline with author */}
-                  <div className="flex flex-wrap gap-1">
-                    {post.tags.slice(0, 4).map((tag) => (
-                      <span 
-                        key={tag}
-                        className="px-2 py-1 bg-azure-400/15 text-azure-300 rounded-full text-[10px] hover:bg-azure-400/25 transition-colors"
-                      >
-                        {tag}
-                      </span>
-                    ))}
-                    {post.tags.length > 4 && (
-                      <span className="text-white/40 text-[10px] px-2 py-1">
-                        +{post.tags.length - 4} more
-                      </span>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              {/* Action Buttons */}
-              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-white/10">
-                <div className="flex items-center justify-between sm:justify-start gap-3">
-                  <button
-                    onClick={handleLike}
-                    disabled={isLiking || !isLikeStatusLoaded}
-                    className={`flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${
-                      isLiked 
-                        ? 'bg-red-500/30 text-red-400 border border-red-400/50 hover:bg-red-500/40' 
-                        : 'bg-white/10 text-white/70 hover:bg-white/20 border border-white/20'
-                    } ${isLiking ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}`}
-                  >
-                    <Heart 
-                      size={16} 
-                      fill={isLiked ? 'currentColor' : 'none'} 
-                      className={`transition-all duration-300 ${isLiking ? 'animate-pulse' : ''} ${
-                        isLiked ? 'text-red-400' : 'text-white/70'
-                      }`}
+                {/* Author Info (combined card header) */}
+                <div className="flex items-center gap-3 pt-1">
+                  <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 border border-white/10 bg-white/5">
+                    <ProgressiveImage
+                      src={post.author_avatar}
+                      alt={post.author_name}
+                      wrapperClassName="w-full h-full"
+                      className="object-cover"
+                      aspectClass="w-full h-full"
+                      initialBlur={false}
+                      revealScale={false}
                     />
-                    <span className={`font-medium ${isLiked ? 'text-red-400' : 'text-white/70'}`}>
-                      {likeCount}
-                    </span>
-                  </button>
-                  <button
-                    onClick={handleCommentClick}
-                    className="flex items-center space-x-2 text-white/60 hover:text-azure-400 transition-colors duration-300 px-3 sm:px-4 py-2 rounded-lg hover:bg-white/10 text-sm"
-                    title="Go to comments"
-                  >
-                    <MessageCircle size={16} />
-                    <span>Comments</span>
-                  </button>
-                </div>
-                {/* Condensed Share Dropdown */}
-                <div className="relative self-end sm:self-auto">
-                  <details className="group">
-                    <summary className="list-none cursor-pointer flex items-center space-x-2 bg-white/10 hover:bg-white/20 px-3 sm:px-4 py-2 rounded-lg text-white/70 text-sm border border-white/15">
-                      <span>Share</span>
-                      <ArrowRight size={14} className="group-open:rotate-90 transition-transform" />
-                    </summary>
-                    <div className="absolute right-0 mt-2 w-40 bg-[#111827] border border-white/10 rounded-lg shadow-lg p-2 flex flex-col gap-1 z-20">
-                      <SocialShare url={currentUrl} title={post.title} description={post.excerpt} compact />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="leading-tight">
+                      <h3 className="text-white font-medium text-sm truncate">{post.author_name}</h3>
+                      <p className="text-white/50 text-xs line-clamp-1">{post.author_bio}</p>
                     </div>
-                  </details>
+                  </div>
                 </div>
-               </div>
-            </div>
-          </GlassCard>
 
-          {/* Article Content */}
-          <GlassCard className="p-4 sm:p-8">
-            <div 
-              ref={contentRef}
-              className="prose prose-invert max-w-none prose-sm sm:prose-base"
-              dangerouslySetInnerHTML={{ 
-                __html: displayHtml
-              }}
-            />
-          </GlassCard>
+                {/* Tags */}
+                <div className="flex flex-wrap gap-1">
+                  {post.tags.slice(0, 4).map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-2 py-1 bg-azure-400/15 text-azure-300 rounded-full text-[10px] hover:bg-azure-400/25 transition-colors"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                  {post.tags.length > 4 && (
+                    <span className="text-white/40 text-[10px] px-2 py-1">
+                      +{post.tags.length - 4} more
+                    </span>
+                  )}
+                </div>
+
+                {/* Story */}
+                <div
+                  ref={contentRefMobile}
+                  className="blogpost-prose-tight prose prose-invert max-w-none prose-sm prose-headings:mt-1 prose-headings:mb-1 prose-p:my-1 prose-li:my-1"
+                  dangerouslySetInnerHTML={{ __html: displayHtml }}
+                />
+
+                {/* Engagement stats + actions (bottom, separated by a line) */}
+                <div className="pt-3 border-t border-white/10">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-4 text-white/60 text-xs">
+                      <span className="flex items-center gap-1 whitespace-nowrap">
+                        <Eye size={14} />
+                        {post.views.toLocaleString()}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={handleLike}
+                        disabled={isLiking || !isLikeStatusLoaded}
+                        className={`flex items-center gap-1 whitespace-nowrap transition-colors ${
+                          isLiked ? 'text-red-400' : 'text-white/60 hover:text-red-400'
+                        } ${isLiking ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}`}
+                        aria-label="Like post"
+                        title="Like"
+                      >
+                        <Heart size={14} fill={isLiked ? 'currentColor' : 'none'} />
+                        {likeCount}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={handleCommentClick}
+                        className="flex items-center gap-1 whitespace-nowrap text-white/60 hover:text-azure-400 transition-colors"
+                        title="Go to comments"
+                        aria-label="Go to comments"
+                      >
+                        <MessageCircle size={14} />
+                        {commentCount}
+                      </button>
+                    </div>
+
+                    <div className="relative">
+                      <details className="group">
+                        <summary className="list-none cursor-pointer flex items-center gap-2 bg-white/10 hover:bg-white/20 px-3 py-2 rounded-lg text-white/70 text-xs border border-white/15">
+                          <span>Share</span>
+                          <ArrowRight size={12} className="group-open:rotate-90 transition-transform" />
+                        </summary>
+                        <div className="absolute right-0 mt-2 w-40 bg-[#111827] border border-white/10 rounded-lg shadow-lg p-2 flex flex-col gap-1 z-20">
+                          <SocialShare url={currentUrl} title={post.title} description={post.excerpt} compact />
+                        </div>
+                      </details>
+                    </div>
+                  </div>
+
+                  <div className="mt-2 flex items-center gap-4 text-white/50 text-[11px]">
+                    <span className="flex items-center gap-1 whitespace-nowrap">
+                      <Calendar size={12} />
+                      {new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                    </span>
+                    <span className="flex items-center gap-1 whitespace-nowrap">
+                      <Clock size={12} />
+                      {post.read_time}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </GlassCard>
+          </div>
+
+          {/* Desktop: keep the original separated meta + content cards */}
+          <div className="hidden md:block">
+            <GlassCard className="p-4 sm:p-6 -mt-3 sm:-mt-4 relative z-10">
+              <div className="space-y-4">
+                <h1 className="fluid-h2 font-bold text-white">
+                  {post.title}
+                </h1>
+
+                <p className="text-white/80 text-sm sm:text-lg leading-relaxed">
+                  {post.excerpt}
+                </p>
+
+                {/* Meta Information */}
+                <div className="flex flex-wrap items-center gap-3 sm:gap-6 text-white/60 text-xs sm:text-sm">
+                  <div className="flex items-center space-x-2">
+                    <Calendar size={16} className="hidden sm:inline" />
+                    <span>{new Date(post.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Clock size={16} className="hidden sm:inline" />
+                    <span>{post.read_time}</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Eye size={16} className="hidden sm:inline" />
+                    <span>{post.views.toLocaleString()}</span>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <MessageCircle size={16} className="hidden sm:inline" />
+                    <span>{commentCount}</span>
+                  </div>
+                </div>
+
+                {/* Author Info */}
+                <div className="flex items-center gap-3 pt-4 border-t border-white/10">
+                  <div className="w-8 h-8 rounded-full overflow-hidden flex-shrink-0 border border-white/10 bg-white/5">
+                    <ProgressiveImage
+                      src={post.author_avatar}
+                      alt={post.author_name}
+                      wrapperClassName="w-full h-full"
+                      className="object-cover"
+                      aspectClass="w-full h-full"
+                      initialBlur={false}
+                      revealScale={false}
+                    />
+                  </div>
+                  <div className="flex-1">
+                    <div className="leading-tight mb-2">
+                      <h3 className="text-white font-medium text-sm">{post.author_name}</h3>
+                      <p className="text-white/50 text-xs">{post.author_bio}</p>
+                    </div>
+                    <div className="flex flex-wrap gap-1">
+                      {post.tags.slice(0, 4).map((tag) => (
+                        <span
+                          key={tag}
+                          className="px-2 py-1 bg-azure-400/15 text-azure-300 rounded-full text-[10px] hover:bg-azure-400/25 transition-colors"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                      {post.tags.length > 4 && (
+                        <span className="text-white/40 text-[10px] px-2 py-1">
+                          +{post.tags.length - 4} more
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 pt-4 border-t border-white/10">
+                  <div className="flex items-center justify-between sm:justify-start gap-3">
+                    <button
+                      onClick={handleLike}
+                      disabled={isLiking || !isLikeStatusLoaded}
+                      className={`flex items-center space-x-2 px-3 sm:px-4 py-2 rounded-lg transition-all duration-300 ${
+                        isLiked
+                          ? 'bg-red-500/30 text-red-400 border border-red-400/50 hover:bg-red-500/40'
+                          : 'bg-white/10 text-white/70 hover:bg-white/20 border border-white/20'
+                      } ${isLiking ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105'}`}
+                    >
+                      <Heart
+                        size={16}
+                        fill={isLiked ? 'currentColor' : 'none'}
+                        className={`transition-all duration-300 ${isLiking ? 'animate-pulse' : ''} ${
+                          isLiked ? 'text-red-400' : 'text-white/70'
+                        }`}
+                      />
+                      <span className={`font-medium ${isLiked ? 'text-red-400' : 'text-white/70'}`}>
+                        {likeCount}
+                      </span>
+                    </button>
+                    <button
+                      onClick={handleCommentClick}
+                      className="flex items-center space-x-2 text-white/60 hover:text-azure-400 transition-colors duration-300 px-3 sm:px-4 py-2 rounded-lg hover:bg-white/10 text-sm"
+                      title="Go to comments"
+                    >
+                      <MessageCircle size={16} />
+                      <span>Comments</span>
+                    </button>
+                  </div>
+                  <div className="relative self-end sm:self-auto">
+                    <details className="group">
+                      <summary className="list-none cursor-pointer flex items-center space-x-2 bg-white/10 hover:bg-white/20 px-3 sm:px-4 py-2 rounded-lg text-white/70 text-sm border border-white/15">
+                        <span>Share</span>
+                        <ArrowRight size={14} className="group-open:rotate-90 transition-transform" />
+                      </summary>
+                      <div className="absolute right-0 mt-2 w-40 bg-[#111827] border border-white/10 rounded-lg shadow-lg p-2 flex flex-col gap-1 z-20">
+                        <SocialShare url={currentUrl} title={post.title} description={post.excerpt} compact />
+                      </div>
+                    </details>
+                  </div>
+                </div>
+              </div>
+            </GlassCard>
+
+            <GlassCard className="p-4 sm:p-8">
+              <div
+                ref={contentRefDesktop}
+                className="blogpost-prose-tight prose prose-invert max-w-none prose-sm sm:prose-base"
+                dangerouslySetInnerHTML={{ __html: displayHtml }}
+              />
+            </GlassCard>
+          </div>
 
           {/* Comments Section with Ref */}
           <div id="comments" ref={commentsRef} className="scroll-mt-24">
-            <CommentSection 
-              postId={post.id} 
-              postTitle={post.title}
-              onCommentCountChange={setCommentCount}
-              autoOpenForm={autoOpenCommentForm}
-            />
+            {(!isMobile || showCommentsOnMobile) && (
+              <CommentSection 
+                postId={post.id} 
+                postTitle={post.title}
+                onCommentCountChange={setCommentCount}
+                autoOpenForm={autoOpenCommentForm}
+                autoExpand={isMobile && autoExpandCommentsOnMobile}
+              />
+            )}
           </div>
 
           {/* Related Articles */}

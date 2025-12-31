@@ -53,9 +53,10 @@ interface CommentSectionProps {
   postTitle: string;
   onCommentCountChange?: (count: number) => void;
   autoOpenForm?: boolean;
+  autoExpand?: boolean;
 }
 
-const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unusedPostTitle, onCommentCountChange, autoOpenForm = false }) => {
+const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unusedPostTitle, onCommentCountChange, autoOpenForm = false, autoExpand = false }) => {
   const [comments, setComments] = useState<DBComment[]>([]);
   const [replies, setReplies] = useState<DBReply[]>([]);
   const [dummyComments, setDummyComments] = useState<any[]>([]);
@@ -132,6 +133,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unu
       textarea?.scrollIntoView({ behavior: 'smooth', block: 'center' });
     }, 250);
   }, [autoOpenForm, postId]);
+
+  useEffect(() => {
+    if (!autoExpand) return;
+    if (!isMobile) return;
+    if (autoOpenForm) return; // autoOpenForm handles expansion + form.
+    // Expand to show comments + the Add button in one tap.
+    setIsMobileExpanded(true);
+  }, [autoExpand, autoOpenForm, isMobile, postId]);
 
   // Debounced email validation for real-time feedback
   const debouncedEmailValidation = useCallback(
