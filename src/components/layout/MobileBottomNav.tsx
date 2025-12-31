@@ -37,19 +37,6 @@ const MobileBottomNav: React.FC = () => {
     return navItems[0];
   }, [location.pathname]);
 
-  const activeMainIndex = useMemo(() => {
-    const pathname = location.pathname;
-    const exactIndex = navItems.findIndex((item) => item.to !== '/' && pathname === item.to);
-    if (exactIndex >= 0) return exactIndex;
-
-    const nestedIndex = navItems.findIndex(
-      (item) => item.to !== '/' && (pathname === item.to || pathname.startsWith(`${item.to}/`))
-    );
-    if (nestedIndex >= 0) return nestedIndex;
-
-    return 0;
-  }, [location.pathname]);
-
   const leftCollapsedItem = useMemo(() => {
     if (isBlogPostPage) return null;
     if (isBlogPage) return blogItem;
@@ -143,19 +130,9 @@ const MobileBottomNav: React.FC = () => {
 
                 {!collapsed && (
                   <ul className="relative flex items-stretch px-2">
-                    {/* Sliding active indicator for main tabs (not for Blog/BlogPost routes) */}
-                    {!isBlogPage && !isBlogPostPage && (
-                      <motion.span
-                        layoutId="mobile-nav-active"
-                        className="absolute top-[2px] bottom-[2px] left-2 rounded-[1.5rem] bg-azure-500/10 border border-azure-300/25 shadow-[0_0_0_1px_rgba(14,165,233,0.08)]"
-                        style={{ width: `calc((100% - 16px) / ${navItems.length})` }}
-                        animate={{ x: `${activeMainIndex * 100}%` }}
-                        transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-                      />
-                    )}
                     {navItems.map((item) => {
                       const Icon = item.icon;
-                      const active = location.pathname === item.to;
+                      const active = !isBlogPage && !isBlogPostPage && activeMainItem.to === item.to;
                       return (
                         <li key={item.to} className="flex-1 min-w-0">
                           <NavLink
@@ -168,6 +145,15 @@ const MobileBottomNav: React.FC = () => {
                           >
                             {/* Fixed-size touch target container (>= 48px height). */}
                             <div className="relative w-full h-14 min-h-[56px] flex items-center justify-center">
+                              {/* Active indicator layer (sized to full tab area, not icon). */}
+                              {active && (
+                                <motion.span
+                                  layoutId="mobile-nav-active"
+                                  className="absolute inset-[2px] rounded-[1.5rem] bg-azure-500/10 border border-azure-300/25 shadow-[0_0_0_1px_rgba(14,165,233,0.08)]"
+                                  transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+                                />
+                              )}
+
                               {/* Content layer */}
                               <div className="relative z-10">
                                 {/*
