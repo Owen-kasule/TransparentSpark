@@ -29,8 +29,7 @@ import {
   MapPin,
   Clock,
   ThumbsUp,
-  ThumbsDown,
-  X
+  ThumbsDown
 } from 'lucide-react';
 import { supabase, checkAdminAuthorization, getGitHubUserData } from '../lib/supabase';
 import EmailValidator from '../components/admin/EmailValidator';
@@ -122,6 +121,11 @@ const Admin: React.FC = () => {
   // Filters and search
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
+
+  // Modal actions (state values not currently rendered)
+  const [, setShowModal] = useState(false);
+  const [, setModalType] = useState<'edit' | 'view' | 'delete'>('view');
+  const [, setSelectedItem] = useState<any>(null);
 
   // Bulletproof state update function
   const updateAuthState = (updates: Partial<AuthState>) => {
