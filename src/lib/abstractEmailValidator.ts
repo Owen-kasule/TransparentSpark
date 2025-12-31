@@ -83,7 +83,7 @@ class AbstractEmailValidator {
   }
 
   private isApiKeyConfigured(): boolean {
-    return this.config.apiKey && this.config.apiKey.trim() !== '';
+    return this.config.apiKey.trim() !== '';
   }
 
   private isValidEmailFormat(email: string): boolean {

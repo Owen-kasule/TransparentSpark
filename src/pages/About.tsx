@@ -95,12 +95,12 @@ const About: React.FC = () => {
   }, []);
 
   useEffect(() => {
-    if (storyRef.current) {
-      setStoryHeights(prev => ({
-        ...prev,
-        full: storyRef.current.scrollHeight
-      }));
-    }
+    const el = storyRef.current;
+    if (!el) return;
+    setStoryHeights(prev => ({
+      ...prev,
+      full: el.scrollHeight
+    }));
   }, [isStoryExpanded]);
 
   // Testimonials carousel effect - infinite loop in one direction

@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { supabase } from '../lib/supabase';
 
 const BlogDebug = () => {
-  const [debugInfo, setDebugInfo] = useState<any>({});
+  const [debugInfo, setDebugInfo] = useState<Record<string, unknown>>({});
   const [isInserting, setIsInserting] = useState(false);
 
   const insertSampleData = async () => {
@@ -55,16 +55,16 @@ const BlogDebug = () => {
 
       if (error) {
         console.error('Insert error:', error);
-        setDebugInfo(prev => ({ ...prev, insertError: error }));
+        setDebugInfo((prev: Record<string, unknown>) => ({ ...prev, insertError: error }));
       } else {
         console.log('Data inserted successfully:', data);
-        setDebugInfo(prev => ({ ...prev, insertSuccess: true }));
+        setDebugInfo((prev: Record<string, unknown>) => ({ ...prev, insertSuccess: true }));
         // Refresh the page to see the new data
         window.location.reload();
       }
     } catch (err) {
       console.error('Insert failed:', err);
-      setDebugInfo(prev => ({ ...prev, insertError: err }));
+      setDebugInfo((prev: Record<string, unknown>) => ({ ...prev, insertError: err }));
     } finally {
       setIsInserting(false);
     }

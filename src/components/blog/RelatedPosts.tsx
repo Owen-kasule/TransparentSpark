@@ -47,7 +47,7 @@ const RelatedPosts: React.FC<RelatedPostsProps> = ({
                 {/* Image */}
                 <div className="aspect-video relative overflow-hidden">
                   <ProgressiveImage
-                    src={(post as any).image_url || (post as any).imageUrl || post.imageUrl || ''}
+                    src={post.image_url || post.images?.[0] || ''}
                     alt={post.title}
                     wrapperClassName="w-full h-full"
                     className="object-cover group-hover:scale-110 transition-transform duration-300"
@@ -83,7 +83,7 @@ const RelatedPosts: React.FC<RelatedPostsProps> = ({
                     </div>
                     <div className="flex items-center space-x-1">
                       <Clock size={12} />
-                      <span>{(post as any).read_time || (post as any).readTime || post.readTime}</span>
+                      <span>{post.read_time}</span>
                     </div>
                   </div>
 
