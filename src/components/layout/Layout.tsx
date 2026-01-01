@@ -78,7 +78,7 @@ const Layout: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3, ease: 'easeInOut' }}
-          className="flex-1 pt-0 pb-8 md:pb-0" /* reduced bottom space for mobile: enough for nav but tighter layout */
+          className="flex-1 pt-0 pb-8 md:pb-8 lg:pb-0" /* reserve space for bottom nav on mobile+tablet */
         >
           <Outlet />
         </motion.main>
@@ -90,10 +90,7 @@ const Layout: React.FC = () => {
         </div>
         {/* Footer placed before mobile nav so it's fully visible; add bottom margin for spacing */}
         <Footer />
-        {/* Mobile Bottom Navigation */}
-        <div className="md:hidden" aria-hidden="true">
-          <div className="h-0" />
-        </div>
+        {/* Bottom Navigation spacer (handled by Footer + main padding) */}
         <MobileBottomNav />
       </div>
     </div>

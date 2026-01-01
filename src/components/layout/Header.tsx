@@ -42,7 +42,7 @@ const Header: React.FC = () => {
 
   return (
     <motion.header 
-      className="fixed top-0 left-0 right-0 z-50 hidden md:block"
+      className="fixed top-0 left-0 right-0 z-50 hidden lg:block"
       initial={{ y: 0 }}
       animate={{ y: isVisible ? 0 : -20 }}
       transition={{ duration: 0.3, ease: 'easeInOut' }}

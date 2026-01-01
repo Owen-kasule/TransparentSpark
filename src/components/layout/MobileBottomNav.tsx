@@ -102,7 +102,7 @@ const MobileBottomNav: React.FC = () => {
   return (
     <AnimatePresence>
       <>
-        {/* Bottom nav: mobile + tablet portrait (hidden on tablet landscape + desktop) */}
+        {/* Bottom nav: mobile + tablet (hidden on desktop) */}
         <motion.nav
           key="mobile-bottom-nav"
           initial={{ y: 80, opacity: 0 }}
@@ -110,7 +110,7 @@ const MobileBottomNav: React.FC = () => {
           exit={{ y: 80, opacity: 0 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}
           style={{ x: '-50%' }}
-          className="fixed left-1/2 bottom-[env(safe-area-inset-bottom)] z-50 w-full max-w-[100vw] box-border overflow-x-hidden pt-2 pb-[env(safe-area-inset-bottom)] md:landscape:hidden lg:hidden"
+          className="fixed left-1/2 bottom-[env(safe-area-inset-bottom)] z-50 w-full max-w-[100vw] box-border overflow-x-hidden pt-2 pb-[env(safe-area-inset-bottom)] lg:hidden"
           aria-label="Primary navigation"
         >
           <LayoutGroup id="mobile-bottom-nav">
@@ -244,59 +244,6 @@ const MobileBottomNav: React.FC = () => {
                   </div>
                 </div>
               </div>
-            </div>
-          </LayoutGroup>
-        </motion.nav>
-
-        {/* Tablet landscape: left side nav (icons only, label on hover). */}
-        <motion.nav
-          key="tablet-side-nav"
-          initial={{ x: -24, opacity: 0 }}
-          animate={{ x: 0, opacity: 1 }}
-          exit={{ x: -24, opacity: 0 }}
-          transition={{ duration: 0.25, ease: 'easeOut' }}
-          className="fixed left-3 top-1/2 -translate-y-1/2 z-50 hidden md:landscape:flex lg:hidden"
-          aria-label="Primary navigation"
-        >
-          <LayoutGroup id="tablet-side-nav">
-            <div className="relative">
-              <div className="absolute inset-0 rounded-[1.25rem] bg-black/35 backdrop-blur-xl border border-white/10 shadow-[0_8px_30px_-10px_rgba(0,0,0,0.75)]" />
-              <ul className="relative flex flex-col gap-1 p-2">
-                {[...navItems, blogItem].map((item) => {
-                  const Icon = item.icon;
-                  const isActive =
-                    item.to === blogItem.to
-                      ? isBlogPage || isBlogPostPage
-                      : activeMainItem.to === item.to;
-
-                  return (
-                    <li key={item.to}>
-                      <NavLink
-                        to={item.to}
-                        aria-label={item.label}
-                        className={() =>
-                          'group relative flex items-center justify-center w-12 h-12 rounded-[1rem] text-white/75 hover:text-white transition-colors'
-                        }
-                      >
-                        {isActive && (
-                          <motion.span
-                            layoutId="tablet-nav-active"
-                            className="absolute inset-0 rounded-[1rem] bg-azure-500/10 border border-azure-300/25"
-                            transition={{ type: 'spring', stiffness: 420, damping: 34 }}
-                          />
-                        )}
-
-                        <Icon size={22} className="relative z-10" />
-
-                        {/* Hover label */}
-                        <span className="pointer-events-none absolute left-full ml-3 whitespace-nowrap rounded-full bg-black/70 border border-white/10 px-3 py-1 text-xs font-medium text-white/90 opacity-0 translate-x-[-4px] group-hover:opacity-100 group-hover:translate-x-0 group-focus-visible:opacity-100 group-focus-visible:translate-x-0 transition-all">
-                          {item.label}
-                        </span>
-                      </NavLink>
-                    </li>
-                  );
-                })}
-              </ul>
             </div>
           </LayoutGroup>
         </motion.nav>
