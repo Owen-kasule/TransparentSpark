@@ -103,8 +103,8 @@ const Home: React.FC = () => {
   useAnalytics('home');
 
   return (
-    <div className="min-h-screen relative pt-4 lg:pt-24">
-      <div className="container mx-auto px-6">
+    <div className="min-h-screen relative pt-4 lg:pt-24 pb-0.5 lg:pb-12">
+      <div className="container mx-auto px-6 space-y-4 lg:space-y-0">
         {/* Hero Section - Two Column Layout */}
         <div className="flex items-center justify-center min-h-[60vh] lg:min-h-[calc(100vh-6rem)] relative">
           {/* Left Side - Social Links (positioned lower) */}
@@ -203,7 +203,7 @@ const Home: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.7 }}
-                  className="mb-3 lg:mb-6"
+                  className="mb-3 md:mb-0 lg:mb-6"
                 >
                   <p className="text-white/90 fluid-body">
                     I craft digital experiences that blend beautiful design with powerful functionality. 
@@ -216,7 +216,7 @@ const Home: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.9 }}
-                  className="flex justify-center lg:justify-start flex-wrap gap-4 mb-3 lg:mb-8"
+                  className="flex justify-center lg:justify-start flex-wrap gap-4 mb-3 md:mb-0 lg:mb-8"
                 >
                   <motion.div 
                     whileHover={{ scale: 1.05, y: -1 }}
@@ -242,7 +242,7 @@ const Home: React.FC = () => {
                 </motion.div>
 
                 {/* Glassmorphism CTA Component */}
-                <div className="mb-3 lg:mb-6">
+                <div className="mb-3 md:mb-0 lg:mb-6">
                   <GlassCTA delay={1.1} />
                 </div>
 
@@ -348,10 +348,10 @@ const Home: React.FC = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1.1 }}
-          className="pt-4 pb-0.5 lg:pt-0 lg:pb-20"
+          className="pt-4 lg:pt-0 lg:pb-20"
         >
-          <div className="text-center mb-0 lg:mb-8">
-            <h2 className="fluid-h2 font-bold text-white mb-1 lg:mb-4">Featured Work</h2>
+          <div className="text-center mb-0 md:mb-4 lg:mb-8">
+            <h2 className="fluid-h2 font-bold text-white mb-1 md:mb-3 lg:mb-4">Featured Work</h2>
             <p className="text-white/60">Some of my recent projects</p>
           </div>
 
