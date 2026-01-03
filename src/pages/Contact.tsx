@@ -298,7 +298,7 @@ const Contact: React.FC = () => {
           </GlassCard>
 
           {/* Contact Info & Services */}
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             <GlassCard delay={0.4} className="p-6">
               <h3 className="ui-section-title">Contact Information</h3>
               <div className="space-y-4">
