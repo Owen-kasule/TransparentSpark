@@ -1,7 +1,13 @@
 import { supabase } from '../lib/supabase';
 
 const categories = [
-  'React', 'CSS', 'TypeScript', 'Node.js', 'Design', 'Serverless', 'GraphQL', 'Animation', 'UI/UX'
+  'AI-Augmented Development',
+  'Full-Stack Architecture',
+  'DevSecOps & Security',
+  'Cloud-Native & Scaling',
+  'Product & UI/UX Design',
+  'Emerging Tech (Web3 & XR)',
+  'Engineering Culture & Career'
 ];
 
 const samplePosts = categories.flatMap((cat, i) => [

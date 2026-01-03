@@ -494,7 +494,7 @@ const Blog: React.FC = () => {
                       >
                         <Tag size={12} className="inline mr-1" />
                         All
-                        {categoriesLoaded && (
+                        {categoriesLoaded && getCategoryCount('all') > 0 && (
                           <span className="ml-1 text-xs opacity-70">
                             ({getCategoryCount('all')})
                           </span>
@@ -513,7 +513,7 @@ const Blog: React.FC = () => {
                           >
                             <Tag size={12} className="inline mr-1" />
                             {category}
-                            {categoriesLoaded && (
+                            {categoriesLoaded && getCategoryCount(category) > 0 && (
                               <span className="ml-1 text-xs opacity-70">
                                 ({getCategoryCount(category)})
                               </span>
@@ -1087,7 +1087,7 @@ const Blog: React.FC = () => {
                       : 'bg-azure-400/20 text-azure-400 hover:bg-azure-400/30'
                   }`}
                 >
-                  All ({getMoreArticlesCategoryCount('all')})
+                  All{getMoreArticlesCategoryCount('all') > 0 ? ` (${getMoreArticlesCategoryCount('all')})` : ''}
                 </button>
                 {categories.map((category) => (
                   <button 
@@ -1099,7 +1099,7 @@ const Blog: React.FC = () => {
                         : 'bg-azure-400/20 text-azure-400 hover:bg-azure-400/30'
                     }`}
                   >
-                    {category} ({getMoreArticlesCategoryCount(category)})
+                    {category}{getMoreArticlesCategoryCount(category) > 0 ? ` (${getMoreArticlesCategoryCount(category)})` : ''}
                   </button>
                 ))}
               </div>

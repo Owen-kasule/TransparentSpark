@@ -35,7 +35,7 @@ const BlogSearch: React.FC<BlogSearchProps> = ({ onSearchResults, onCategoryChan
   const [showResults, setShowResults] = useState(false);
   const [showFilters, setShowFilters] = useState(false);
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
-  const [popularSearches] = useState(['React', 'TypeScript', 'CSS', 'Performance', 'Node.js']);
+  const [popularSearches] = useState(['AI', 'Cloud', 'Security', 'UI/UX', 'Career']);
   
   const [filters, setFilters] = useState<SearchFilters>({
     category: 'all',

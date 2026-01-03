@@ -1,4 +1,5 @@
 import { supabase } from './supabase';
+import { BLOG_CATEGORIES } from './blogCategories';
 
 export interface BlogPost {
   id: string;
@@ -280,30 +281,7 @@ class BlogService {
 
   // Get all categories
   async getAllCategories(): Promise<string[]> {
-    try {
-      const { data, error } = await supabase
-        .from('blog_posts')
-        .select('category')
-        .eq('published', true);
-
-      if (error) {
-        console.error('Error fetching categories:', error);
-        return [];
-      }
-
-      const rows = (data ?? []) as Array<{ category?: unknown }>;
-      const categories = Array.from(
-        new Set(
-          rows
-            .map((post) => post.category)
-            .filter((c): c is string => typeof c === 'string' && c.trim().length > 0)
-        )
-      );
-      return categories;
-    } catch (error) {
-      console.error('Error in getAllCategories:', error);
-      return [];
-    }
+    return [...BLOG_CATEGORIES];
   }
 
   // Advanced search with fuzzy matching and relevance scoring
