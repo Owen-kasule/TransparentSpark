@@ -174,7 +174,7 @@ const About: React.FC = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-4 lg:mb-12"
         >
-          <h1 className="fluid-h1 font-bold text-white mb-5">
+          <h1 className="ui-page-title mb-5">
             ABOUT ME
           </h1>
           <div className="flex items-center justify-center mb-6">
@@ -182,10 +182,10 @@ const About: React.FC = () => {
           </div>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-8 mb-12">
+        <div className="grid lg:grid-cols-2 ui-grid-gap lg:gap-8 mb-12">
           {/* Bio Section */}
           <GlassCard delay={0.2} className="p-6">
-            <h2 className="fluid-h3 font-bold text-white mb-4 text-center lg:text-left">My Story</h2>
+            <h2 className="ui-section-title text-center lg:text-left">My Story</h2>
             <motion.div
               ref={storyRef}
               initial={false}
@@ -201,7 +201,7 @@ const About: React.FC = () => {
                 WebkitLineClamp: isMobile && !isStoryExpanded ? 5 : 'unset',
                 WebkitBoxOrient: 'vertical' as any
               }}
-              className="space-y-3 text-white/80 leading-relaxed text-sm"
+              className="space-y-3 ui-body leading-relaxed"
             >
               <p>
                 I'm Owen, a passionate full-stack developer with over 5 years of experience 
@@ -243,7 +243,7 @@ const About: React.FC = () => {
           <div className="space-y-6">
             {/* Stats with Count-up Animation */}
             <GlassCard delay={0.4} className="p-6">
-              <h3 className="text-xl font-bold text-white mb-4 text-center lg:text-left">By the Numbers</h3>
+              <h3 className="ui-section-title text-center lg:text-left">By the Numbers</h3>
               <div className="grid grid-cols-3 gap-4">
                 {stats.map((stat, index) => (
                   <div key={index} className="text-center">
@@ -259,7 +259,7 @@ const About: React.FC = () => {
                       {stat.key === 'clients' && '+'}
                       {stat.key === 'projects' && '+'}
                     </motion.div>
-                    <div className="text-white/60 text-xs">{stat.label}</div>
+                    <div className="ui-meta">{stat.label}</div>
                   </div>
                 ))}
               </div>
@@ -267,7 +267,7 @@ const About: React.FC = () => {
 
             {/* Skills */}
             <GlassCard delay={0.6} className="p-6">
-              <h3 className="text-xl font-bold text-white mb-4 text-center lg:text-left">Tech Stack</h3>
+              <h3 className="ui-section-title text-center lg:text-left">Tech Stack</h3>
               <div className="space-y-3">
                 {[
                   { category: 'Frontend', skills: ['React', 'TypeScript', 'Next.js', 'Tailwind CSS'] },
@@ -275,7 +275,7 @@ const About: React.FC = () => {
                   { category: 'Tools', skills: ['Git', 'Docker', 'AWS', 'Figma'] }
                 ].map((group, index) => (
                   <div key={index}>
-                    <h4 className="text-azure-400 font-semibold mb-2 text-sm">{group.category}</h4>
+                    <h4 className="text-azure-400 font-semibold mb-2 ui-meta">{group.category}</h4>
                     <div className="flex flex-wrap gap-1">
                       {group.skills.map((skill) => (
                         <span 

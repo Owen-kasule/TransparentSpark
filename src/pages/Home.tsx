@@ -149,7 +149,7 @@ const Home: React.FC = () => {
                         onAnimationComplete={() => console.log('✅ Large bar animation complete')}
                       />
                     </div>
-                    <h1 ref={fullNameRefLg} className="font-bold text-white text-4xl lg:text-5xl leading-tight">
+                    <h1 ref={fullNameRefLg} className="ui-page-title leading-tight">
                       OWEN <span className="mx-1">K. </span><span ref={muherezeRefLg} className="capitalize">muhereze</span>
                     </h1>
                   </div>
@@ -355,7 +355,7 @@ const Home: React.FC = () => {
             <p className="text-white/60">Some of my recent projects</p>
           </div>
 
-          <div className="grid md:grid-cols-2 gap-4">
+          <div className="grid md:grid-cols-2 ui-grid-gap">
             {featuredProjects.map((project, index) => (
               <GlassCard key={project.id} delay={1.3 + index * 0.2} className="p-6">
                 <div className="aspect-video rounded-xl overflow-hidden mb-4">

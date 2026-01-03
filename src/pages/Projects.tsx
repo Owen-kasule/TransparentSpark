@@ -81,13 +81,13 @@ const Projects: React.FC = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-4 lg:mb-12"
         >
-          <h1 className="fluid-h1 font-bold text-white mb-5">
+          <h1 className="ui-page-title mb-5">
             PROJECTS
           </h1>
           <div className="flex items-center justify-center mb-6">
             <div className="h-1 w-24 bg-azure-400"></div>
           </div>
-          <p className="text-white/70 max-w-2xl mx-auto">
+          <p className="ui-lead max-w-2xl mx-auto">
             A showcase of my work, featuring full-stack applications and innovative solutions.
           </p>
         </motion.div>
@@ -201,7 +201,7 @@ const Projects: React.FC = () => {
         {/* Projects Grid - Compact for single page */}
         <motion.div
           layout
-          className="grid md:grid-cols-3 gap-6 mb-8 relative z-0"
+          className="grid md:grid-cols-3 ui-grid-gap mb-8 relative z-0"
         >
           {filteredProjects.map((project, index) => (
             <motion.div
@@ -275,8 +275,8 @@ const Projects: React.FC = () => {
 
         {/* Interactive Resume Section */}
         <GlassCard delay={0.8} className="text-center p-6 md:mb-8 lg:mb-0">
-          <h2 className="fluid-h3 font-bold text-white mb-3">Want to See More?</h2>
-          <p className="text-white/70 mb-4 text-sm">
+          <h2 className="ui-section-title">Want to See More?</h2>
+          <p className="ui-body mb-4">
             View my interactive resume for a complete overview of my experience and skills.
           </p>
           <Link to="/resume">

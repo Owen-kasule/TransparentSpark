@@ -362,13 +362,13 @@ const Blog: React.FC = () => {
             transition={{ duration: 0.8 }}
               className="text-center mb-4 lg:mb-8"
           >
-            <h1 className="fluid-h1 font-bold text-white mb-4">
+            <h1 className="ui-page-title mb-4">
               BLOG
             </h1>
             <div className="flex items-center justify-center mb-4">
               <div className="h-1 w-24 bg-azure-400"></div>
             </div>
-            <p className="text-white/70 max-w-2xl mx-auto text-sm mb-8">
+            <p className="ui-lead max-w-2xl mx-auto mb-8">
               Insights, tutorials, and thoughts on modern web development
             </p>
           </motion.div>
@@ -445,13 +445,13 @@ const Blog: React.FC = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-4 lg:mb-8"
         >
-            <h1 className="fluid-h1 font-bold text-white mb-4">
+            <h1 className="ui-page-title mb-4">
             BLOG
           </h1>
           <div className="flex items-center justify-center mb-4">
             <div className="h-1 w-24 bg-azure-400"></div>
           </div>
-          <p className="text-white/70 max-w-2xl mx-auto text-sm mb-5 sm:mb-8">
+          <p className="ui-lead max-w-2xl mx-auto mb-5 sm:mb-8">
             Insights, tutorials, and thoughts on modern web development
           </p>
 
@@ -475,7 +475,7 @@ const Blog: React.FC = () => {
             {/* Desktop: full categories card */}
             <div className="hidden sm:block md:hidden lg:block">
               <GlassCard className="p-4">
-                <h3 className="text-lg font-bold text-white mb-3 text-center">Categories</h3>
+                <h3 className="ui-section-title text-center">Categories</h3>
                 <div className="flex flex-wrap justify-center gap-2">
                   {!categoriesLoaded ? (
                     // Skeleton loading for categories
@@ -762,7 +762,7 @@ const Blog: React.FC = () => {
           >
             <GlassCard className="p-6">
               <div className="flex items-center justify-between mb-6">
-                <h2 className="fluid-h3 font-bold text-white">
+                <h2 className="ui-section-title">
                   Search Results ({searchResults.length})
                 </h2>
                 <div className="flex items-center space-x-4">
@@ -781,7 +781,7 @@ const Blog: React.FC = () => {
                 </div>
               </div>
               
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="grid md:grid-cols-2 lg:grid-cols-3 ui-grid-gap">
                 {searchResults.map((post, index) => (
                   <Link key={post.id} to={`/blog/${post.id}`}>
                     <motion.div
@@ -874,7 +874,7 @@ const Blog: React.FC = () => {
             className="hidden sm:block mb-8"
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="fluid-h3 font-bold text-white">
+              <h2 className="ui-section-title">
                 {selectedCategory === 'all' ? 'Featured Posts' : `Featured Posts in ${selectedCategory}`}
               </h2>
               {selectedCategory !== 'all' && (
@@ -886,7 +886,7 @@ const Blog: React.FC = () => {
                 </button>
               )}
             </div>
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-3 ui-grid-gap">
               {!featuredLoaded ? (
                 // Skeleton loading for featured posts
                 [...Array(3)].map((_, index) => (
@@ -984,11 +984,11 @@ const Blog: React.FC = () => {
             className="hidden sm:block mb-8"
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="fluid-h3 font-bold text-white">
+              <h2 className="ui-section-title">
                 {selectedCategory === 'all' ? 'Recent Posts' : `Recent Posts in ${selectedCategory}`}
               </h2>
             </div>
-            <div className="grid md:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-3 ui-grid-gap">
               {!recentLoaded ? (
                 // Skeleton loading for recent posts
                 [...Array(3)].map((_, index) => (
@@ -1072,10 +1072,10 @@ const Blog: React.FC = () => {
             className="hidden sm:block mb-8"
           >
             <div className="text-center mb-6">
-              <h2 className="fluid-h3 font-bold text-white mb-2">
+              <h2 className="ui-section-title">
                 {moreArticlesCategory === 'all' ? 'More Articles' : `More Articles in ${moreArticlesCategory}`}
               </h2>
-              <p className="text-white/60 text-sm mb-4">Discover more insights and tutorials</p>
+              <p className="ui-meta mb-4">Discover more insights and tutorials</p>
               
               {/* Simple Category Filter */}
               <div className="flex flex-wrap justify-center gap-2">
@@ -1105,7 +1105,7 @@ const Blog: React.FC = () => {
               </div>
             </div>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 ui-grid-gap">
               {!additionalLoaded ? (
                 // Skeleton loading for additional posts
                 [...Array(6)].map((_, index) => (

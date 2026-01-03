@@ -143,21 +143,21 @@ const Contact: React.FC = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-4 lg:mb-12"
         >
-          <h1 className="fluid-h1 font-bold text-white mb-5">
+          <h1 className="ui-page-title mb-5">
             CONTACT
           </h1>
           <div className="flex items-center justify-center mb-6">
             <div className="h-1 w-24 bg-azure-400"></div>
           </div>
-          <p className="text-white/70 max-w-2xl mx-auto">
+          <p className="ui-lead max-w-2xl mx-auto">
             Ready to start your next project? Let's discuss how we can work together.
           </p>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 gap-8 mb-12">
+        <div className="grid lg:grid-cols-2 ui-grid-gap lg:gap-8 mb-12">
           {/* Contact Form */}
           <GlassCard delay={0.2} className="p-6">
-            <h2 className="fluid-h3 font-bold text-white mb-4">Get In Touch</h2>
+            <h2 className="ui-section-title">Get In Touch</h2>
             
             {isSubmitted ? (
               <motion.div
@@ -300,7 +300,7 @@ const Contact: React.FC = () => {
           {/* Contact Info & Services */}
           <div className="space-y-6">
             <GlassCard delay={0.4} className="p-6">
-              <h3 className="text-xl font-bold text-white mb-4">Contact Information</h3>
+              <h3 className="ui-section-title">Contact Information</h3>
               <div className="space-y-4">
                 {contactInfo.map((info, index) => (
                   <a
@@ -312,7 +312,7 @@ const Contact: React.FC = () => {
                       <info.icon size={16} className="text-azure-400" />
                     </div>
                     <div>
-                      <p className="text-white/60 text-xs">{info.label}</p>
+                      <p className="ui-meta">{info.label}</p>
                       <p className="font-medium text-sm">{info.value}</p>
                     </div>
                   </a>
@@ -321,7 +321,7 @@ const Contact: React.FC = () => {
             </GlassCard>
 
             <GlassCard delay={0.6} className="p-6">
-              <h3 className="text-xl font-bold text-white mb-4">Services</h3>
+              <h3 className="ui-section-title">Services</h3>
               <div className="flex flex-wrap gap-2">
                 {['Web Development', 'Mobile Apps', 'API Design', 'Consulting'].map((service) => (
                   <span 
@@ -335,8 +335,8 @@ const Contact: React.FC = () => {
             </GlassCard>
 
             <GlassCard delay={0.8} className="p-6 hidden lg:block">
-              <h3 className="text-xl font-bold text-white mb-3">Follow Me</h3>
-              <p className="text-white/70 mb-4 text-sm">
+              <h3 className="ui-section-title">Follow Me</h3>
+              <p className="ui-body mb-4">
                 Stay updated with my latest projects and insights
               </p>
               <div className="hidden lg:block">

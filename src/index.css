@@ -28,8 +28,8 @@
   .glass-card {
     @apply backdrop-blur-xl bg-white/5 border border-white/10 shadow-2xl;
     background: rgba(255, 255, 255, 0.05);
-    backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(20px);
     border: 1px solid rgba(255, 255, 255, 0.1);
     box-shadow: 
       0 8px 32px rgba(0, 0, 0, 0.3),
@@ -51,8 +51,8 @@
       radial-gradient(circle at 80% 70%, rgba(14, 165, 233, 0.03) 0%, transparent 50%),
       radial-gradient(circle at 40% 90%, rgba(255, 255, 255, 0.01) 0%, transparent 50%),
       rgba(255, 255, 255, 0.015);
-    backdrop-filter: blur(60px) saturate(180%);
     -webkit-backdrop-filter: blur(60px) saturate(180%);
+    backdrop-filter: blur(60px) saturate(180%);
     border: 1px solid rgba(255, 255, 255, 0.08);
     box-shadow: 
       0 25px 80px rgba(0, 0, 0, 0.4),
@@ -169,9 +169,43 @@
   .container {
     @apply max-w-7xl mx-auto;
   }
+
+  /*
+    Shared typography tokens
+    Use these to keep font sizing uniform across pages and breakpoints.
+  */
+  .ui-page-title {
+    @apply fluid-h1 font-bold text-white;
+  }
+
+  .ui-section-title {
+    @apply fluid-h3 font-bold text-white mb-4;
+  }
+
+  .ui-article-title {
+    @apply fluid-h2 font-bold text-white;
+  }
+
+  .ui-lead {
+    @apply fluid-body text-white/70;
+  }
+
+  .ui-body {
+    @apply fluid-body text-white/80;
+  }
+
+  .ui-meta {
+    @apply text-white/60 text-xs sm:text-sm;
+  }
+
+  /* Shared spacing tokens (mobile + tablet first; desktop can still override) */
+  .ui-grid-gap {
+    @apply gap-4 md:gap-6;
+  }
   
   .line-clamp-2 {
     display: -webkit-box;
+    line-clamp: 2;
     -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
     overflow: hidden;
@@ -179,6 +213,7 @@
   
   .line-clamp-3 {
     display: -webkit-box;
+    line-clamp: 3;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
     overflow: hidden;
@@ -292,7 +327,9 @@
 
 @layer utilities {
   .text-balance {
-    text-wrap: balance;
+    @supports (text-wrap: balance) {
+      text-wrap: balance;
+    }
   }
 
   /* Testimonial grid responsive columns */

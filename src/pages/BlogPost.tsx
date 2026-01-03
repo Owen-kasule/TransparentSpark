@@ -533,8 +533,8 @@ function createHandler(config: Config) {
     return (
       <div className="min-h-screen pt-24 pb-0.5 lg:pb-12 flex items-center justify-center">
         <GlassCard className="p-8 text-center">
-          <h1 className="fluid-h3 font-bold text-white mb-4">Post Not Found</h1>
-          <p className="text-white/70 mb-6">The blog post you're looking for doesn't exist.</p>
+          <h1 className="ui-section-title">Post Not Found</h1>
+          <p className="ui-lead mb-6">The blog post you're looking for doesn't exist.</p>
           <Link
             to="/blog"
             className="bg-azure-500 hover:bg-azure-600 text-white px-6 py-3 rounded-lg transition-colors duration-300 inline-flex items-center space-x-2"
@@ -693,11 +693,11 @@ function createHandler(config: Config) {
           <div className="-mt-3 relative z-10">
             <GlassCard className="p-4">
               <div className="space-y-2">
-                <h1 className="fluid-h2 font-bold text-white leading-tight">
+                <h1 className="ui-article-title leading-tight">
                   {post.title}
                 </h1>
 
-                <p className="text-white/80 text-sm leading-relaxed">
+                <p className="ui-lead leading-relaxed">
                   {post.excerpt}
                 </p>
 
@@ -717,7 +717,7 @@ function createHandler(config: Config) {
                   <div className="flex-1 min-w-0">
                     <div className="leading-tight">
                       <h3 className="text-white font-medium text-sm truncate">{post.author_name}</h3>
-                      <p className="text-white/50 text-xs line-clamp-1">{post.author_bio}</p>
+                      <p className="ui-meta line-clamp-1">{post.author_bio}</p>
                     </div>
                   </div>
                 </div>
@@ -971,7 +971,7 @@ function createHandler(config: Config) {
               </div>
 
               {/* Desktop: cards */}
-              <div className="hidden sm:grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="hidden sm:grid grid-cols-1 md:grid-cols-3 ui-grid-gap">
                 {(relatedPosts.concat(additionalRelatedPosts).slice(0,3)).map((rp) => (
                   <Link key={rp.id} to={`/blog/${rp.id}`} className="group">
                     <div className="bg-white/5 hover:bg-white/10 transition-all duration-300 rounded-lg overflow-hidden border border-white/10 h-full group-hover:border-azure-400/30">

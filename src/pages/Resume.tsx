@@ -342,7 +342,7 @@ const Resume: React.FC = () => {
           transition={{ duration: 0.8 }}
           className="text-center mb-4 lg:mb-12"
         >
-          <h1 className="fluid-h1 font-bold text-white mb-4 sm:mb-5">
+          <h1 className="ui-page-title mb-4 sm:mb-5">
             RESUME
           </h1>
           <div className="flex items-center justify-center mb-4 sm:mb-6">
