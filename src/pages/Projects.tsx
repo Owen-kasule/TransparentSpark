@@ -51,7 +51,7 @@ const Projects: React.FC = () => {
     : projects.filter(project => project.technologies.includes(filter));
 
     return (
-    <div className="min-h-screen relative pt-4 lg:pt-24 pb-0.5 lg:pb-12">
+    <div className="min-h-screen md:min-h-0 lg:min-h-screen relative pt-4 lg:pt-24 pb-0.5 lg:pb-12">
       {/* Social Links on all pages */}
       <div className="hidden lg:block">
   <SocialLinks vertical className="fixed left-8 bottom-32 transform z-[60]" />
@@ -274,7 +274,7 @@ const Projects: React.FC = () => {
         </motion.div>
 
         {/* Interactive Resume Section */}
-        <GlassCard delay={0.8} className="text-center p-6 md:mb-12 lg:mb-0">
+        <GlassCard delay={0.8} className="text-center p-6 md:mb-8 lg:mb-0">
           <h2 className="fluid-h3 font-bold text-white mb-3">Want to See More?</h2>
           <p className="text-white/70 mb-4 text-sm">
             View my interactive resume for a complete overview of my experience and skills.

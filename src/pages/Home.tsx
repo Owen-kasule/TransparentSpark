@@ -103,10 +103,10 @@ const Home: React.FC = () => {
   useAnalytics('home');
 
   return (
-    <div className="min-h-screen relative pt-4 lg:pt-24 pb-0.5 lg:pb-12">
+    <div className="min-h-screen md:min-h-0 lg:min-h-screen relative pt-4 lg:pt-24 pb-0.5 lg:pb-12">
       <div className="container mx-auto px-6 space-y-4 lg:space-y-0">
         {/* Hero Section - Two Column Layout */}
-        <div className="flex items-center justify-center min-h-[60vh] lg:min-h-[calc(100vh-6rem)] relative">
+        <div className="flex items-center justify-center md:items-start md:justify-start lg:items-center lg:justify-center md:pt-4 lg:pt-0 min-h-[60vh] md:min-h-0 lg:min-h-[calc(100vh-6rem)] relative">
           {/* Left Side - Social Links (positioned lower) */}
           <div className="hidden lg:block">
             <SocialLinks vertical className="fixed left-8 bottom-32 transform z-[60]" />
@@ -348,7 +348,7 @@ const Home: React.FC = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1.1 }}
-          className="pt-4 lg:pt-0 lg:pb-20"
+          className="pt-4 md:pt-2 lg:pt-0 lg:pb-20"
         >
           <div className="text-center mb-0 md:mb-4 lg:mb-8">
             <h2 className="fluid-h2 font-bold text-white mb-1 md:mb-3 lg:mb-4">Featured Work</h2>

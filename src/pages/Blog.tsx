@@ -473,7 +473,7 @@ const Blog: React.FC = () => {
             className="mt-4 sm:mt-6"
           >
             {/* Desktop: full categories card */}
-            <div className="hidden sm:block">
+            <div className="hidden sm:block md:hidden lg:block">
               <GlassCard className="p-4">
                 <h3 className="text-lg font-bold text-white mb-3 text-center">Categories</h3>
                 <div className="flex flex-wrap justify-center gap-2">

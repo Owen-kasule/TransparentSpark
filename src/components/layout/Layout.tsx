@@ -9,6 +9,7 @@ import { motion } from 'framer-motion';
 
 const Layout: React.FC = () => {
   const location = useLocation();
+  const isHome = location.pathname === '/';
 
   // Smooth scroll to top on route change with minimal movement
   useEffect(() => {
@@ -78,7 +79,7 @@ const Layout: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3, ease: 'easeInOut' }}
-          className="flex-1 pt-0 pb-8 md:pb-8 lg:pb-0" /* reserve space for bottom nav on mobile+tablet */
+          className={`flex-1 pt-0 pb-8 ${isHome ? 'md:pb-4' : 'md:pb-8'} lg:pb-0`} /* reserve space for bottom nav on mobile+tablet */
         >
           <Outlet />
         </motion.main>
