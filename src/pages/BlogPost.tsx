@@ -64,7 +64,6 @@ function createHandler(config: Config) {
   const [isLikeStatusLoaded, setIsLikeStatusLoaded] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [autoOpenCommentForm, setAutoOpenCommentForm] = useState(false);
-  const [isMobile, setIsMobile] = useState(false);
   const [showCommentsOnMobile, setShowCommentsOnMobile] = useState(false);
   const [autoExpandCommentsOnMobile, setAutoExpandCommentsOnMobile] = useState(false);
 
@@ -98,15 +97,6 @@ function createHandler(config: Config) {
     };
     loadBlogPost();
   }, [id]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const mq = window.matchMedia('(max-width: 639px)');
-    const update = () => setIsMobile(mq.matches);
-    update();
-    mq.addEventListener('change', update);
-    return () => mq.removeEventListener('change', update);
-  }, []);
 
   useEffect(() => {
     const openFromLink = location.hash === '#comments' || (location.state as any)?.openComment === true;
@@ -943,13 +933,13 @@ function createHandler(config: Config) {
 
           {/* Comments Section with Ref */}
           <div id="comments" ref={commentsRef} className="scroll-mt-24">
-            {(!isMobile || showCommentsOnMobile) && (
+            {showCommentsOnMobile && (
               <CommentSection 
                 postId={post.id} 
                 postTitle={post.title}
                 onCommentCountChange={setCommentCount}
                 autoOpenForm={autoOpenCommentForm}
-                autoExpand={isMobile && autoExpandCommentsOnMobile}
+                autoExpand={autoExpandCommentsOnMobile}
               />
             )}
           </div>
