@@ -240,7 +240,7 @@ const About: React.FC = () => {
           </GlassCard>
 
           {/* Stats & Skills */}
-          <div className="space-y-6">
+          <div className="space-y-4 md:space-y-6">
             {/* Stats with Count-up Animation */}
             <GlassCard delay={0.4} className="p-6">
               <h3 className="ui-section-title text-center lg:text-left">By the Numbers</h3>
