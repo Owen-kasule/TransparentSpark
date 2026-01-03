@@ -700,7 +700,7 @@ function createHandler(config: Config) {
 
           {/* Article Meta (now includes a small thumbnail instead of large hero) */}
           {/* Mobile/tablet: combine author + story into one card, with engagement stats at bottom */}
-          <div className="md:hidden -mt-3 relative z-10">
+          <div className="-mt-3 relative z-10">
             <GlassCard className="p-4">
               <div className="space-y-2">
                 <h1 className="fluid-h2 font-bold text-white leading-tight">
@@ -818,7 +818,7 @@ function createHandler(config: Config) {
           </div>
 
           {/* Desktop: keep the original separated meta + content cards */}
-          <div className="hidden md:block">
+          <div className="hidden">
             <GlassCard className="p-4 sm:p-6 -mt-3 sm:-mt-4 relative z-10">
               <div className="space-y-4">
                 <h1 className="fluid-h2 font-bold text-white">
