@@ -20,7 +20,7 @@ const GlassCTA: React.FC<GlassCTAProps> = ({ delay = 0 }) => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.6, delay }}
-      className="relative max-w-md"
+      className="relative max-w-md md:mx-auto lg:mx-0"
     >
       {/* GitHub-style Pill Container */}
       <div className="relative bg-white/10 backdrop-blur-md border border-white/20 rounded-full overflow-hidden shadow-lg">
