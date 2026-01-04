@@ -83,8 +83,8 @@ const Layout: React.FC = () => {
         >
           <Outlet />
         </motion.main>
-        {/* Mobile social links bar positioned just above footer */}
-        <div className="md:hidden px-6 pb-4 pt-2">
+        {/* Mobile/Tablet social links bar positioned just above footer */}
+        <div className="lg:hidden px-6 pt-2 pb-4 md:pt-1 md:pb-2">
           <div className="max-w-sm mx-auto flex justify-center">
             <SocialLinks />
           </div>
