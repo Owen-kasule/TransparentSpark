@@ -42,7 +42,7 @@ const Footer: React.FC = () => {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.6, delay: 0.3 }}
-  className="relative z-10 bg-black/20 backdrop-blur-sm mb-[72px] md:mb-[72px] lg:mb-0" /* reserve space equal to nav height on mobile+tablet */
+      className="relative z-10 bg-black/20 backdrop-blur-sm mb-[calc(64px+env(safe-area-inset-bottom))] md:mb-[calc(64px+env(safe-area-inset-bottom))] lg:mb-0" /* reserve space equal to nav height on mobile+tablet */
     >
       <div className="container mx-auto px-6">
         {/* Contained border line */}

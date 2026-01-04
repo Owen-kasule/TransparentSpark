@@ -79,7 +79,7 @@ const Layout: React.FC = () => {
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: -20 }}
           transition={{ duration: 0.3, ease: 'easeInOut' }}
-          className={`flex-1 pt-0 pb-8 ${isHome ? 'md:pb-4' : 'md:pb-8'} lg:pb-0`} /* reserve space for bottom nav on mobile+tablet */
+          className={`${isHome ? 'flex-1 md:flex-none lg:flex-1' : 'flex-1'} pt-0 pb-8 ${isHome ? 'md:pb-4' : 'md:pb-8'} lg:pb-0`} /* reserve space for bottom nav on mobile+tablet */
         >
           <Outlet />
         </motion.main>
