@@ -110,7 +110,7 @@ const MobileBottomNav: React.FC = () => {
           exit={{ y: 80, opacity: 0 }}
           transition={{ duration: 0.35, ease: 'easeOut' }}
           style={{ x: '-50%' }}
-          className="fixed left-1/2 bottom-[env(safe-area-inset-bottom)] z-50 w-full max-w-[100vw] box-border overflow-x-hidden pt-2 pb-[env(safe-area-inset-bottom)] lg:hidden"
+          className="mobile-bottom-nav fixed left-1/2 bottom-0 z-50 w-full max-w-[100vw] box-border overflow-x-hidden pt-2 pb-0 lg:hidden"
           aria-label="Primary navigation"
         >
           <LayoutGroup id="mobile-bottom-nav">

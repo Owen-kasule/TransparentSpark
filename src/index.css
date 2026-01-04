@@ -204,6 +204,37 @@
   .ui-grid-gap {
     @apply gap-4 md:gap-6;
   }
+
+  /*
+    Safe-area + bottom-nav spacing fallbacks
+    - Provide a stable baseline for browsers without env(safe-area-inset-*) support.
+    - Avoid extra / missing space below footer across mobile/tablet devices.
+  */
+  .site-footer {
+    margin-bottom: 64px;
+  }
+
+  @supports (margin-bottom: env(safe-area-inset-bottom)) {
+    .site-footer {
+      margin-bottom: calc(64px + env(safe-area-inset-bottom));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .site-footer {
+      margin-bottom: 0;
+    }
+  }
+
+  .mobile-bottom-nav {
+    padding-bottom: 0;
+  }
+
+  @supports (padding-bottom: env(safe-area-inset-bottom)) {
+    .mobile-bottom-nav {
+      padding-bottom: env(safe-area-inset-bottom);
+    }
+  }
   
   .line-clamp-2 {
     display: -webkit-box;
