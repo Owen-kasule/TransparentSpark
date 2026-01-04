@@ -381,7 +381,7 @@ const Resume: React.FC = () => {
         </motion.div>
 
         {/* Navigation Tabs */}
-        <GlassCard delay={0.4} className="w-full mb-6 sm:mb-8 md:mb-0 lg:mb-6 p-3 sm:p-4">
+        <GlassCard delay={0.4} className="w-full mb-0 lg:mb-6 p-3 sm:p-4">
           <div className="flex justify-center">
             <div className="grid grid-cols-2 gap-1 sm:flex sm:gap-0 sm:space-x-1 bg-white/10 p-1 rounded-lg w-full max-w-md sm:max-w-none">
               {sections.map((section) => {
