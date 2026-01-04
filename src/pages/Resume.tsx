@@ -133,7 +133,7 @@ const Resume: React.FC = () => {
   ];
 
   const renderExperience = () => (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {resumeData.experience.map((job, index) => (
         <motion.div
           key={job.id}
@@ -187,7 +187,7 @@ const Resume: React.FC = () => {
   );
 
   const renderSkills = () => (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {Object.entries(resumeData.skills).map(([category, skills], index) => (
         <motion.div key={category} variants={itemVariants} className="w-full">
           <GlassCard delay={0.2 + index * 0.1} className="w-full p-4 sm:p-6">
@@ -211,7 +211,7 @@ const Resume: React.FC = () => {
   );
 
   const renderEducation = () => (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {resumeData.education.map((edu, index) => (
         <motion.div key={edu.id} variants={itemVariants} className="w-full">
           <GlassCard delay={0.2 + index * 0.1} className="w-full p-4 sm:p-6">
@@ -256,7 +256,7 @@ const Resume: React.FC = () => {
   );
 
   const renderProjects = () => (
-    <div className="space-y-4 sm:space-y-6">
+    <div className="space-y-4 md:space-y-6">
       {resumeData.projects.map((project, index) => (
         <motion.div key={project.id} variants={itemVariants} className="w-full">
           <GlassCard delay={0.2 + index * 0.1} className="w-full p-4 sm:p-6">
@@ -334,13 +334,13 @@ const Resume: React.FC = () => {
         </motion.div>
       </div>
 
-      <div className="container mx-auto px-4 sm:px-6 space-y-4 lg:space-y-0">
+      <div className="container mx-auto px-4 sm:px-6 space-y-4 md:space-y-6 lg:space-y-0">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="text-center mb-4 lg:mb-12"
+          className="text-center mb-0 lg:mb-12"
         >
           <h1 className="ui-page-title mb-4 sm:mb-5">
             RESUME
@@ -350,7 +350,7 @@ const Resume: React.FC = () => {
           </div>
           
           {/* Personal Info Card */}
-          <GlassCard delay={0.2} className="w-full p-4 sm:p-6 mb-6 sm:mb-8">
+          <GlassCard delay={0.2} className="w-full p-4 sm:p-6 mt-6">
             <div className="text-center mb-4 sm:mb-6">
               <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-white mb-2">{resumeData.personal.name}</h2>
               <p className="text-base sm:text-lg md:text-xl text-blue-400 mb-3 sm:mb-4">{resumeData.personal.title}</p>
@@ -381,7 +381,7 @@ const Resume: React.FC = () => {
         </motion.div>
 
         {/* Navigation Tabs */}
-        <GlassCard delay={0.4} className="w-full mb-6 sm:mb-8 p-3 sm:p-4">
+        <GlassCard delay={0.4} className="w-full mb-6 sm:mb-8 md:mb-0 lg:mb-6 p-3 sm:p-4">
           <div className="flex justify-center">
             <div className="grid grid-cols-2 gap-1 sm:flex sm:gap-0 sm:space-x-1 bg-white/10 p-1 rounded-lg w-full max-w-md sm:max-w-none">
               {sections.map((section) => {
@@ -411,13 +411,13 @@ const Resume: React.FC = () => {
           variants={containerVariants}
           initial="hidden"
           animate="visible"
-          className="w-full mb-12"
+          className="w-full mb-0 lg:mb-12"
         >
           {renderContent()}
         </motion.div>
 
         {/* Certifications Section */}
-        <GlassCard delay={0.8} className="w-full p-4 sm:p-6 mb-6 sm:mb-8">
+        <GlassCard delay={0.8} className="w-full p-4 sm:p-6 mb-0 lg:mb-6">
           <h3 className="text-xl sm:text-2xl font-semibold text-white mb-3 sm:mb-4 text-center">Certifications</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             {resumeData.certifications.map((cert, index) => (
