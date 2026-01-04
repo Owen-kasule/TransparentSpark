@@ -103,7 +103,7 @@ const Home: React.FC = () => {
   useAnalytics('home');
 
   return (
-    <div className="min-h-screen md:min-h-0 lg:min-h-screen relative pt-4 lg:pt-24 pb-0.5 lg:pb-12">
+    <div className="min-h-screen md:min-h-0 lg:min-h-screen relative pt-4 lg:pt-20 pb-0.5 lg:pb-12">
       <div className="container mx-auto px-6 space-y-4 lg:space-y-0">
         {/* Hero Section - Two Column Layout */}
         <div className="flex items-start justify-start lg:items-center lg:justify-center md:pt-4 lg:pt-0 min-h-0 lg:min-h-[calc(100vh-6rem)] relative">
