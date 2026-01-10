@@ -149,7 +149,7 @@ const Home: React.FC = () => {
                         onAnimationComplete={() => console.log('✅ Large bar animation complete')}
                       />
                     </div>
-                    <h1 ref={fullNameRefLg} className="ui-page-title leading-tight">
+                    <h1 ref={fullNameRefLg} className="font-bold text-white leading-tight text-4xl">
                       OWEN <span className="mx-1">K. </span><span ref={muherezeRefLg} className="capitalize">muhereze</span>
                     </h1>
                   </div>
