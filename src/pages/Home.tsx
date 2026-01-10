@@ -242,7 +242,7 @@ const Home: React.FC = () => {
                 </motion.div>
 
                 {/* Glassmorphism CTA Component */}
-                <div className="mb-3 md:mb-0 lg:mb-6">
+                <div className="mb-3 md:mb-0 lg:mt-4 lg:mb-6">
                   <GlassCTA delay={1.1} />
                 </div>
 
