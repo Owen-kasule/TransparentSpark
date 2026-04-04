@@ -33,7 +33,7 @@ async function getCommentCounts(postIds: string[]): Promise<Record<string, numbe
     if (error || !data) return {};
 
     const counts: Record<string, number> = {};
-    data.forEach(row => {
+    data.forEach((row: { blog_post_id: string }) => {
       counts[row.blog_post_id] = (counts[row.blog_post_id] || 0) + 1;
     });
     return counts;
