@@ -122,10 +122,10 @@ const Admin: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
 
-  // Modal actions (state values not currently rendered)
-  const [, setShowModal] = useState(false);
-  const [, setModalType] = useState<'edit' | 'view' | 'delete'>('view');
-  const [, setSelectedItem] = useState<any>(null);
+  // Modal actions
+  const [showModal, setShowModal] = useState(false);
+  const [modalType, setModalType] = useState<'edit' | 'view' | 'delete'>('view');
+  const [selectedItem, setSelectedItem] = useState<any>(null);
 
   // Bulletproof state update function
   const updateAuthState = (updates: Partial<AuthState>) => {
@@ -373,6 +373,37 @@ const Admin: React.FC = () => {
     } catch (error) {
       console.error('Error updating post:', error);
       toast.error('Failed to update post');
+    }
+  };
+
+  // Delete item handler
+  const handleDeleteItem = async () => {
+    if (!selectedItem) return;
+    try {
+      let table = '';
+      if (activeTab === 'blog-posts') table = 'blog_posts';
+      else if (activeTab === 'comments') table = 'blog_comments';
+      else if (activeTab === 'reviews') table = 'reviews';
+      else return;
+
+      const { error } = await supabase
+        .from(table)
+        .delete()
+        .eq('id', selectedItem.id);
+
+      if (error) throw error;
+
+      toast.success('Item deleted successfully');
+      setShowModal(false);
+      setSelectedItem(null);
+
+      // Reload relevant data
+      if (table === 'blog_posts') await loadBlogPosts();
+      else if (table === 'blog_comments') await loadComments();
+      else if (table === 'reviews') await loadReviews();
+    } catch (error) {
+      console.error('Error deleting item:', error);
+      toast.error('Failed to delete item');
     }
   };
 
@@ -659,7 +690,7 @@ const Admin: React.FC = () => {
                 onClick={() => updateAuthState({ error: null })}
                 className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm transition-colors duration-300"
               >
-                Continue Anyway
+                Back to Login
               </button>
             </div>
           </div>
@@ -755,7 +786,11 @@ const Admin: React.FC = () => {
           {tabs.map((tab) => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
+              onClick={() => {
+                setActiveTab(tab.id);
+                setSearchTerm('');
+                setStatusFilter('all');
+              }}
               className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors duration-300 text-sm ${
                 activeTab === tab.id
                   ? 'bg-azure-500 text-white'
