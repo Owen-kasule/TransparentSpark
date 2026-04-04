@@ -73,7 +73,7 @@ const Projects: React.FC = () => {
         </motion.div>
       </div>
 
-      <div className="container mx-auto px-6 space-y-4 lg:space-y-0">
+      <div className="container mx-auto px-6 space-y-4 lg:space-y-4">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 30 }}
@@ -93,7 +93,7 @@ const Projects: React.FC = () => {
         </motion.div>
 
         {/* Filter */}
-        <GlassCard delay={0.2} className="mb-8 p-4 relative z-50">
+        <GlassCard delay={0.2} className="mb-8 lg:mb-10 p-4 relative z-50">
           {/* Mobile: compact dropdown */}
           <div className="sm:hidden w-full" ref={mobileFilterRef}>
             <div className="flex items-center gap-3">
@@ -201,7 +201,7 @@ const Projects: React.FC = () => {
         {/* Projects Grid - Compact for single page */}
         <motion.div
           layout
-          className="grid md:grid-cols-3 ui-grid-gap mb-8 relative z-0"
+          className="grid md:grid-cols-3 ui-grid-gap mb-8 lg:mb-10 relative z-0"
         >
           {filteredProjects.map((project, index) => (
             <motion.div
