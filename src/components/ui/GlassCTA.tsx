@@ -1,18 +1,22 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { ArrowRight } from 'lucide-react';
+import { useContent } from '../../contexts/SiteContentContext';
 
 interface GlassCTAProps {
   delay?: number;
 }
 
 const GlassCTA: React.FC<GlassCTAProps> = ({ delay = 0 }) => {
+  const { content } = useContent();
+  const home = content.home;
+
   const handleConnectClick = () => {
-    window.location.href = '/contact';
+    window.location.href = home.ctaPrimaryLink;
   };
 
   const handleResumeClick = () => {
-    window.location.href = '/resume';
+    window.location.href = home.ctaSecondaryLink;
   };
 
   return (

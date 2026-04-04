@@ -1,6 +1,6 @@
 import React from 'react';
 import { Github, Linkedin, Instagram } from 'lucide-react';
-import { socialLinks } from '../../data/portfolio';
+import { useContent } from '../../contexts/SiteContentContext';
 
 // Custom WhatsApp and X (Twitter) icons
 const WhatsAppIcon = () => (
@@ -29,10 +29,13 @@ interface SocialLinksProps {
 }
 
 const SocialLinks: React.FC<SocialLinksProps> = ({ vertical = false, className = '' }) => {
+  const { content } = useContent();
+  const links = content.social.links;
   return (
     <div className={`flex ${vertical ? 'flex-col space-y-4' : 'space-x-4'} ${className}`}>
-      {socialLinks.map((link) => {
+      {links.map((link) => {
         const Icon = iconMap[link.icon as keyof typeof iconMap];
+        if (!Icon) return null;
         return (
           <a
             key={link.platform}
