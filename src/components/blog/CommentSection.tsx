@@ -5,7 +5,6 @@ import { useForm } from 'react-hook-form';
 import validator from 'validator';
 import { supabase } from '../../lib/supabase';
 import { abstractEmailValidator } from '../../lib/abstractEmailValidator';
-import { getCommentsForPost } from '../../data/blogData';
 import GlassCard from '../ui/GlassCard';
 import toast from 'react-hot-toast';
 import { getAvatarUrl } from '../../lib/gravatar';
@@ -218,10 +217,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, onCommentCountC
   useEffect(() => {
     // Update comment count when comments change
     if (onCommentCountChange) {
-      const totalCount = comments.length + getTotalDummyCommentCount();
-      onCommentCountChange(totalCount);
+      onCommentCountChange(comments.length);
     }
-  }, [comments, dummyComments, onCommentCountChange]);
+  }, [comments, onCommentCountChange]);
 
   const getTotalDummyCommentCount = () => {
     let count = dummyComments.length;
@@ -236,10 +234,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, onCommentCountC
   const loadComments = async () => {
     try {
       setIsLoading(true);
-      
-      // Load dummy comments
-      const dummyData = getCommentsForPost(postId);
-      setDummyComments(dummyData);
       
       // Check if Supabase is properly configured
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
@@ -364,7 +358,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, onCommentCountC
       
       // Update comment count immediately
       if (onCommentCountChange) {
-        onCommentCountChange(getTotalDummyCommentCount() + comments.length + 1);
+        onCommentCountChange(comments.length + 1);
       }
 
       // Show success message immediately
