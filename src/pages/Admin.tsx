@@ -1013,7 +1013,10 @@ const Admin: React.FC = () => {
                     <FileText className="text-azure-400" size={24} />
                     <h2 className="text-xl font-bold text-white">Blog Posts Management</h2>
                   </div>
-                  <button className="bg-azure-500 hover:bg-azure-600 text-white px-4 py-2 rounded-lg transition-colors duration-300 flex items-center space-x-2">
+                  <button
+                    onClick={() => toast('Blog post editor coming soon!', { icon: '🚧' })}
+                    className="bg-azure-500 hover:bg-azure-600 text-white px-4 py-2 rounded-lg transition-colors duration-300 flex items-center space-x-2"
+                  >
                     <Plus size={16} />
                     <span>New Post</span>
                   </button>
