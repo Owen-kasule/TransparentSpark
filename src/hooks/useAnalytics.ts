@@ -3,19 +3,25 @@ import { supabase } from '../lib/supabase';
 
 export const useAnalytics = (page: string) => {
   useEffect(() => {
+    const controller = new AbortController();
+
     const trackVisit = async () => {
       try {
-        // Generate or get visitor ID from localStorage
-        let visitorId = localStorage.getItem('visitor_id');
+        // Use the same visitor ID key as blogService for consistency
+        let visitorId = localStorage.getItem('blog_visitor_id');
         if (!visitorId) {
           visitorId = crypto.randomUUID();
-          localStorage.setItem('visitor_id', visitorId);
+          localStorage.setItem('blog_visitor_id', visitorId);
         }
 
-        // Get location data (simplified - in production you'd use a proper geolocation service)
+        // Get location data with abort controller and timeout
         const getLocationData = async () => {
           try {
-            const response = await fetch('https://ipapi.co/json/');
+            const timeoutId = setTimeout(() => controller.abort(), 3000);
+            const response = await fetch('https://ipapi.co/json/', {
+              signal: controller.signal
+            });
+            clearTimeout(timeoutId);
             const data = await response.json();
             return {
               country: data.country_name || 'Unknown',
@@ -28,6 +34,8 @@ export const useAnalytics = (page: string) => {
 
         const location = await getLocationData();
 
+        if (controller.signal.aborted) return;
+
         // Track the visit
         await supabase.from('analytics').insert({
           page,
@@ -38,10 +46,14 @@ export const useAnalytics = (page: string) => {
           city: location.city
         });
       } catch (error) {
-        console.error('Analytics tracking error:', error);
+        if (!controller.signal.aborted) {
+          console.error('Analytics tracking error:', error);
+        }
       }
     };
 
     trackVisit();
+
+    return () => controller.abort();
   }, [page]);
 };

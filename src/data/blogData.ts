@@ -1,10 +1,11 @@
 import { blogService, type BlogPost as DBBlogPost } from '../lib/blogService';
+import { supabase } from '../lib/supabase';
 
 export interface BlogPost extends DBBlogPost {
-  comments: number; // This will be calculated from the comments table
+  comments: number;
 }
 
-// Mock comment data for demonstration (keep for comment count calculation only)
+// Kept for backward compatibility — returns [] since real comments come from Supabase
 interface Comment {
   id: string;
   author: string;
@@ -16,19 +17,49 @@ interface Comment {
 }
 
 export const getCommentsForPost = (_postId: string): Comment[] => {
-  // Return empty array for all posts (no dummy data)
   return [];
 };
+
+// Fetch real comment counts for a batch of post IDs
+async function getCommentCounts(postIds: string[]): Promise<Record<string, number>> {
+  if (postIds.length === 0) return {};
+  try {
+    const { data, error } = await supabase
+      .from('blog_comments')
+      .select('blog_post_id')
+      .in('blog_post_id', postIds)
+      .eq('status', 'approved');
+
+    if (error || !data) return {};
+
+    const counts: Record<string, number> = {};
+    data.forEach(row => {
+      counts[row.blog_post_id] = (counts[row.blog_post_id] || 0) + 1;
+    });
+    return counts;
+  } catch {
+    return {};
+  }
+}
+
+// Helper to attach comment counts to posts
+async function withCommentCounts(posts: DBBlogPost[]): Promise<BlogPost[]> {
+  const counts = await getCommentCounts(posts.map(p => p.id));
+  return posts.map(post => ({
+    ...post,
+    comments: counts[post.id] || 0
+  }));
+}
 
 // Enhanced blog data functions that use the database service
 export const getBlogPostById = async (id: string): Promise<BlogPost | undefined> => {
   try {
     const post = await blogService.getPostById(id);
     if (!post) return undefined;
-    // Add comment count from mock data (always 0)
+    const counts = await getCommentCounts([id]);
     return {
       ...post,
-      comments: 0
+      comments: counts[id] || 0
     };
   } catch (error) {
     console.error('Error getting blog post by ID:', error);
@@ -39,10 +70,7 @@ export const getBlogPostById = async (id: string): Promise<BlogPost | undefined>
 export const getFeaturedPosts = async (): Promise<BlogPost[]> => {
   try {
     const posts = await blogService.getFeaturedPosts();
-    return posts.map(post => ({
-      ...post,
-      comments: 0
-    }));
+    return withCommentCounts(posts);
   } catch (error) {
     console.error('Error getting featured posts:', error);
     return [];
@@ -52,10 +80,7 @@ export const getFeaturedPosts = async (): Promise<BlogPost[]> => {
 export const getRecentPosts = async (): Promise<BlogPost[]> => {
   try {
     const posts = await blogService.getRecentPosts();
-    return posts.map(post => ({
-      ...post,
-      comments: 0
-    }));
+    return withCommentCounts(posts);
   } catch (error) {
     console.error('Error getting recent posts:', error);
     return [];
@@ -65,10 +90,7 @@ export const getRecentPosts = async (): Promise<BlogPost[]> => {
 export const getPostsByCategory = async (category: string): Promise<BlogPost[]> => {
   try {
     const posts = await blogService.getPostsByCategory(category);
-    return posts.map(post => ({
-      ...post,
-      comments: 0
-    }));
+    return withCommentCounts(posts);
   } catch (error) {
     console.error('Error getting posts by category:', error);
     return [];
@@ -78,10 +100,7 @@ export const getPostsByCategory = async (category: string): Promise<BlogPost[]> 
 export const getRelatedPosts = async (currentPostId: string, category: string, limit: number = 3): Promise<BlogPost[]> => {
   try {
     const posts = await blogService.getRelatedPosts(currentPostId, category, limit);
-    return posts.map(post => ({
-      ...post,
-      comments: 0
-    }));
+    return withCommentCounts(posts);
   } catch (error) {
     console.error('Error getting related posts:', error);
     return [];
@@ -100,10 +119,7 @@ export const getAllCategories = async (): Promise<string[]> => {
 export const searchPosts = async (query: string): Promise<BlogPost[]> => {
   try {
     const posts = await blogService.searchPosts(query);
-    return posts.map(post => ({
-      ...post,
-      comments: 0
-    }));
+    return withCommentCounts(posts);
   } catch (error) {
     console.error('Error searching posts:', error);
     return [];
@@ -113,10 +129,7 @@ export const searchPosts = async (query: string): Promise<BlogPost[]> => {
 export const getAllPosts = async (): Promise<BlogPost[]> => {
   try {
     const posts = await blogService.getAllPosts();
-    return posts.map(post => ({
-      ...post,
-      comments: 0
-    }));
+    return withCommentCounts(posts);
   } catch (error) {
     console.error('Error getting all posts:', error);
     return [];

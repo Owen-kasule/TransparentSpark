@@ -70,15 +70,11 @@ export function getDiceBearAvatar(seed: string, options: { size?: number; style?
 
 /**
  * Get avatar URL with fallback options
+ * Uses DiceBear as primary since we don't have a real MD5 implementation for Gravatar
  */
 export function getAvatarUrl(email: string, name: string, options: GravatarOptions = {}): string {
-  try {
-    // Try Gravatar first
-    return getGravatarUrl(email, options);
-  } catch (error) {
-    // Fallback to DiceBear using name as seed
-    return getDiceBearAvatar(name, { size: options.size });
-  }
+  // Use DiceBear directly since the Gravatar MD5 hash is not standard-compliant
+  return getDiceBearAvatar(email || name, { size: options.size });
 }
 
 /**
