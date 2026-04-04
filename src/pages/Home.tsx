@@ -32,7 +32,6 @@ const Home: React.FC = () => {
   const [barWidthLg, setBarWidthLg] = useState<number>(0);
   const subtitleWrapLgRef = useRef<HTMLDivElement | null>(null);
 
-  console.log('🎯 Current bar widths:', { barWidthSm, barWidthLg });
 
   useEffect(() => {
     const parseGap = (el: HTMLElement | null): number => {
@@ -45,7 +44,6 @@ const Home: React.FC = () => {
     };
 
   const update = () => {
-      console.log('🔵 Update called');
       // Small layout: bar width = subtitle width - (OWEN width + gap)
       if (subtitleRefSm.current) {
         const subW = subtitleRefSm.current.getBoundingClientRect().width;
@@ -54,7 +52,6 @@ const Home: React.FC = () => {
         const raw = (subW - nameW - gap) - 1; // epsilon for rounding
         const barW = raw <= 0 ? 6 : raw; // avoid total disappearance on very tight widths
         const finalWidth = Math.max(0, Math.round(barW));
-        console.log('📱 Small bar:', { subW, nameW, gap, raw, finalWidth });
         setBarWidthSm(finalWidth);
       }
       // Large layout: bar width = (end of "Muhereze") - (end of "HI I'M" + gap)
@@ -77,7 +74,6 @@ const Home: React.FC = () => {
           subtitleWrapLgRef.current.style.width = `${finalNameWidth}px`;
         }
 
-        console.log('💻 Large metrics:', { hiImEndX, gap, barLeftX, muherezeEndX, fullNameStartX, rawWidth, finalWidth, rawNameWidth, finalNameWidth });
       }
     };
     // Defer to next frame to measure after first paint, then set widths for animation
@@ -152,8 +148,8 @@ const Home: React.FC = () => {
                         animate={{ width: barWidthLg }}
                         transition={{ duration: 0.8, ease: 'easeOut', delay: 0.5 }}
                         style={{ height: '1.125rem', minWidth: '2px' }}
-                        onAnimationStart={() => console.log('🎬 Large bar animation started')}
-                        onAnimationComplete={() => console.log('✅ Large bar animation complete')}
+                        onAnimationStart={() => {}}
+                        onAnimationComplete={() => {}}
                       />
                     </div>
                     <h1 ref={fullNameRefLg} className="font-bold text-white leading-tight text-4xl">
@@ -188,8 +184,8 @@ const Home: React.FC = () => {
                             animate={{ width: barWidthSm }}
                             transition={{ duration: 0.8, ease: 'easeOut', delay: 0.5 }}
                             style={{ height: '1em', minWidth: '2px' }}
-                            onAnimationStart={() => console.log('🎬 Small bar animation started')}
-                            onAnimationComplete={() => console.log('✅ Small bar animation complete')}
+                            onAnimationStart={() => {}}
+                            onAnimationComplete={() => {}}
                           />
                         </div>
                         <p className="text-azure-400 font-medium uppercase whitespace-nowrap tracking-[0.12em] text-[11px] sm:text-xs md:text-sm mt-1"><span ref={subtitleRefSm} className="inline-block">{home.heroSubtitle}</span></p>

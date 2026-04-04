@@ -160,7 +160,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, onCommentCountC
 
           try {
             const result = await abstractEmailValidator.validateSingleEmail(email);
-            console.log(`📧 Email validation for comment: ${email}:`, result);
             setEmailValidation({
               isValid: result.isValid,
               isChecking: false,
@@ -168,7 +167,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, onCommentCountC
               hasBeenTouched: true
             });
           } catch (error) {
-            console.error('❌ Email validation error in comment form:', error);
+            console.error('Email validation error in comment form:', error);
             setEmailValidation({
               isValid: false,
               isChecking: false,
@@ -228,7 +227,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, onCommentCountC
       // Check if Supabase is properly configured
       const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
       if (!supabaseUrl || supabaseUrl.includes('your-project')) {
-        console.log('Supabase not configured, using dummy comments only');
         setComments([]);
         return;
       }
@@ -361,11 +359,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, onCommentCountC
         try {
           const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
           if (!supabaseUrl || supabaseUrl.includes('your-project')) {
-            console.log('📝 Supabase not configured, keeping comment local');
             return;
           }
 
-          console.log('🔄 Attempting to save comment to database...');
           
           // Try to save comment to database
           const { data: insertedComment, error } = await supabase
@@ -381,8 +377,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, onCommentCountC
             .single();
 
           if (error) {
-            console.log('❌ Database save failed:', error);
-            console.log('📝 Comment remains local (database unavailable)');
             
             // Show a subtle notification that it's saved locally
             toast('Comment saved locally (database unavailable)', {
@@ -390,7 +384,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, onCommentCountC
               duration: 3000
             });
           } else {
-            console.log('✅ Database save successful:', insertedComment.id);
             
             // Update the comment with real ID
             const realCommentWithAvatar = {
@@ -402,7 +395,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, onCommentCountC
               c.id === newComment.id ? realCommentWithAvatar : c
             ));
             
-            console.log('✅ Comment updated with database ID');
             
             // Show success notification
             toast.success('Comment saved to database!', {
@@ -411,7 +403,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, onCommentCountC
           }
 
         } catch (error) {
-          console.log('📝 Database save failed, comment remains local:', error);
           
           // Show a subtle notification that it's saved locally
           toast('Comment saved locally (database unavailable)', {
@@ -540,11 +531,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, onCommentCountC
     setReplies(prev => [...prev, newReply]);
 
     // Debug: Log expandedReplies before and after
-    console.log('Before expanding:', Array.from(expandedReplies));
     setExpandedReplies(prev => {
       const newSet = new Set(prev);
       newSet.add(commentId);
-      console.log('After expanding:', Array.from(newSet));
       return newSet;
     });
 
@@ -571,11 +560,9 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, onCommentCountC
       try {
         const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
         if (!supabaseUrl || supabaseUrl.includes('your-project')) {
-          console.log('📝 Supabase not configured, keeping reply local');
           return;
         }
 
-        console.log('🔄 Attempting to save reply to database...');
         
         const { data: savedReply, error } = await supabase
           .from('comment_replies')
@@ -589,9 +576,7 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, onCommentCountC
           .single();
 
         if (error) {
-          console.log('❌ Reply database save failed:', error);
         } else {
-          console.log('✅ Reply database save successful:', savedReply.id);
           
           // Update reply with real ID
           const realReplyWithAvatar: DBReply = {
@@ -603,10 +588,8 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, onCommentCountC
             r.id === newReply.id ? realReplyWithAvatar : r
           ));
           
-          console.log('✅ Reply updated with database ID');
         }
       } catch (error) {
-        console.log('📝 Reply database save failed, reply remains local:', error);
       }
     };
 

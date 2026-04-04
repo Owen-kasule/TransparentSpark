@@ -135,13 +135,12 @@ const Admin: React.FC = () => {
 
   // Force loading to false - emergency escape hatch
   const forceStopLoading = () => {
-    console.warn('🚨 Force stopping loading state');
     updateAuthState({ isLoading: false });
   };
 
   // Comprehensive error handler
   const handleAuthError = (error: any, context: string) => {
-    console.error(`❌ Auth error in ${context}:`, error);
+    console.error(`Auth error in ${context}:`, error);
     
     const errorMessage = error?.message || error?.toString() || 'Unknown authentication error';
     
@@ -411,7 +410,6 @@ const Admin: React.FC = () => {
 
   // Bulletproof authentication check with comprehensive error handling
   const checkAuth = async () => {
-    console.log('🔍 Starting authentication check...');
     
     updateAuthState({ 
       isLoading: true, 
@@ -420,7 +418,7 @@ const Admin: React.FC = () => {
     });
 
     const timeoutId = setTimeout(() => {
-      console.warn('⏰ Auth check timeout - forcing stop loading');
+      console.warn('Auth check timeout - forcing stop loading');
       forceStopLoading();
     }, 10000);
 
@@ -429,7 +427,6 @@ const Admin: React.FC = () => {
         throw new Error('Supabase client not initialized');
       }
 
-      console.log('✅ Supabase client available');
 
       const sessionPromise = supabase.auth.getSession();
       const sessionResult = await Promise.race([
@@ -445,10 +442,8 @@ const Admin: React.FC = () => {
         throw new Error(`Session error: ${sessionError.message}`);
       }
 
-      console.log('📋 Session check result:', session ? 'Session found' : 'No session');
 
       if (!session?.user) {
-        console.log('👤 No authenticated user found');
         updateAuthState({
           isLoading: false,
           isAuthenticated: false,
@@ -466,7 +461,6 @@ const Admin: React.FC = () => {
     } finally {
       clearTimeout(timeoutId);
       if (authState.isLoading) {
-        console.log('🔄 Ensuring loading state is stopped in finally block');
         updateAuthState({ isLoading: false });
       }
     }
@@ -474,7 +468,6 @@ const Admin: React.FC = () => {
 
   // Handle authenticated user with comprehensive error handling
   const handleAuthenticatedUser = async (user: any) => {
-    console.log('👤 Processing authenticated user:', user.id);
 
     try {
       const provider = user.app_metadata?.provider || 'email';
@@ -488,7 +481,6 @@ const Admin: React.FC = () => {
           throw new Error('Failed to get GitHub user data');
         }
 
-        console.log('🐙 GitHub user data:', githubUserData.login);
         adminUser = await checkAdminAuthorization(githubUserData.id.toString());
       } else {
         // Google / Email flow: check by email
@@ -497,7 +489,6 @@ const Admin: React.FC = () => {
           throw new Error('No email found for this account');
         }
 
-        console.log('📧 Checking admin authorization by email:', email);
         adminUser = await checkAdminByEmail(email);
 
         // If found, update avatar/username from provider metadata
@@ -519,7 +510,6 @@ const Admin: React.FC = () => {
         throw new Error(`User ${identifier} is not authorized as admin`);
       }
 
-      console.log('✅ Admin authorization confirmed');
 
       updateAuthState({
         isLoading: false,
@@ -541,7 +531,6 @@ const Admin: React.FC = () => {
 
   // GitHub sign-in with comprehensive error handling
   const signInWithGitHub = async () => {
-    console.log('🔐 Starting GitHub sign-in...');
     
     updateAuthState({ isLoading: true, error: null });
 
@@ -557,7 +546,6 @@ const Admin: React.FC = () => {
         throw error;
       }
 
-      console.log('🔄 Redirecting to GitHub...');
       
     } catch (error) {
       handleAuthError(error, 'signInWithGitHub');
@@ -566,7 +554,6 @@ const Admin: React.FC = () => {
 
   // Google sign-in
   const signInWithGoogle = async () => {
-    console.log('🔐 Starting Google sign-in...');
     
     updateAuthState({ isLoading: true, error: null });
 
@@ -585,7 +572,6 @@ const Admin: React.FC = () => {
         throw error;
       }
 
-      console.log('🔄 Redirecting to Google...');
       
     } catch (error: any) {
       console.error('Google sign-in error:', error);
@@ -771,7 +757,6 @@ const Admin: React.FC = () => {
 
   // Sign out with error handling
   const signOut = async () => {
-    console.log('🚪 Signing out...');
     
     try {
       const { error } = await supabase.auth.signOut();
@@ -796,19 +781,16 @@ const Admin: React.FC = () => {
 
   // Retry authentication
   const retryAuth = () => {
-    console.log('🔄 Retrying authentication...');
     checkAuth();
   };
 
   // Initialize authentication on mount
   useEffect(() => {
-    console.log('🚀 Admin component mounted, starting auth check...');
     
     checkAuth();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event: AuthChangeEvent, session: Session | null) => {
-        console.log('🔄 Auth state changed:', event);
         
         try {
           if (event === 'SIGNED_IN' && session?.user) {
@@ -828,7 +810,6 @@ const Admin: React.FC = () => {
     );
 
     return () => {
-      console.log('🧹 Cleaning up auth subscription');
       subscription.unsubscribe();
     };
   }, []);
@@ -837,7 +818,6 @@ const Admin: React.FC = () => {
   useEffect(() => {
     if (authState.isLoading && authState.retryCount > 0) {
       const emergencyTimeout = setTimeout(() => {
-        console.warn('🚨 Emergency timeout triggered - stopping loading');
         forceStopLoading();
       }, 15000);
 

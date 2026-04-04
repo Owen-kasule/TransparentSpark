@@ -76,9 +76,8 @@ class AbstractEmailValidator {
     // Log configuration status in development only
     if (import.meta.env.DEV) {
       if (this.isApiKeyConfigured()) {
-        console.log('✅ Abstract API Email Validation configured');
+        console.log('Abstract API Email Validation configured');
       } else {
-        console.warn('⚠️ Abstract API key not configured - falling back to basic validation');
       }
     }
   }
@@ -127,7 +126,6 @@ class AbstractEmailValidator {
     // Paid plans have higher limits
     if (now - this.lastRequestTime < 1100) { // Wait 1.1 seconds between requests
       const waitTime = 1100 - (now - this.lastRequestTime);
-      console.log(`⏳ Rate limiting: waiting ${waitTime}ms...`);
       await new Promise(resolve => setTimeout(resolve, waitTime));
     }
 
@@ -135,7 +133,6 @@ class AbstractEmailValidator {
 
     if (this.rateLimitResetTime > now) {
       const waitTime = this.rateLimitResetTime - now;
-      console.log(`🚫 Rate limit penalty active. Waiting ${waitTime}ms...`);
       await new Promise(resolve => setTimeout(resolve, waitTime));
       this.rateLimitResetTime = 0;
     }
@@ -191,17 +188,6 @@ class AbstractEmailValidator {
     let isValid = false;
     let reason = '';
 
-    console.log('🔍 Abstract API Response for', email, ':', {
-      deliverability: emailData.deliverability,
-      quality_score: emailData.quality_score,
-      is_valid_format: emailData.is_valid_format.value,
-      is_free_email: emailData.is_free_email.value,
-      is_disposable_email: emailData.is_disposable_email.value,
-      is_role_email: emailData.is_role_email.value,
-      is_mx_found: emailData.is_mx_found.value,
-      is_smtp_valid: emailData.is_smtp_valid.value,
-      autocorrect: emailData.autocorrect
-    });
 
     // STRICT VALIDATION: Only accept emails that are confirmed as deliverable
     switch (emailData.deliverability) {
@@ -315,11 +301,6 @@ class AbstractEmailValidator {
 
       const apiUrl = `${this.config.apiUrl}?${params.toString()}`;
 
-      console.log('🌐 Making Abstract API Email Validation request:', {
-        url: apiUrl.replace(this.config.apiKey, 'API_KEY_HIDDEN'),
-        email: email,
-        auto_correct: true
-      });
 
       const response = await fetch(apiUrl, {
         method: 'GET',
@@ -332,7 +313,6 @@ class AbstractEmailValidator {
 
       clearTimeout(timeoutId);
 
-      console.log('📡 Abstract API response status:', response.status);
 
       // Handle rate limiting (429 status)
       if (response.status === 429) {
@@ -342,29 +322,27 @@ class AbstractEmailValidator {
 
       if (!response.ok) {
         const errorText = await response.text();
-        console.error('❌ Abstract API error response:', errorText);
+        console.error('Abstract API error response:', errorText);
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
       const data = await response.json();
-      console.log('✅ Abstract API response data:', data);
 
       // Check for API error in response
       if (data.error) {
-        console.error('❌ Abstract API returned error:', data.error);
+        console.error('Abstract API returned error:', data.error);
         throw new Error(data.error);
       }
 
       return data;
     } catch (error) {
       clearTimeout(timeoutId);
-      console.error('❌ Abstract API request failed:', error);
+      console.error('Abstract API request failed:', error);
       throw error;
     }
   }
 
   public async validateSingleEmail(email: string): Promise<ValidationResult> {
-    console.log(`🚀 Starting SINGLE EMAIL validation for: ${email}`);
     
     // Check basic format first
     if (!this.isValidEmailFormat(email)) {
@@ -379,7 +357,6 @@ class AbstractEmailValidator {
 
     // If API key is not configured, use stricter validation rules
     if (!this.isApiKeyConfigured()) {
-      console.warn('⚠️ Abstract API key not configured, using strict format validation');
       
       // Additional checks for common invalid patterns
       const emailParts = email.split('@');
@@ -453,17 +430,15 @@ class AbstractEmailValidator {
     }
 
     try {
-      console.log(`🌐 Using Abstract API OFFICIAL EMAIL VALIDATION for: ${email}`);
       const emailData = await this.makeSingleEmailRequest(email);
       
       // Validate using our strict criteria
       const result = this.validateEmailCriteria(emailData);
       
-      console.log(`✅ Single email validation result for ${email}:`, result);
       return result;
       
     } catch (error) {
-      console.error('❌ Abstract API validation error:', error);
+      console.error('Abstract API validation error:', error);
       
       // Return user-friendly error message
       return {
@@ -495,7 +470,6 @@ class AbstractEmailValidator {
     
     // If API key is not configured, use stricter validation rules
     if (!this.isApiKeyConfigured()) {
-      console.warn('⚠️ Abstract API key not configured, using strict format validation');
       
       const validEmails: string[] = [];
       const invalidEmails: ValidationResult[] = [];
@@ -519,7 +493,6 @@ class AbstractEmailValidator {
     }
     
     // Abstract API doesn't have a batch endpoint, so we process emails one by one
-    console.log(`🔄 Processing ${uniqueEmails.length} emails individually with Abstract API`);
     
     const validEmails: string[] = [];
     const invalidEmails: ValidationResult[] = [];
@@ -573,7 +546,6 @@ class AbstractEmailValidator {
     let totalProcessed = 0;
 
     for (let i = 0; i < chunks.length; i++) {
-      console.log(`📦 Processing chunk ${i + 1} of ${chunks.length} (${chunks[i].length} emails)...`);
       
       try {
         const result = await this.validateBatch(chunks[i]);
@@ -584,11 +556,10 @@ class AbstractEmailValidator {
 
         // Add delay between chunks to respect rate limits
         if (i < chunks.length - 1) {
-          console.log('⏳ Waiting 5 seconds before processing next chunk...');
           await new Promise(resolve => setTimeout(resolve, 5000));
         }
       } catch (error) {
-        console.error(`❌ Error processing chunk ${i + 1}:`, error);
+        console.error(`Error processing chunk ${i + 1}:`, error);
         
         // If chunk fails, reject all emails in that chunk with user-friendly message
         for (const email of chunks[i]) {

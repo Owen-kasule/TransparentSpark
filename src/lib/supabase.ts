@@ -6,7 +6,7 @@ const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 // Debug logging only in development
 if (import.meta.env.DEV) {
-  console.log('🔍 Supabase Environment Check:', {
+  console.log('Supabase Environment Check:', {
     hasUrl: !!supabaseUrl,
     hasKey: !!supabaseAnonKey,
     envMode: import.meta.env.MODE
@@ -15,12 +15,12 @@ if (import.meta.env.DEV) {
 
 // Validate environment variables
 if (!supabaseUrl) {
-  console.error('❌ VITE_SUPABASE_URL is missing from environment variables');
+  console.error('VITE_SUPABASE_URL is missing from environment variables');
   throw new Error('Missing VITE_SUPABASE_URL environment variable');
 }
 
 if (!supabaseAnonKey) {
-  console.error('❌ VITE_SUPABASE_ANON_KEY is missing from environment variables');
+  console.error('VITE_SUPABASE_ANON_KEY is missing from environment variables');
   throw new Error('Missing VITE_SUPABASE_ANON_KEY environment variable');
 }
 
@@ -37,11 +37,11 @@ try {
   });
   
   if (import.meta.env.DEV) {
-    console.log('✅ Supabase client created successfully');
+    console.log('Supabase client created successfully');
   }
   
 } catch (error) {
-  console.error('❌ Failed to create Supabase client:', error);
+  console.error('Failed to create Supabase client:', error);
   throw new Error(`Failed to initialize Supabase: ${error}`);
 }
 
@@ -89,17 +89,14 @@ export const githubOAuthConfig = {
 
 // Enhanced GitHub user data fetching with multiple fallback strategies
 export const getGitHubUserData = async (accessToken?: string) => {
-  console.log('🐙 Starting GitHub user data fetch...');
 
   try {
     // Strategy 1: Use provided access token
     if (accessToken) {
-      console.log('📋 Using provided access token');
       return await fetchGitHubUserWithToken(accessToken);
     }
 
     // Strategy 2: Get token from current session
-    console.log('📋 Getting token from current session...');
     const { data: { session }, error: sessionError } = await supabase.auth.getSession();
 
     if (sessionError) {
@@ -110,18 +107,15 @@ export const getGitHubUserData = async (accessToken?: string) => {
       throw new Error('No provider token found in session');
     }
 
-    console.log('✅ Found provider token in session');
     return await fetchGitHubUserWithToken(session.provider_token);
   } catch (error) {
-    console.error('❌ GitHub user data fetch failed:', error);
+    console.error('GitHub user data fetch failed:', error);
 
     // Strategy 3: Fallback to user metadata if available
     try {
-      console.log('🔄 Attempting fallback to user metadata...');
       const { data: { user } } = await supabase.auth.getUser();
       
       if (user?.user_metadata) {
-        console.log('📋 Using user metadata as fallback');
         return {
           id: user.user_metadata.provider_id || user.user_metadata.sub,
           login: user.user_metadata.user_name || user.user_metadata.preferred_username,
@@ -131,7 +125,7 @@ export const getGitHubUserData = async (accessToken?: string) => {
         };
       }
     } catch (fallbackError) {
-      console.error('❌ Fallback strategy failed:', fallbackError);
+      console.error('Fallback strategy failed:', fallbackError);
     }
 
     throw error;
@@ -140,7 +134,6 @@ export const getGitHubUserData = async (accessToken?: string) => {
 
 // Fetch GitHub user data with token
 const fetchGitHubUserWithToken = async (token: string) => {
-  console.log('🌐 Fetching GitHub user data with token...');
 
   const response = await fetch('https://api.github.com/user', {
     headers: {
@@ -152,7 +145,7 @@ const fetchGitHubUserWithToken = async (token: string) => {
 
   if (!response.ok) {
     const errorText = await response.text();
-    console.error('❌ GitHub API error:', response.status, errorText);
+    console.error('GitHub API error:', response.status, errorText);
 
     if (response.status === 401) {
       throw new Error('GitHub token is invalid or expired');
@@ -164,14 +157,12 @@ const fetchGitHubUserWithToken = async (token: string) => {
   }
 
   const userData = await response.json();
-  console.log('✅ GitHub user data fetched successfully:', userData.login);
 
   return userData;
 };
 
 // Helper function to check if user is authorized admin
 export const checkAdminAuthorization = async (githubId: string): Promise<AdminUser | null> => {
-  console.log('🔍 Checking admin authorization for GitHub ID:', githubId);
 
   try {
     const { data: adminUser, error } = await supabase
@@ -182,16 +173,14 @@ export const checkAdminAuthorization = async (githubId: string): Promise<AdminUs
 
     if (error) {
       if (error.code === 'PGRST116') {
-        console.log('❌ User not found in admin_users table');
         return null;
       }
       throw error;
     }
 
-    console.log('✅ Admin authorization confirmed for:', adminUser.username);
     return adminUser;
   } catch (error) {
-    console.error('❌ Error checking admin authorization:', error);
+    console.error('Error checking admin authorization:', error);
     return null;
   }
 };

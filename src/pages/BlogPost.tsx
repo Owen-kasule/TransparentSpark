@@ -116,7 +116,6 @@ function createHandler(config: Config) {
     
     // Don't reload if we're in the middle of a like operation
     if (likeStateRef.current.isProcessing) {
-      console.log('🔄 Skipping loadBlogPost during like operation');
       return;
     }
 
@@ -186,7 +185,6 @@ function createHandler(config: Config) {
     // Prevent multiple rapid clicks with timestamp check
     const now = Date.now();
     if (likeStateRef.current.isProcessing || (now - likeStateRef.current.lastAction) < 500) {
-      console.log('🚫 Like action blocked - too soon or already processing');
       return;
     }
 
@@ -194,7 +192,6 @@ function createHandler(config: Config) {
     const currentLikeState = isLiked;
     const currentLikeCount = likeCount;
 
-    console.log('🔍 Like action started:', { currentLikeState, currentLikeCount, postId: id });
 
     try {
       // Set processing flags
@@ -206,7 +203,6 @@ function createHandler(config: Config) {
       const newLikeState = !currentLikeState;
       const newLikeCount = currentLikeState ? Math.max(0, currentLikeCount - 1) : currentLikeCount + 1;
       
-      console.log('🎨 Optimistic update:', { newLikeState, newLikeCount });
       
       // Update all state immediately
       setIsLiked(newLikeState);
@@ -224,12 +220,11 @@ function createHandler(config: Config) {
       // Make the API call to sync with server
       const serverResponse = await blogService.toggleLike(id);
       
-      console.log('🔄 Server response:', { serverResponse, expected: newLikeState });
       
       // The server response should match our optimistic update
       // If it doesn't, there was an error or the server state is different
       if (serverResponse !== newLikeState) {
-        console.warn('❌ Server state mismatch, reverting optimistic update...');
+        console.warn('Server state mismatch, reverting optimistic update...');
         // Revert to original state if server response doesn't match
         setIsLiked(currentLikeState);
         setLikeCount(currentLikeCount);
@@ -243,13 +238,12 @@ function createHandler(config: Config) {
           isProcessing: false
         };
       } else {
-        console.log('✅ Server response matches optimistic update');
         // Update ref to mark processing as complete
         likeStateRef.current.isProcessing = false;
       }
       
     } catch (error) {
-      console.error('❌ Error handling like:', error);
+      console.error('Error handling like:', error);
       // Revert to original state on error
       setIsLiked(currentLikeState);
       setLikeCount(currentLikeCount);

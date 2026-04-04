@@ -37,12 +37,9 @@ const EmailValidator: React.FC = () => {
     setShowResults(false);
 
     try {
-      console.log('🚀 Starting OFFICIAL Abstract API validation process...');
-      console.log('📧 Emails to validate:', emailList);
       
       const validationResults = await abstractEmailValidator.validateEmailsInChunks(emailList);
       
-      console.log('✅ Validation completed:', validationResults);
       
       setResults(validationResults);
       setShowResults(true);
@@ -51,7 +48,7 @@ const EmailValidator: React.FC = () => {
         `Validation complete! ${validationResults.validCount} valid, ${validationResults.invalidCount} invalid`
       );
     } catch (error) {
-      console.error('❌ Validation error:', error);
+      console.error('Validation error:', error);
       toast.error(error instanceof Error ? error.message : 'Validation failed');
     } finally {
       setIsValidating(false);
@@ -63,9 +60,7 @@ const EmailValidator: React.FC = () => {
     setIsValidating(true);
     
     try {
-      console.log(`🧪 Testing single email with OFFICIAL Abstract API: ${email}`);
       const result = await abstractEmailValidator.validateSingleEmail(email);
-      console.log(`🧪 Test result for ${email}:`, result);
       
       if (result.isValid) {
         toast.success(`✅ ${email} is VALID: ${result.reason}`);
@@ -73,7 +68,7 @@ const EmailValidator: React.FC = () => {
         toast.error(`❌ ${email} is INVALID: ${result.reason}`);
       }
     } catch (error) {
-      console.error('❌ Test error:', error);
+      console.error('Test error:', error);
       toast.error(`Test failed: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setIsValidating(false);

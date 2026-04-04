@@ -71,7 +71,6 @@ const Contact: React.FC = () => {
 
           try {
             const result = await abstractEmailValidator.validateSingleEmail(email);
-            console.log(`📧 Email validation for ${email}:`, result);
             setEmailValidation({
               isValid: result.isValid,
               isChecking: false,
@@ -79,7 +78,7 @@ const Contact: React.FC = () => {
               hasBeenTouched: true
             });
           } catch (error) {
-            console.error('❌ Email validation error:', error);
+            console.error('Email validation error:', error);
             setEmailValidation({
               isValid: false,
               isChecking: false,

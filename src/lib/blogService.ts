@@ -420,7 +420,6 @@ class BlogService {
     const maxRetries = 3;
     let retryCount = 0;
 
-    console.log('🔄 Toggling like for post:', postId, 'visitor:', visitorId);
 
     while (retryCount < maxRetries) {
       try {
@@ -433,7 +432,7 @@ class BlogService {
           .maybeSingle();
 
         if (checkError) {
-          console.error('❌ Error checking existing like:', checkError);
+          console.error('Error checking existing like:', checkError);
           throw checkError;
         }
 
@@ -448,7 +447,7 @@ class BlogService {
             .eq('visitor_id', visitorId);
 
           if (deleteError) {
-            console.error('❌ Error removing like:', deleteError);
+            console.error('Error removing like:', deleteError);
             throw deleteError;
           }
 
@@ -460,22 +459,21 @@ class BlogService {
             .insert([{ blog_post_id: postId, visitor_id: visitorId }]);
 
           if (insertError) {
-            console.error('❌ Error adding like:', insertError);
+            console.error('Error adding like:', insertError);
             throw insertError;
           }
 
           isLiked = true;
         }
 
-        console.log('✅ Toggle like result:', { postId, result: isLiked, retryCount });
         return isLiked;
 
       } catch (error) {
         retryCount++;
-        console.error(`❌ Error in toggleLike (attempt ${retryCount}/${maxRetries}):`, error);
+        console.error(`Error in toggleLike (attempt ${retryCount}/${maxRetries}):`, error);
         
         if (retryCount >= maxRetries) {
-          console.error('❌ Max retries reached, throwing error');
+          console.error('Max retries reached, throwing error');
           throw error;
         }
         
@@ -492,7 +490,6 @@ class BlogService {
     try {
       const visitorId = this.getVisitorId();
 
-      console.log('🔍 Checking like status for post:', postId, 'visitor:', visitorId);
 
       const { data, error } = await supabase
         .from('blog_likes')
@@ -507,7 +504,6 @@ class BlogService {
       }
 
       const hasLiked = !!data;
-      console.log('📊 Like status result:', { postId, hasLiked, data });
       return hasLiked;
     } catch (error) {
       console.error('Error in hasLiked:', error);
