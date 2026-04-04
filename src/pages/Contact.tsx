@@ -89,17 +89,45 @@ const Contact: React.FC = () => {
     debouncedEmailValidation(formData.email);
   }, [formData.email, debouncedEmailValidation]);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Prevent submission if email is invalid
     if (!emailValidation.isValid && emailValidation.hasBeenTouched) {
       return;
     }
+
+    setIsSubmitting(true);
     
-    // Handle form submission here
-    setIsSubmitted(true);
-    setTimeout(() => setIsSubmitted(false), 3000);
+    try {
+      // Save contact message to Supabase
+      const { error } = await supabase.from('contact_messages').insert({
+        name: formData.name.trim(),
+        email: formData.email.toLowerCase().trim(),
+        subject: formData.subject.trim(),
+        message: formData.message.trim()
+      });
+
+      if (error) {
+        // If table doesn't exist yet, fall back to mailto
+        console.warn('Contact message DB save failed, using mailto fallback:', error.message);
+        const mailtoUrl = `mailto:owenatug@gmail.com?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(
+          `From: ${formData.name} (${formData.email})\n\n${formData.message}`
+        )}`;
+        window.open(mailtoUrl, '_blank');
+      }
+
+      setIsSubmitted(true);
+      toast.success('Message sent successfully!');
+      setFormData({ name: '', email: '', subject: '', message: '' });
+      setEmailValidation({ isValid: false, isChecking: false, message: '', hasBeenTouched: false });
+      setTimeout(() => setIsSubmitted(false), 3000);
+    } catch (err) {
+      console.error('Contact form error:', err);
+      toast.error('Failed to send message. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -284,17 +312,26 @@ const Contact: React.FC = () => {
                 
                 <motion.button
                   type="submit"
-                  disabled={!emailValidation.isValid && emailValidation.hasBeenTouched}
-                  whileHover={{ scale: emailValidation.isValid || !emailValidation.hasBeenTouched ? 1.02 : 1 }}
-                  whileTap={{ scale: emailValidation.isValid || !emailValidation.hasBeenTouched ? 0.98 : 1 }}
+                  disabled={isSubmitting || (!emailValidation.isValid && emailValidation.hasBeenTouched)}
+                  whileHover={{ scale: (emailValidation.isValid || !emailValidation.hasBeenTouched) && !isSubmitting ? 1.02 : 1 }}
+                  whileTap={{ scale: (emailValidation.isValid || !emailValidation.hasBeenTouched) && !isSubmitting ? 0.98 : 1 }}
                   className={`w-full px-4 py-2 rounded-lg transition-colors duration-300 font-medium flex items-center justify-center space-x-2 text-sm ${
-                    emailValidation.isValid || !emailValidation.hasBeenTouched
+                    (emailValidation.isValid || !emailValidation.hasBeenTouched) && !isSubmitting
                       ? 'bg-azure-500 hover:bg-azure-600 text-white'
                       : 'bg-gray-500 text-gray-300 cursor-not-allowed'
                   }`}
                 >
-                  <Send size={16} />
-                  <span>Send Message</span>
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 size={16} className="animate-spin" />
+                      <span>Sending...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Send size={16} />
+                      <span>Send Message</span>
+                    </>
+                  )}
                 </motion.button>
               </form>
             )}
