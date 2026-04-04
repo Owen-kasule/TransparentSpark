@@ -821,14 +821,14 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, onCommentCountC
     </motion.div>
   );
 
-  const totalComments = comments.length + replies.length + getTotalDummyCommentCount();
+  const totalComments = comments.length + replies.length;
 
-  const totalTopLevelCount = dummyComments.length + comments.length;
+  const totalTopLevelCount = comments.length;
   const showAllOnThisViewport = !isMobile || isMobileExpanded;
-  const visibleDummy = showAllOnThisViewport ? dummyComments : dummyComments.slice(0, mobileVisibleCount);
-  const remainingSlots = showAllOnThisViewport ? comments.length : Math.max(0, mobileVisibleCount - visibleDummy.length);
+  const visibleDummy: any[] = [];
+  const remainingSlots = showAllOnThisViewport ? comments.length : Math.max(0, mobileVisibleCount);
   const visibleReal = showAllOnThisViewport ? comments : comments.slice(0, remainingSlots);
-  const canShowMore = isMobile && isMobileExpanded && totalTopLevelCount > (visibleDummy.length + visibleReal.length);
+  const canShowMore = isMobile && isMobileExpanded && totalTopLevelCount > visibleReal.length;
 
   return (
     <GlassCard className="p-4 sm:p-6">
