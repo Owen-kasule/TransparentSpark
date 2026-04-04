@@ -5,10 +5,13 @@ import { ExternalLink, Github, Filter, Download, ArrowDown, ChevronDown } from '
 import { Link } from 'react-router-dom';
 import GlassCard from '../components/ui/GlassCard';
 import SocialLinks from '../components/ui/SocialLinks';
-import { projects } from '../data/portfolio';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useContent } from '../contexts/SiteContentContext';
 
 const Projects: React.FC = () => {
+  const { content } = useContent();
+  const projectsContent = content.projects;
+  const projectsData = projectsContent.projects;
   const [filter, setFilter] = useState('all');
   const [isMobileFilterOpen, setIsMobileFilterOpen] = useState(false);
   const mobileFilterRef = useRef<HTMLDivElement | null>(null);
@@ -18,10 +21,10 @@ const Projects: React.FC = () => {
   
   const allTechnologies = useMemo(
     () =>
-      Array.from(new Set(projects.flatMap(project => project.technologies))).sort((a, b) =>
+      Array.from(new Set(projectsData.flatMap(project => project.technologies))).sort((a, b) =>
         a.localeCompare(b)
       ),
-    []
+    [projectsData]
   );
 
   useEffect(() => {
@@ -47,8 +50,8 @@ const Projects: React.FC = () => {
   }, [isMobileFilterOpen]);
 
   const filteredProjects = filter === 'all' 
-    ? projects 
-    : projects.filter(project => project.technologies.includes(filter));
+    ? projectsData 
+    : projectsData.filter(project => project.technologies.includes(filter));
 
     return (
     <div className="min-h-screen md:min-h-0 lg:min-h-screen relative pt-4 lg:pt-20 pb-0.5 lg:pb-12">
@@ -82,13 +85,13 @@ const Projects: React.FC = () => {
           className="text-center mb-4 lg:mb-12"
         >
           <h1 className="ui-page-title mb-5">
-            PROJECTS
+            {projectsContent.pageTitle}
           </h1>
           <div className="flex items-center justify-center mb-6">
             <div className="h-1 w-24 bg-azure-400"></div>
           </div>
           <p className="ui-lead max-w-2xl mx-auto">
-            A showcase of my work, featuring full-stack applications and innovative solutions.
+            {projectsContent.pageSubtitle}
           </p>
         </motion.div>
 

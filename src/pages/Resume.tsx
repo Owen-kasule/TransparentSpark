@@ -15,93 +15,23 @@ import {
 } from 'lucide-react';
 import GlassCard from '../components/ui/GlassCard';
 import SocialLinks from '../components/ui/SocialLinks';
-import { projects } from '../data/portfolio';
+import { useContent } from '../contexts/SiteContentContext';
 
 const Resume: React.FC = () => {
+  const { content } = useContent();
+  const resume = content.resume;
   const [activeSection, setActiveSection] = useState('experience');
 
   const resumeData = {
-    personal: {
-      name: "Owen Kasule Muhereza",
-      title: "Software Engineer | Technical Problem Solver",
-      email: "owenatug@gmail.com",
-      phone: "+256774711146",
-      location: "Uganda",
-      linkedin: "www.linkedin.com/in/owen-muhereza-kasule-teachrooot",
-      summary: "Developer with 2 years' experience building web solutions. Skilled in front-end, back-end, and Power Platform tools. Team-oriented and focused on delivering smooth, user-friendly experiences."
-    },
-    experience: [
-      {
-        id: 1,
-        company: "Mountain River Partners",
-        position: "Bookkeeping Intern",
-        duration: "2025 - 2025",
-        location: "Uganda",
-        description: "Led peers with clear communication, kept 100% deadlines, and adapted swiftly under pressure.",
-        achievements: [
-          "Led peers with clear communication, kept 100% deadlines, and adapted swiftly under pressure",
-          "Reconciled daily QuickBooks transactions and audited 20+ monthly ledgers under GAAP, eliminating discrepancies and ensuring full compliance"
-        ],
-        technologies: ["QuickBooks", "GAAP", "Financial Auditing", "Team Leadership"]
-      },
-      {
-        id: 2,
-        company: "Guild Digital Foundation",
-        position: "Software Developer",
-        duration: "2023 - 2024",
-        location: "Uganda",
-        description: "Managed and optimized databases, applications, and servers to ensure seamless backend support for web and mobile apps.",
-        achievements: [
-          "Managed and optimized databases, applications, and servers to ensure seamless backend support for web and mobile apps",
-          "Collaborated on internal research tools using Microsoft Power Platform (Power Apps & Power BI), enhancing user workflows and data visibility for reporting"
-        ],
-        technologies: ["Power Apps", "Power BI", "Database Management", "Microsoft Power Platform"]
-      }
-    ],
-    education: [
-      {
-        id: 1,
-        degree: "Bachelor of Science in Software Development",
-        school: "BYU-Idaho - USA",
-        duration: "Expected 2026",
-        location: "USA",
-        gpa: "In Progress",
-        relevantCourses: ["Software Development", "Programming", "Database Systems", "Web Development"]
-      },
-      {
-        id: 2,
-        degree: "Diploma in Information Technology",
-        school: "Isbat University - Uganda",
-        duration: "2023",
-        location: "Uganda",
-        gpa: "Completed",
-        relevantCourses: ["Information Technology", "Computer Science", "Programming Fundamentals"]
-      }
-    ],
-    skills: {
-      technical: ["Database Management (Relational Databases, Optimization)", "Full-Stack Development (Python, PHP, JavaScript, MySQL, PSQL)", "Problem-Solving and Troubleshooting", "Debugging"],
-      soft: ["Remote Collaboration (Cross-functional teamwork, clear communication)", "Continuous Learning and Adaptability", "Critical Thinking", "Reliability & Accountability", "Emotional Intelligence", "Customer Service & CRM Systems (Email & Phone Support, CRM tools)"]
-    },
-    projects: projects.map(project => ({
-      id: project.id,
-      name: project.title,
-      description: project.description,
-      technologies: project.technologies,
-      link: project.liveUrl || project.githubUrl || "#",
-      featured: project.featured
+    ...resume,
+    projects: content.projects.projects.map(p => ({
+      id: p.id,
+      name: p.title,
+      description: p.description,
+      technologies: p.technologies,
+      link: p.liveUrl || p.githubUrl || '#',
+      featured: p.featured,
     })),
-    certifications: [
-      {
-        name: "QuickBooks Online Certification Level 1",
-        issuer: "Intuit",
-        date: "2025"
-      },
-      {
-        name: "Teaching English as a Foreign Language (TEFL)",
-        issuer: "TEFL Certification",
-        date: "2024"
-      }
-    ]
   };
 
   const containerVariants = {
