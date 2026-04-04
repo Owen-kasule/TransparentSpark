@@ -196,6 +196,31 @@ export const checkAdminAuthorization = async (githubId: string): Promise<AdminUs
   }
 };
 
+// Helper function to check if user is authorized admin by email
+export const checkAdminByEmail = async (email: string): Promise<AdminUser | null> => {
+  if (!email) return null;
+
+  try {
+    const { data: adminUser, error } = await supabase
+      .from('admin_users')
+      .select('*')
+      .eq('email', email)
+      .single();
+
+    if (error) {
+      if (error.code === 'PGRST116') {
+        return null;
+      }
+      throw error;
+    }
+
+    return adminUser;
+  } catch (error) {
+    console.error('Error checking admin by email:', error);
+    return null;
+  }
+};
+
 // Helper function to create or update admin user
 export const upsertAdminUser = async (githubUserData: any): Promise<AdminUser | null> => {
   try {
