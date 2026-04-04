@@ -221,16 +221,6 @@ const CommentSection: React.FC<CommentSectionProps> = ({ postId, onCommentCountC
     }
   }, [comments, onCommentCountChange]);
 
-  const getTotalDummyCommentCount = () => {
-    let count = dummyComments.length;
-    dummyComments.forEach(comment => {
-      if (comment.replies) {
-        count += comment.replies.length;
-      }
-    });
-    return count;
-  };
-
   const loadComments = async () => {
     try {
       setIsLoading(true);
