@@ -127,7 +127,7 @@ const Home: React.FC = () => {
               <div className="glass-distortion"></div>
               
               {/* Content */}
-              <div className="relative z-10 text-center lg:text-left space-y-4 lg:space-y-0">
+              <div className="relative z-10 text-center lg:text-left space-y-4 lg:space-y-8">
                 <motion.div
                   initial={{ opacity: 0, y: 30 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -203,7 +203,7 @@ const Home: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.7 }}
-                  className="mb-3 md:mb-0 lg:mb-6"
+                  className="mb-3 md:mb-0 lg:mb-0"
                 >
                   <p className="text-white/90 fluid-body">
                     I craft digital experiences that blend beautiful design with powerful functionality. 
@@ -216,7 +216,7 @@ const Home: React.FC = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 0.9 }}
-                  className="flex justify-center lg:justify-start flex-wrap gap-4 mb-3 md:mb-0 lg:mb-8"
+                  className="flex justify-center lg:justify-start flex-wrap gap-4 mb-3 md:mb-0 lg:mb-0"
                 >
                   <motion.div 
                     whileHover={{ scale: 1.05, y: -1 }}
@@ -242,7 +242,7 @@ const Home: React.FC = () => {
                 </motion.div>
 
                 {/* Glassmorphism CTA Component */}
-                <div className="mb-3 md:mb-0 lg:mt-4 lg:mb-6">
+                <div className="mb-3 md:mb-0 lg:mb-0">
                   <GlassCTA delay={1.1} />
                 </div>
 
