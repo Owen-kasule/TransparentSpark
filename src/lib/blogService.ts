@@ -342,7 +342,8 @@ class BlogService {
         const contentLower = post.content.toLowerCase();
         if (contentLower.includes(queryLower)) score += 20;
         queryWords.forEach(word => {
-          const matches = (contentLower.match(new RegExp(word, 'g')) || []).length;
+          const escapedWord = word.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+          const matches = (contentLower.match(new RegExp(escapedWord, 'g')) || []).length;
           score += Math.min(matches * 5, 25); // Cap content score
         });
         
