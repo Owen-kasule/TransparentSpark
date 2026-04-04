@@ -5,6 +5,8 @@ import GlassCard from '../components/ui/GlassCard';
 import SocialLinks from '../components/ui/SocialLinks';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { abstractEmailValidator } from '../lib/abstractEmailValidator';
+import { supabase } from '../lib/supabase';
+import toast from 'react-hot-toast';
 
 const Contact: React.FC = () => {
   const [formData, setFormData] = useState({
@@ -14,6 +16,7 @@ const Contact: React.FC = () => {
     message: ''
   });
   const [isSubmitted, setIsSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   // Email validation state
   const [emailValidation, setEmailValidation] = useState({
