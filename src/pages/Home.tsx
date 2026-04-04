@@ -348,7 +348,7 @@ const Home: React.FC = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1.1 }}
-          className="pt-4 md:pt-2 lg:pt-0 lg:pb-20"
+          className="pt-4 md:pt-2 lg:pt-0 lg:pb-0"
         >
           <div className="text-center mb-0 md:mb-4 lg:mb-8">
             <h2 className="fluid-h2 font-bold text-white mb-1 md:mb-3 lg:mb-4">Featured Work</h2>
