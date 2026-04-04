@@ -1,9 +1,10 @@
-import React, { useState, useRef, useCallback, useEffect } from 'react';
+import React, { useState, useRef } from 'react';
 import {
-  Save, ArrowLeft, Plus, Trash2, GripVertical, Upload,
+  Save, ArrowLeft, Plus, Trash2, Upload, X,
   Eye, Palette, Home, User, Mail, FileText, Briefcase,
-  Share2, Layout as LayoutIcon, AlertCircle, Check, Image as ImageIcon,
+  Share2, Layout as LayoutIcon,
 } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import toast from 'react-hot-toast';
 import GlassCard from '../ui/GlassCard';
 import ImageCropperModal from './ImageCropper';
@@ -12,7 +13,7 @@ import { uploadImage } from '../../lib/contentService';
 import { defaultContent } from '../../lib/contentDefaults';
 import { TEXT_LIMITS, IMAGE_SPECS } from '../../types/content';
 import type {
-  SiteContent, SiteSection, ImageSpec,
+  SiteSection, ImageSpec,
   HomeContent, AboutContent, ContactContent, ResumeContent,
   ProjectsContent, FooterContent, HeaderContent, SocialContent, ThemeContent,
 } from '../../types/content';
@@ -901,7 +902,7 @@ const HeaderFooterEditor: React.FC<{
 interface Section {
   id: string;
   label: string;
-  icon: React.FC<{ size?: number; className?: string }>;
+  icon: LucideIcon;
   sectionKey: SiteSection;
 }
 

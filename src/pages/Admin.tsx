@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 import { 
@@ -532,6 +532,7 @@ const Admin: React.FC = () => {
 
       // Load admin data after successful authentication
       await loadAdminData();
+      await loadAdminUsers();
 
     } catch (error) {
       handleAuthError(error, 'handleAuthenticatedUser');
@@ -586,8 +587,15 @@ const Admin: React.FC = () => {
 
       console.log('🔄 Redirecting to Google...');
       
-    } catch (error) {
-      handleAuthError(error, 'signInWithGoogle');
+    } catch (error: any) {
+      console.error('Google sign-in error:', error);
+      const msg = error?.message || '';
+      if (msg.includes('provider') || msg.includes('not enabled') || msg.includes('unsupported')) {
+        updateAuthState({ isLoading: false, error: null });
+        toast.error('Google sign-in is not configured yet. Use Email or GitHub instead.');
+      } else {
+        handleAuthError(error, 'signInWithGoogle');
+      }
     }
   };
 
@@ -597,14 +605,116 @@ const Admin: React.FC = () => {
   const [emailSending, setEmailSending] = useState(false);
   const [otpCode, setOtpCode] = useState('');
   const [otpVerifying, setOtpVerifying] = useState(false);
+  const [resendCooldown, setResendCooldown] = useState(0);
+  const emailInputRef = useRef<HTMLInputElement>(null);
+  const otpInputRef = useRef<HTMLInputElement>(null);
 
-  const signInWithEmail = async () => {
+  // Admin user management state
+  const [adminUsers, setAdminUsers] = useState<AdminUser[]>([]);
+  const [newAdminEmail, setNewAdminEmail] = useState('');
+  const [addingAdmin, setAddingAdmin] = useState(false);
+  const [removingAdminId, setRemovingAdminId] = useState<string | null>(null);
+
+  // Resend cooldown timer
+  useEffect(() => {
+    if (resendCooldown <= 0) return;
+    const timer = setInterval(() => {
+      setResendCooldown(prev => {
+        if (prev <= 1) { clearInterval(timer); return 0; }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  }, [resendCooldown]);
+
+  // Auto-focus email input on mount, OTP input when code sent
+  useEffect(() => {
+    if (!authState.isAuthenticated && !authState.isLoading && !authState.error) {
+      if (emailSent) {
+        otpInputRef.current?.focus();
+      } else {
+        emailInputRef.current?.focus();
+      }
+    }
+  }, [authState.isAuthenticated, authState.isLoading, authState.error, emailSent]);
+
+  // Load admin users for the settings tab
+  const loadAdminUsers = useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('admin_users')
+        .select('*')
+        .order('created_at', { ascending: true });
+      if (error) throw error;
+      setAdminUsers(data || []);
+    } catch (error) {
+      console.error('Error loading admin users:', error);
+    }
+  }, []);
+
+  // Add a new admin by email
+  const addAdminUser = async () => {
+    const email = newAdminEmail.trim().toLowerCase();
+    if (!email) { toast.error('Please enter an email address'); return; }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { toast.error('Please enter a valid email'); return; }
+    if (adminUsers.some(u => u.email === email)) { toast.error('This email is already an admin'); return; }
+
+    setAddingAdmin(true);
+    try {
+      const { error } = await supabase
+        .from('admin_users')
+        .insert({
+          email,
+          username: email.split('@')[0],
+          avatar_url: '',
+          auth_provider: 'email'
+        });
+      if (error) throw error;
+      toast.success(`${email} added as admin`);
+      setNewAdminEmail('');
+      await loadAdminUsers();
+    } catch (error: any) {
+      console.error('Error adding admin:', error);
+      toast.error(error.message || 'Failed to add admin user');
+    } finally {
+      setAddingAdmin(false);
+    }
+  };
+
+  // Remove an admin user
+  const removeAdminUser = async (userId: string, userEmail: string) => {
+    if (userEmail === authState.user?.email) {
+      toast.error('You cannot remove yourself');
+      return;
+    }
+    setRemovingAdminId(userId);
+    try {
+      const { error } = await supabase
+        .from('admin_users')
+        .delete()
+        .eq('id', userId);
+      if (error) throw error;
+      toast.success(`Admin removed`);
+      await loadAdminUsers();
+    } catch (error: any) {
+      console.error('Error removing admin:', error);
+      toast.error(error.message || 'Failed to remove admin');
+    } finally {
+      setRemovingAdminId(null);
+    }
+  };
+
+  const sendOtpEmail = async (isResend = false) => {
     if (!emailInput.trim()) {
       toast.error('Please enter your email address');
       return;
     }
 
-    setEmailSending(true);
+    if (isResend) {
+      setEmailSending(true);
+    } else {
+      setEmailSending(true);
+    }
 
     try {
       const { error } = await supabase.auth.signInWithOtp({
@@ -616,7 +726,9 @@ const Admin: React.FC = () => {
       }
 
       setEmailSent(true);
-      toast.success('Verification code sent! Check your email.');
+      setOtpCode('');
+      setResendCooldown(60);
+      toast.success(isResend ? 'New code sent! Check your email.' : 'Verification code sent! Check your email.');
       
     } catch (error: any) {
       console.error('Email sign-in error:', error);
@@ -625,6 +737,9 @@ const Admin: React.FC = () => {
       setEmailSending(false);
     }
   };
+
+  const signInWithEmail = () => sendOtpEmail(false);
+  const resendOtp = () => sendOtpEmail(true);
 
   const verifyOtpCode = async () => {
     if (!otpCode.trim() || otpCode.trim().length !== 6) {
@@ -844,17 +959,29 @@ const Admin: React.FC = () => {
                 </div>
                 <div className="flex space-x-2">
                   <input
+                    ref={otpInputRef}
                     type="text"
                     inputMode="numeric"
                     autoComplete="one-time-code"
                     maxLength={6}
                     value={otpCode}
-                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    onChange={(e) => {
+                      const val = e.target.value.replace(/\D/g, '').slice(0, 6);
+                      setOtpCode(val);
+                      // Auto-submit when 6 digits entered
+                      if (val.length === 6) {
+                        setTimeout(() => {
+                          const btn = document.getElementById('verify-otp-btn');
+                          btn?.click();
+                        }, 100);
+                      }
+                    }}
                     onKeyDown={(e) => e.key === 'Enter' && verifyOtpCode()}
-                    placeholder="Enter 6-digit code"
-                    className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 text-sm text-center tracking-[0.3em] font-mono focus:outline-none focus:border-azure-400 focus:ring-1 focus:ring-azure-400 transition-colors"
+                    placeholder="000000"
+                    className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/20 text-lg text-center tracking-[0.4em] font-mono focus:outline-none focus:border-azure-400 focus:ring-1 focus:ring-azure-400 transition-colors"
                   />
                   <button
+                    id="verify-otp-btn"
                     onClick={verifyOtpCode}
                     disabled={otpVerifying || otpCode.length !== 6}
                     className="px-5 py-3 bg-azure-500 hover:bg-azure-600 disabled:bg-azure-500/50 disabled:cursor-not-allowed text-white rounded-lg text-sm transition-colors duration-300 flex items-center space-x-2"
@@ -868,19 +995,35 @@ const Admin: React.FC = () => {
                   </button>
                 </div>
                 <div className="flex items-center justify-between">
-                  <p className="text-white/40 text-xs">Check your inbox for the 6-digit code.</p>
+                  <div className="flex items-center space-x-2">
+                    {resendCooldown > 0 ? (
+                      <p className="text-white/40 text-xs">Resend in {resendCooldown}s</p>
+                    ) : (
+                      <button
+                        onClick={resendOtp}
+                        disabled={emailSending}
+                        className="text-azure-400 hover:text-azure-300 text-xs underline disabled:opacity-50"
+                      >
+                        {emailSending ? 'Sending...' : 'Resend code'}
+                      </button>
+                    )}
+                  </div>
                   <button
-                    onClick={() => { setEmailSent(false); setEmailInput(''); setOtpCode(''); }}
-                    className="text-azure-400 hover:text-azure-300 text-xs underline"
+                    onClick={() => { setEmailSent(false); setOtpCode(''); setResendCooldown(0); }}
+                    className="text-white/40 hover:text-white/60 text-xs underline"
                   >
                     Change email
                   </button>
                 </div>
+                <p className="text-white/30 text-xs text-center">
+                  Didn&apos;t get an email? Check your spam folder or try resending.
+                </p>
               </div>
             ) : (
               <div className="w-full space-y-3">
                 <div className="flex space-x-2">
                   <input
+                    ref={emailInputRef}
                     type="email"
                     value={emailInput}
                     onChange={(e) => setEmailInput(e.target.value)}
@@ -1006,6 +1149,7 @@ const Admin: React.FC = () => {
                 setActiveTab(tab.id);
                 setSearchTerm('');
                 setStatusFilter('all');
+                if (tab.id === 'settings') loadAdminUsers();
               }}
               className={`flex items-center space-x-2 px-3 py-2 rounded-lg transition-colors duration-300 text-sm ${
                 activeTab === tab.id
@@ -1596,46 +1740,131 @@ const Admin: React.FC = () => {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
+              className="space-y-6"
             >
+              {/* Account Information */}
               <GlassCard className="p-6">
                 <div className="flex items-center space-x-3 mb-6">
                   <Settings className="text-azure-400" size={24} />
-                  <h2 className="text-xl font-bold text-white">Settings</h2>
+                  <h2 className="text-xl font-bold text-white">Your Account</h2>
                 </div>
                 
-                <div className="space-y-6">
-                  <div className="p-4 bg-white/5 rounded-lg">
-                    <h3 className="text-white font-medium mb-4">Account Information</h3>
-                    <div className="grid md:grid-cols-2 gap-4 text-sm">
-                      <div>
-                        <label className="text-white/50">Username</label>
-                        <p className="text-white/80">{authState.user?.username}</p>
+                <div className="p-4 bg-white/5 rounded-lg">
+                  <div className="flex items-center space-x-4 mb-4">
+                    {authState.user?.avatar_url ? (
+                      <img src={authState.user.avatar_url} alt="" className="w-12 h-12 rounded-full" />
+                    ) : (
+                      <div className="w-12 h-12 rounded-full bg-azure-500/30 flex items-center justify-center text-azure-400 font-bold text-lg">
+                        {authState.user?.username?.charAt(0).toUpperCase() || '?'}
                       </div>
-                      <div>
-                        <label className="text-white/50">Email</label>
-                        <p className="text-white/80">{authState.user?.email}</p>
-                      </div>
-                      <div>
-                        <label className="text-white/50">GitHub ID</label>
-                        <p className="text-white/80">{authState.user?.github_id}</p>
-                      </div>
-                      <div>
-                        <label className="text-white/50">Admin Since</label>
-                        <p className="text-white/80">{new Date(authState.user?.created_at || '').toLocaleDateString()}</p>
-                      </div>
+                    )}
+                    <div>
+                      <p className="text-white font-semibold">{authState.user?.username}</p>
+                      <p className="text-white/50 text-sm">{authState.user?.email}</p>
                     </div>
                   </div>
-                  
-                  <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
-                    <h3 className="text-red-400 font-medium mb-2">Danger Zone</h3>
-                    <button
-                      onClick={signOut}
-                      className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transition-colors duration-300 flex items-center space-x-2"
-                    >
-                      <LogOut size={14} />
-                      <span>Sign Out</span>
-                    </button>
+                  <div className="grid md:grid-cols-3 gap-4 text-sm">
+                    {authState.user?.github_id && (
+                      <div>
+                        <label className="text-white/50 text-xs">GitHub ID</label>
+                        <p className="text-white/80">{authState.user.github_id}</p>
+                      </div>
+                    )}
+                    <div>
+                      <label className="text-white/50 text-xs">Admin Since</label>
+                      <p className="text-white/80">{new Date(authState.user?.created_at || '').toLocaleDateString()}</p>
+                    </div>
                   </div>
+                </div>
+              </GlassCard>
+
+              {/* Admin User Management */}
+              <GlassCard className="p-6">
+                <div className="flex items-center space-x-3 mb-6">
+                  <Users className="text-azure-400" size={24} />
+                  <h2 className="text-xl font-bold text-white">Admin Users</h2>
+                </div>
+                
+                <p className="text-white/60 text-sm mb-4">
+                  People listed here can sign in to this admin panel using their email (OTP), Google, or GitHub.
+                </p>
+
+                {/* Add new admin */}
+                <div className="flex space-x-2 mb-6">
+                  <input
+                    type="email"
+                    value={newAdminEmail}
+                    onChange={(e) => setNewAdminEmail(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && addAdminUser()}
+                    placeholder="Enter email to invite as admin"
+                    className="flex-1 px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 text-sm focus:outline-none focus:border-azure-400 focus:ring-1 focus:ring-azure-400 transition-colors"
+                  />
+                  <button
+                    onClick={addAdminUser}
+                    disabled={addingAdmin || !newAdminEmail.trim()}
+                    className="px-4 py-2.5 bg-azure-500 hover:bg-azure-600 disabled:bg-azure-500/50 disabled:cursor-not-allowed text-white rounded-lg text-sm transition-colors duration-300 flex items-center space-x-2"
+                  >
+                    {addingAdmin ? <Loader className="animate-spin" size={14} /> : <Plus size={14} />}
+                    <span>Add Admin</span>
+                  </button>
+                </div>
+
+                {/* Admin list */}
+                <div className="space-y-2">
+                  {adminUsers.length === 0 ? (
+                    <div className="text-center py-8 text-white/40 text-sm">
+                      <Users size={24} className="mx-auto mb-2 opacity-50" />
+                      <p>No admin users found. Add one above.</p>
+                    </div>
+                  ) : (
+                    adminUsers.map(admin => (
+                      <div key={admin.id} className="flex items-center justify-between p-3 bg-white/5 rounded-lg hover:bg-white/8 transition-colors">
+                        <div className="flex items-center space-x-3">
+                          {admin.avatar_url ? (
+                            <img src={admin.avatar_url} alt="" className="w-8 h-8 rounded-full" />
+                          ) : (
+                            <div className="w-8 h-8 rounded-full bg-azure-500/20 flex items-center justify-center text-azure-400 font-semibold text-xs">
+                              {admin.username?.charAt(0).toUpperCase() || admin.email?.charAt(0).toUpperCase() || '?'}
+                            </div>
+                          )}
+                          <div>
+                            <p className="text-white text-sm font-medium">{admin.username || admin.email?.split('@')[0]}</p>
+                            <p className="text-white/40 text-xs">{admin.email}</p>
+                          </div>
+                          {admin.email === authState.user?.email && (
+                            <span className="px-2 py-0.5 bg-azure-500/20 text-azure-400 rounded-full text-xs font-medium">You</span>
+                          )}
+                        </div>
+                        <button
+                          onClick={() => removeAdminUser(admin.id, admin.email)}
+                          disabled={admin.email === authState.user?.email || removingAdminId === admin.id}
+                          className="p-2 text-white/30 hover:text-red-400 disabled:opacity-30 disabled:cursor-not-allowed transition-colors rounded-lg hover:bg-red-500/10"
+                          title={admin.email === authState.user?.email ? 'Cannot remove yourself' : 'Remove admin'}
+                        >
+                          {removingAdminId === admin.id ? (
+                            <Loader className="animate-spin" size={14} />
+                          ) : (
+                            <Trash2 size={14} />
+                          )}
+                        </button>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </GlassCard>
+
+              {/* Sign Out */}
+              <GlassCard className="p-6">
+                <div className="p-4 bg-red-500/10 border border-red-500/20 rounded-lg">
+                  <h3 className="text-red-400 font-medium mb-2">Session</h3>
+                  <p className="text-white/50 text-sm mb-3">Sign out of this admin session.</p>
+                  <button
+                    onClick={signOut}
+                    className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg text-sm transition-colors duration-300 flex items-center space-x-2"
+                  >
+                    <LogOut size={14} />
+                    <span>Sign Out</span>
+                  </button>
                 </div>
               </GlassCard>
             </motion.div>
