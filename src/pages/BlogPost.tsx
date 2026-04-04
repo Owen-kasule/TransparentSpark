@@ -936,7 +936,6 @@ function createHandler(config: Config) {
             {showCommentsOnMobile && (
               <CommentSection 
                 postId={post.id} 
-                postTitle={post.title}
                 onCommentCountChange={setCommentCount}
                 autoOpenForm={autoOpenCommentForm}
                 autoExpand={autoExpandCommentsOnMobile}

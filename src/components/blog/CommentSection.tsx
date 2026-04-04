@@ -50,16 +50,14 @@ interface ReplyFormData {
 
 interface CommentSectionProps {
   postId: string;
-  postTitle: string;
   onCommentCountChange?: (count: number) => void;
   autoOpenForm?: boolean;
   autoExpand?: boolean;
 }
 
-const CommentSection: React.FC<CommentSectionProps> = ({ postId, postTitle: _unusedPostTitle, onCommentCountChange, autoOpenForm = false, autoExpand = false }) => {
+const CommentSection: React.FC<CommentSectionProps> = ({ postId, onCommentCountChange, autoOpenForm = false, autoExpand = false }) => {
   const [comments, setComments] = useState<DBComment[]>([]);
   const [replies, setReplies] = useState<DBReply[]>([]);
-  const [dummyComments, setDummyComments] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isValidatingEmail, setIsValidatingEmail] = useState(false);
