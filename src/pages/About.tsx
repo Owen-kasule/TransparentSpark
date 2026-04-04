@@ -8,8 +8,11 @@ import SocialLinks from '../components/ui/SocialLinks';
 import AddReviewButton from '../components/reviews/AddReviewButton';
 import { testimonials } from '../data/portfolio';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useContent } from '../contexts/SiteContentContext';
 
 const About: React.FC = () => {
+  const { content } = useContent();
+  const about = content.about;
   const [counters, setCounters] = useState({ experience: 0, clients: 0, projects: 0 });
   const [hasAnimated, setHasAnimated] = useState(false);
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);

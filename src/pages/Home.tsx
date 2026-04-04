@@ -1,14 +1,21 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { ArrowDown, Code, Database, Globe } from 'lucide-react';
+import { ArrowDown, Code, Database, Globe, Server, Smartphone, Cloud } from 'lucide-react';
 import ProgressiveImage from '../components/ui/ProgressiveImage';
 import GlassCard from '../components/ui/GlassCard';
 import GlassCTA from '../components/ui/GlassCTA';
 import SocialLinks from '../components/ui/SocialLinks';
-import { projects } from '../data/portfolio';
 import { useAnalytics } from '../hooks/useAnalytics';
+import { useContent } from '../contexts/SiteContentContext';
+
+const skillIconMap: Record<string, React.FC<{ size?: number }>> = {
+  code: Code, database: Database, globe: Globe, server: Server, smartphone: Smartphone, cloud: Cloud,
+};
 
 const Home: React.FC = () => {
+  const { content } = useContent();
+  const home = content.home;
+  const projectsData = content.projects.projects;
   // Measure subtitle width so the inline blue bar matches it
   const subtitleRefSm = useRef<HTMLParagraphElement | null>(null);
   const subtitleRefLg = useRef<HTMLParagraphElement | null>(null);
@@ -97,7 +104,7 @@ const Home: React.FC = () => {
   // no timers to clear
     };
   }, []);
-  const featuredProjects = projects.filter(project => project.featured).slice(0, 2);
+  const featuredProjects = projectsData.filter(project => project.featured).slice(0, 2);
   
   // Track page visit
   useAnalytics('home');
@@ -135,7 +142,7 @@ const Home: React.FC = () => {
                 >
                   <div className="hidden lg:block mb-1">
                     <div ref={hiImRowLgRef} className="flex items-center gap-3 mb-1">
-                      <p ref={hiImRefLg} className="text-azure-400 text-lg font-medium tracking-wider">HI I'M</p>
+                      <p ref={hiImRefLg} className="text-azure-400 text-lg font-medium tracking-wider">{home.heroGreeting}</p>
                       <motion.span
                         ref={barRefLg}
                         aria-hidden="true"
@@ -150,7 +157,7 @@ const Home: React.FC = () => {
                       />
                     </div>
                     <h1 ref={fullNameRefLg} className="font-bold text-white leading-tight text-4xl">
-                      OWEN <span className="mx-1">K. </span><span ref={muherezeRefLg} className="capitalize">muhereze</span>
+                      {home.heroFirstName} <span className="mx-1">{home.heroMiddleInitial} </span><span ref={muherezeRefLg} className="capitalize">{home.heroLastName}</span>
                     </h1>
                   </div>
                   
@@ -160,17 +167,17 @@ const Home: React.FC = () => {
                       {/* Inline profile image */}
                       <div className="relative w-20 h-20 rounded-full overflow-hidden border border-white/20 bg-white/5 shadow">
                         <ProgressiveImage
-                          src="/images/profile/OwenProfile-Mobile.png"
-                          alt="Owen - Full Stack Developer"
+                          src={home.profileImageMobile}
+                          alt={`${home.heroFirstName} - ${home.heroSubtitle}`}
                           wrapperClassName="w-full h-full"
                           className="w-full h-full object-cover"
                           aspectClass="w-full h-full"
                         />
                       </div>
                       <div className="text-left">
-                        <p className="text-azure-400 text-sm font-medium tracking-wider mb-1 lg:hidden">HI I'M</p>
+                        <p className="text-azure-400 text-sm font-medium tracking-wider mb-1 lg:hidden">{home.heroGreeting}</p>
                         <div ref={nameRowSmRef} className="flex items-center gap-3 fluid-h2 leading-tight">
-                          <h1 ref={owenRefSm} className="font-bold text-white leading-tight">OWEN</h1>
+                          <h1 ref={owenRefSm} className="font-bold text-white leading-tight">{home.heroFirstName}</h1>
                           {/* Inline blue bar matching subtitle width and OWEN height */}
                           <motion.span
                             ref={barRefSm}
@@ -185,7 +192,7 @@ const Home: React.FC = () => {
                             onAnimationComplete={() => console.log('✅ Small bar animation complete')}
                           />
                         </div>
-                        <p className="text-azure-400 font-medium uppercase whitespace-nowrap tracking-[0.12em] text-[11px] sm:text-xs md:text-sm mt-1"><span ref={subtitleRefSm} className="inline-block">A FULL STACK DEVELOPER</span></p>
+                        <p className="text-azure-400 font-medium uppercase whitespace-nowrap tracking-[0.12em] text-[11px] sm:text-xs md:text-sm mt-1"><span ref={subtitleRefSm} className="inline-block">{home.heroSubtitle}</span></p>
                       </div>
                     </div>
                   </div>
@@ -193,7 +200,7 @@ const Home: React.FC = () => {
                   {/* Large screens: subtitle under name with minimal spacing and right-aligned to name end */}
                   <div className="hidden lg:block">
                     <div ref={subtitleWrapLgRef} className="flex justify-end">
-                      <p className="text-azure-400 fluid-body font-medium tracking-wider mb-2 uppercase tracking-[0.2em] text-right"><span ref={subtitleRefLg} className="inline-block">A FULL STACK DEVELOPER</span></p>
+                      <p className="text-azure-400 fluid-body font-medium tracking-wider mb-2 uppercase tracking-[0.2em] text-right"><span ref={subtitleRefLg} className="inline-block">{home.heroSubtitle}</span></p>
                     </div>
                   </div>
                 </motion.div>
@@ -206,8 +213,7 @@ const Home: React.FC = () => {
                   className="mb-3 md:mb-0 lg:mb-0"
                 >
                   <p className="text-white/90 fluid-body">
-                    I craft digital experiences that blend beautiful design with powerful functionality. 
-                    Specializing in modern web technologies, I build scalable applications that make a difference.
+                    {home.heroDescription}
                   </p>
                 </motion.div>
 
@@ -218,27 +224,19 @@ const Home: React.FC = () => {
                   transition={{ duration: 0.6, delay: 0.9 }}
                   className="flex justify-center lg:justify-start flex-wrap gap-4 mb-3 md:mb-0 lg:mb-0"
                 >
-                  <motion.div 
-                    whileHover={{ scale: 1.05, y: -1 }}
-                    className="flex items-center space-x-2 text-white/70 hover:text-azure-400 transition-colors duration-300"
-                  >
-                    <Code size={16} />
-                    <span className="text-xs font-medium">Frontend</span>
-                  </motion.div>
-                  <motion.div 
-                    whileHover={{ scale: 1.05, y: -1 }}
-                    className="flex items-center space-x-2 text-white/70 hover:text-azure-400 transition-colors duration-300"
-                  >
-                    <Database size={16} />
-                    <span className="text-xs font-medium">Backend</span>
-                  </motion.div>
-                  <motion.div 
-                    whileHover={{ scale: 1.05, y: -1 }}
-                    className="flex items-center space-x-2 text-white/70 hover:text-azure-400 transition-colors duration-300"
-                  >
-                    <Globe size={16} />
-                    <span className="text-xs font-medium">Full Stack</span>
-                  </motion.div>
+                  {home.heroSkills.map((skill, idx) => {
+                    const SkillIcon = skillIconMap[skill.icon] || Code;
+                    return (
+                      <motion.div
+                        key={idx}
+                        whileHover={{ scale: 1.05, y: -1 }}
+                        className="flex items-center space-x-2 text-white/70 hover:text-azure-400 transition-colors duration-300"
+                      >
+                        <SkillIcon size={16} />
+                        <span className="text-xs font-medium">{skill.label}</span>
+                      </motion.div>
+                    );
+                  })}
                 </motion.div>
 
                 {/* Glassmorphism CTA Component */}
@@ -270,8 +268,8 @@ const Home: React.FC = () => {
                 >
                   <div className="relative h-full max-h-full flex">
                     <ProgressiveImage
-                      src="/images/profile/OwenProfile.png"
-                      alt="Owen - Full Stack Developer"
+                      src={home.profileImageDesktop}
+                      alt={`${home.heroFirstName} - ${home.heroSubtitle}`}
                       wrapperClassName="h-full max-h-full w-auto"
                       className="h-full w-auto max-h-full object-contain"
                       aspectClass="h-full"
@@ -351,8 +349,8 @@ const Home: React.FC = () => {
           className="pt-4 md:pt-2 lg:pt-0 lg:pb-0"
         >
           <div className="text-center mb-0 md:mb-4 lg:mb-8">
-            <h2 className="fluid-h2 font-bold text-white mb-1 md:mb-3 lg:mb-4">Featured Work</h2>
-            <p className="text-white/60">Some of my recent projects</p>
+            <h2 className="fluid-h2 font-bold text-white mb-1 md:mb-3 lg:mb-4">{home.featuredTitle}</h2>
+            <p className="text-white/60">{home.featuredSubtitle}</p>
           </div>
 
           <div className="grid md:grid-cols-2 ui-grid-gap">

@@ -40,7 +40,7 @@ const GlassCTA: React.FC<GlassCTAProps> = ({ delay = 0 }) => {
             whileTap={{ scale: 0.98 }}
           className="flex flex-1 items-center justify-center text-center bg-azure-500 hover:bg-azure-600 text-white px-5 xs:px-6 py-2.5 md:py-3 font-medium transition-all duration-300 rounded-l-full whitespace-nowrap md:whitespace-normal text-[13px] xs:text-sm md:text-base lg:text-lg"
           >
-          <span className="block">Let's Connect</span>
+          <span className="block">{home.ctaPrimaryText}</span>
           </motion.button>
 
           {/* Secondary CTA - View My Resume */}
@@ -50,8 +50,8 @@ const GlassCTA: React.FC<GlassCTAProps> = ({ delay = 0 }) => {
             whileTap={{ scale: 0.98 }}
             className="group flex-1 bg-white/10 hover:bg-white/15 text-white/90 hover:text-white px-5 xs:px-6 py-2.5 md:py-3 font-medium transition-all duration-300 rounded-r-full flex items-center justify-center gap-2 border-l border-white/20 whitespace-nowrap md:whitespace-normal text-[13px] xs:text-sm md:text-base lg:text-lg"
           >
-            <span className="hidden sm:block">View My Resume</span>
-            <span className="block sm:hidden">Resume</span>
+            <span className="hidden sm:block">{home.ctaSecondaryText}</span>
+            <span className="block sm:hidden">{home.ctaSecondaryTextShort}</span>
             <ArrowRight size={14} className="opacity-60 group-hover:opacity-90 transition-opacity hidden sm:inline" />
           </motion.button>
         </div>
