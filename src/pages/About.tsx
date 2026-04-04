@@ -13,7 +13,8 @@ import { useContent } from '../contexts/SiteContentContext';
 const About: React.FC = () => {
   const { content } = useContent();
   const about = content.about;
-  const [counters, setCounters] = useState({ experience: 0, clients: 0, projects: 0 });
+  const [counters, setCounters] = useState<number[]>(about.stats.map(() => 0));
+  const statIcons = [Award, Users, Coffee];
   const [hasAnimated, setHasAnimated] = useState(false);
   const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -34,19 +35,15 @@ const About: React.FC = () => {
   // Track page visit
   useAnalytics('about');
 
-  const stats = [
-    { icon: Award, label: 'Years Experience', value: '5+', target: 5, key: 'experience' },
-    { icon: Users, label: 'Happy Clients', value: '50+', target: 50, key: 'clients' },
-    { icon: Coffee, label: 'Projects Completed', value: '100+', target: 100, key: 'projects' },
-  ];
+  const statsData = about.stats;
 
   // Count-up animation effect
   useEffect(() => {
     if (!hasAnimated) {
       const timer = setTimeout(() => {
-        stats.forEach((stat) => {
-          const duration = 2000; // 2 seconds
-          const steps = 60; // 60 steps for smooth animation
+        statsData.forEach((stat, idx) => {
+          const duration = 2000;
+          const steps = 60;
           const increment = stat.target / steps;
           let current = 0;
           
@@ -57,15 +54,16 @@ const About: React.FC = () => {
               clearInterval(interval);
             }
             
-            setCounters(prev => ({
-              ...prev,
-              [stat.key]: Math.floor(current)
-            }));
+            setCounters(prev => {
+              const next = [...prev];
+              next[idx] = Math.floor(current);
+              return next;
+            });
           }, duration / steps);
         });
         
         setHasAnimated(true);
-      }, 800); // Start animation after initial page load
+      }, 800);
 
       return () => clearTimeout(timer);
     }
@@ -178,7 +176,7 @@ const About: React.FC = () => {
           className="text-center mb-4 lg:mb-12"
         >
           <h1 className="ui-page-title mb-5">
-            ABOUT ME
+            {about.pageTitle}
           </h1>
           <div className="flex items-center justify-center mb-6">
             <div className="h-1 w-24 bg-azure-400"></div>
@@ -188,7 +186,7 @@ const About: React.FC = () => {
         <div className="grid lg:grid-cols-2 ui-grid-gap lg:gap-8 mb-12">
           {/* Bio Section */}
           <GlassCard delay={0.2} className="p-6">
-            <h2 className="ui-section-title text-center lg:text-left">My Story</h2>
+            <h2 className="ui-section-title text-center lg:text-left">{about.storyTitle}</h2>
             <motion.div
               ref={storyRef}
               initial={false}
@@ -206,17 +204,9 @@ const About: React.FC = () => {
               }}
               className="space-y-3 ui-body leading-relaxed"
             >
-              <p>
-                I'm Owen, a passionate full-stack developer with over 5 years of experience 
-                creating digital solutions that make a real impact. My journey began with a 
-                curiosity about how things work on the web.
-              </p>
-              <p>
-                I specialize in modern JavaScript frameworks, cloud technologies, and 
-                database design. Whether it's building a responsive frontend with React 
-                or architecting a scalable backend with Node.js, I bring both technical 
-                expertise and creative problem-solving to every project.
-              </p>
+              {about.storyParagraphs.map((paragraph, i) => (
+                <p key={i}>{paragraph}</p>
+              ))}
             </motion.div>
 
             {/* Read more toggle for mobile */}
@@ -246,37 +236,33 @@ const About: React.FC = () => {
           <div className="space-y-4 md:space-y-6">
             {/* Stats with Count-up Animation */}
             <GlassCard delay={0.4} className="p-6">
-              <h3 className="ui-section-title text-center lg:text-left">By the Numbers</h3>
+              <h3 className="ui-section-title text-center lg:text-left">{about.statsTitle}</h3>
               <div className="grid grid-cols-3 gap-4">
-                {stats.map((stat, index) => (
-                  <div key={index} className="text-center">
-                    <stat.icon className="text-azure-400 mx-auto mb-2" size={20} />
-                    <motion.div 
-                      className="text-xl font-bold text-white"
-                      initial={{ scale: 1 }}
-                      animate={{ scale: hasAnimated ? [1, 1.1, 1] : 1 }}
-                      transition={{ duration: 0.3, delay: 0.8 + index * 0.2 }}
-                    >
-                      {counters[stat.key as keyof typeof counters]}
-                      {stat.key === 'experience' && '+'}
-                      {stat.key === 'clients' && '+'}
-                      {stat.key === 'projects' && '+'}
-                    </motion.div>
-                    <div className="ui-meta">{stat.label}</div>
-                  </div>
-                ))}
+                {statsData.map((stat, index) => {
+                  const Icon = statIcons[index % statIcons.length];
+                  return (
+                    <div key={index} className="text-center">
+                      <Icon className="text-azure-400 mx-auto mb-2" size={20} />
+                      <motion.div 
+                        className="text-xl font-bold text-white"
+                        initial={{ scale: 1 }}
+                        animate={{ scale: hasAnimated ? [1, 1.1, 1] : 1 }}
+                        transition={{ duration: 0.3, delay: 0.8 + index * 0.2 }}
+                      >
+                        {counters[index] ?? 0}+
+                      </motion.div>
+                      <div className="ui-meta">{stat.label}</div>
+                    </div>
+                  );
+                })}
               </div>
             </GlassCard>
 
             {/* Skills */}
             <GlassCard delay={0.6} className="p-6">
-              <h3 className="ui-section-title text-center lg:text-left">Tech Stack</h3>
+              <h3 className="ui-section-title text-center lg:text-left">{about.techStackTitle}</h3>
               <div className="space-y-3">
-                {[
-                  { category: 'Frontend', skills: ['React', 'TypeScript', 'Next.js', 'Tailwind CSS'] },
-                  { category: 'Backend', skills: ['Node.js', 'Express', 'Python', 'PostgreSQL'] },
-                  { category: 'Tools', skills: ['Git', 'Docker', 'AWS', 'Figma'] }
-                ].map((group, index) => (
+                {about.techStack.map((group, index) => (
                   <div key={index}>
                     <h4 className="text-azure-400 font-semibold mb-2 ui-meta">{group.category}</h4>
                     <div className="flex flex-wrap gap-1">

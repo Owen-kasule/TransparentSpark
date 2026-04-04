@@ -7,8 +7,17 @@ import { useAnalytics } from '../hooks/useAnalytics';
 import { abstractEmailValidator } from '../lib/abstractEmailValidator';
 import { supabase } from '../lib/supabase';
 import toast from 'react-hot-toast';
+import { useContent } from '../contexts/SiteContentContext';
+
+const contactIconMap: Record<string, React.ComponentType<any>> = {
+  mail: Mail,
+  phone: Phone,
+  mapPin: MapPin,
+};
 
 const Contact: React.FC = () => {
+  const { content } = useContent();
+  const contact = content.contact;
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -111,7 +120,7 @@ const Contact: React.FC = () => {
       if (error) {
         // If table doesn't exist yet, fall back to mailto
         console.warn('Contact message DB save failed, using mailto fallback:', error.message);
-        const mailtoUrl = `mailto:owenatug@gmail.com?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(
+        const mailtoUrl = `mailto:${contact.recipientEmail}?subject=${encodeURIComponent(formData.subject)}&body=${encodeURIComponent(
           `From: ${formData.name} (${formData.email})\n\n${formData.message}`
         )}`;
         window.open(mailtoUrl, '_blank');
@@ -137,11 +146,10 @@ const Contact: React.FC = () => {
     });
   };
 
-  const contactInfo = [
-    { icon: Mail, label: 'Email', value: 'owenatug@gmail.com', href: 'mailto:owenatug@gmail.com' },
-    { icon: Phone, label: 'Phone', value: '+256774711146', href: 'tel:+256774711146' },
-    { icon: MapPin, label: 'Location', value: 'Kampala, Uganda', href: '#' }
-  ];
+  const contactInfo = contact.contactInfo.map(item => ({
+    ...item,
+    icon: contactIconMap[item.icon] || Mail,
+  }));
 
   return (
     <div className="min-h-screen md:min-h-0 lg:min-h-screen relative pt-4 lg:pt-20 pb-0.5 lg:pb-12">
@@ -175,20 +183,20 @@ const Contact: React.FC = () => {
           className="text-center mb-4 lg:mb-12"
         >
           <h1 className="ui-page-title mb-5">
-            CONTACT
+            {contact.pageTitle}
           </h1>
           <div className="flex items-center justify-center mb-6">
             <div className="h-1 w-24 bg-azure-400"></div>
           </div>
           <p className="ui-lead max-w-2xl mx-auto">
-            Ready to start your next project? Let's discuss how we can work together.
+            {contact.pageSubtitle}
           </p>
         </motion.div>
 
         <div className="grid lg:grid-cols-2 ui-grid-gap lg:gap-8 mb-12">
           {/* Contact Form */}
           <GlassCard delay={0.2} className="p-6">
-            <h2 className="ui-section-title">Get In Touch</h2>
+            <h2 className="ui-section-title">{contact.formTitle}</h2>
             
             {isSubmitted ? (
               <motion.div
@@ -197,8 +205,8 @@ const Contact: React.FC = () => {
                 className="text-center py-6"
               >
                 <CheckCircle className="text-green-400 mx-auto mb-3" size={40} />
-                <h3 className="text-lg font-semibold text-white mb-2">Message Sent!</h3>
-                <p className="text-white/70 text-sm">Thank you for reaching out. I'll get back to you soon.</p>
+                <h3 className="text-lg font-semibold text-white mb-2">{contact.successTitle}</h3>
+                <p className="text-white/70 text-sm">{contact.successMessage}</p>
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-4">
