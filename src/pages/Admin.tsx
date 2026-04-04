@@ -1345,7 +1345,7 @@ const Admin: React.FC = () => {
                   <div className="bg-white/5 p-4 rounded-lg">
                     <h3 className="text-white font-semibold mb-2">Homepage</h3>
                     <p className="text-white/70 text-sm mb-3">Edit hero section, about, and featured content</p>
-                    <button className="bg-azure-500 hover:bg-azure-600 text-white px-3 py-2 rounded text-sm transition-colors duration-300">
+                    <button onClick={() => toast('Homepage editor coming soon!', { icon: '🚧' })} className="bg-azure-500 hover:bg-azure-600 text-white px-3 py-2 rounded text-sm transition-colors duration-300">
                       Edit Homepage
                     </button>
                   </div>
@@ -1353,7 +1353,7 @@ const Admin: React.FC = () => {
                   <div className="bg-white/5 p-4 rounded-lg">
                     <h3 className="text-white font-semibold mb-2">About Page</h3>
                     <p className="text-white/70 text-sm mb-3">Update bio, skills, and experience</p>
-                    <button className="bg-azure-500 hover:bg-azure-600 text-white px-3 py-2 rounded text-sm transition-colors duration-300">
+                    <button onClick={() => toast('About editor coming soon!', { icon: '🚧' })} className="bg-azure-500 hover:bg-azure-600 text-white px-3 py-2 rounded text-sm transition-colors duration-300">
                       Edit About
                     </button>
                   </div>
@@ -1361,7 +1361,7 @@ const Admin: React.FC = () => {
                   <div className="bg-white/5 p-4 rounded-lg">
                     <h3 className="text-white font-semibold mb-2">Projects</h3>
                     <p className="text-white/70 text-sm mb-3">Manage portfolio projects and case studies</p>
-                    <button className="bg-azure-500 hover:bg-azure-600 text-white px-3 py-2 rounded text-sm transition-colors duration-300">
+                    <button onClick={() => toast('Projects editor coming soon!', { icon: '🚧' })} className="bg-azure-500 hover:bg-azure-600 text-white px-3 py-2 rounded text-sm transition-colors duration-300">
                       Edit Projects
                     </button>
                   </div>
@@ -1369,7 +1369,7 @@ const Admin: React.FC = () => {
                   <div className="bg-white/5 p-4 rounded-lg">
                     <h3 className="text-white font-semibold mb-2">Contact Info</h3>
                     <p className="text-white/70 text-sm mb-3">Update contact details and social links</p>
-                    <button className="bg-azure-500 hover:bg-azure-600 text-white px-3 py-2 rounded text-sm transition-colors duration-300">
+                    <button onClick={() => toast('Contact editor coming soon!', { icon: '🚧' })} className="bg-azure-500 hover:bg-azure-600 text-white px-3 py-2 rounded text-sm transition-colors duration-300">
                       Edit Contact
                     </button>
                   </div>
@@ -1377,7 +1377,7 @@ const Admin: React.FC = () => {
                   <div className="bg-white/5 p-4 rounded-lg">
                     <h3 className="text-white font-semibold mb-2">SEO Settings</h3>
                     <p className="text-white/70 text-sm mb-3">Meta tags, descriptions, and keywords</p>
-                    <button className="bg-azure-500 hover:bg-azure-600 text-white px-3 py-2 rounded text-sm transition-colors duration-300">
+                    <button onClick={() => toast('SEO editor coming soon!', { icon: '🚧' })} className="bg-azure-500 hover:bg-azure-600 text-white px-3 py-2 rounded text-sm transition-colors duration-300">
                       Edit SEO
                     </button>
                   </div>
@@ -1385,7 +1385,7 @@ const Admin: React.FC = () => {
                   <div className="bg-white/5 p-4 rounded-lg">
                     <h3 className="text-white font-semibold mb-2">Navigation</h3>
                     <p className="text-white/70 text-sm mb-3">Customize menu items and structure</p>
-                    <button className="bg-azure-500 hover:bg-azure-600 text-white px-3 py-2 rounded text-sm transition-colors duration-300">
+                    <button onClick={() => toast('Navigation editor coming soon!', { icon: '🚧' })} className="bg-azure-500 hover:bg-azure-600 text-white px-3 py-2 rounded text-sm transition-colors duration-300">
                       Edit Navigation
                     </button>
                   </div>
@@ -1406,7 +1406,10 @@ const Admin: React.FC = () => {
                     <Image className="text-azure-400" size={24} />
                     <h2 className="text-xl font-bold text-white">Media Library</h2>
                   </div>
-                  <button className="bg-azure-500 hover:bg-azure-600 text-white px-4 py-2 rounded-lg transition-colors duration-300 flex items-center space-x-2">
+                  <button
+                    onClick={() => toast('Media upload coming soon!', { icon: '🚧' })}
+                    className="bg-azure-500 hover:bg-azure-600 text-white px-4 py-2 rounded-lg transition-colors duration-300 flex items-center space-x-2"
+                  >
                     <Upload size={16} />
                     <span>Upload Media</span>
                   </button>
@@ -1477,6 +1480,67 @@ const Admin: React.FC = () => {
             </motion.div>
           )}
         </div>
+
+        {/* Delete Confirmation Modal */}
+        {showModal && modalType === 'delete' && selectedItem && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+            <GlassCard className="p-6 max-w-md w-full">
+              <div className="flex flex-col items-center space-y-4">
+                <Trash2 className="text-red-400" size={32} />
+                <h2 className="text-xl font-bold text-white">Confirm Delete</h2>
+                <p className="text-white/70 text-sm text-center">
+                  Are you sure you want to delete{' '}
+                  <span className="text-white font-medium">
+                    {selectedItem.title || selectedItem.name || selectedItem.author_name || 'this item'}
+                  </span>
+                  ? This action cannot be undone.
+                </p>
+                <div className="flex space-x-3 mt-4">
+                  <button
+                    onClick={() => {
+                      setShowModal(false);
+                      setSelectedItem(null);
+                    }}
+                    className="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg text-sm transition-colors duration-300"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handleDeleteItem}
+                    className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg text-sm transition-colors duration-300 flex items-center space-x-2"
+                  >
+                    <Trash2 size={14} />
+                    <span>Delete</span>
+                  </button>
+                </div>
+              </div>
+            </GlassCard>
+          </div>
+        )}
+
+        {/* Edit Coming Soon Modal */}
+        {showModal && modalType === 'edit' && (
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-6">
+            <GlassCard className="p-6 max-w-md w-full">
+              <div className="flex flex-col items-center space-y-4">
+                <Edit className="text-azure-400" size={32} />
+                <h2 className="text-xl font-bold text-white">Editor Coming Soon</h2>
+                <p className="text-white/70 text-sm text-center">
+                  The inline editor for this item is under development.
+                </p>
+                <button
+                  onClick={() => {
+                    setShowModal(false);
+                    setSelectedItem(null);
+                  }}
+                  className="px-4 py-2 bg-azure-500 hover:bg-azure-600 text-white rounded-lg text-sm transition-colors duration-300"
+                >
+                  OK
+                </button>
+              </div>
+            </GlassCard>
+          </div>
+        )}
       </div>
     </div>
   );
