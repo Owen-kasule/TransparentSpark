@@ -183,7 +183,7 @@ const About: React.FC = () => {
           </div>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 ui-grid-gap lg:gap-8 mb-12">
+        <div className="grid lg:grid-cols-2 ui-grid-gap lg:gap-8 mb-12 lg:mb-16">
           {/* Bio Section */}
           <GlassCard delay={0.2} className="p-6">
             <h2 className="ui-section-title text-center lg:text-left">{about.storyTitle}</h2>
@@ -289,16 +289,16 @@ const About: React.FC = () => {
           transition={{ duration: 0.8, delay: 1 }}
           className="mb-12"
         >
-          <div className="text-center mb-8">
-            <div className="flex flex-col md:flex-row md:flex-nowrap items-center justify-center gap-3 md:gap-3 mb-4 md:mb-2">
-              <h2 className="text-2xl md:text-3xl font-bold text-white text-center md:text-center md:leading-tight">
+          <div className="text-center mb-4">
+            <div className="flex flex-col md:flex-row md:flex-nowrap items-center justify-center gap-3 md:gap-3 mb-2">
+              <h2 className="ui-section-title mb-0">
                 What People Say
               </h2>
               <div className="flex-shrink-0 md:ml-2">
                 <AddReviewButton />
               </div>
             </div>
-            <p className="text-white/60 text-sm mb-4 text-center">
+            <p className="text-white/60 text-sm text-center">
               Click any card to {isPaused ? 'resume' : 'pause'} the slideshow
             </p>
           </div>

@@ -591,10 +591,12 @@ const Admin: React.FC = () => {
     }
   };
 
-  // Email Magic Link sign-in
+  // Email OTP sign-in
   const [emailInput, setEmailInput] = useState('');
   const [emailSent, setEmailSent] = useState(false);
   const [emailSending, setEmailSending] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [otpVerifying, setOtpVerifying] = useState(false);
 
   const signInWithEmail = async () => {
     if (!emailInput.trim()) {
@@ -602,15 +604,11 @@ const Admin: React.FC = () => {
       return;
     }
 
-    console.log('📧 Starting Email Magic Link sign-in...');
     setEmailSending(true);
 
     try {
       const { error } = await supabase.auth.signInWithOtp({
         email: emailInput.trim(),
-        options: {
-          emailRedirectTo: `${window.location.origin}/admin`
-        }
       });
 
       if (error) {
@@ -618,13 +616,41 @@ const Admin: React.FC = () => {
       }
 
       setEmailSent(true);
-      toast.success('Magic link sent! Check your email inbox.');
+      toast.success('Verification code sent! Check your email.');
       
     } catch (error: any) {
       console.error('Email sign-in error:', error);
-      toast.error(error.message || 'Failed to send magic link');
+      toast.error(error.message || 'Failed to send verification code');
     } finally {
       setEmailSending(false);
+    }
+  };
+
+  const verifyOtpCode = async () => {
+    if (!otpCode.trim() || otpCode.trim().length !== 6) {
+      toast.error('Please enter the 6-digit code');
+      return;
+    }
+
+    setOtpVerifying(true);
+
+    try {
+      const { error } = await supabase.auth.verifyOtp({
+        email: emailInput.trim(),
+        token: otpCode.trim(),
+        type: 'email',
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast.success('Verified! Signing you in...');
+    } catch (error: any) {
+      console.error('OTP verification error:', error);
+      toast.error(error.message || 'Invalid or expired code');
+    } finally {
+      setOtpVerifying(false);
     }
   };
 
@@ -807,24 +833,49 @@ const Admin: React.FC = () => {
               </p>
             </div>
 
-            {/* Email Magic Link */}
+            {/* Email OTP */}
             {emailSent ? (
               <div className="w-full space-y-3">
-                <div className="flex items-center justify-center space-x-2 p-4 bg-green-500/10 border border-green-500/30 rounded-lg">
-                  <CheckCircle size={20} className="text-green-400" />
+                <div className="flex items-center justify-center space-x-2 p-3 bg-green-500/10 border border-green-500/30 rounded-lg">
+                  <CheckCircle size={18} className="text-green-400" />
                   <p className="text-green-400 text-sm">
-                    Magic link sent to <strong>{emailInput}</strong>
+                    Code sent to <strong>{emailInput}</strong>
                   </p>
                 </div>
-                <p className="text-white/50 text-xs">
-                  Check your inbox and click the link to sign in. It may take a minute.
-                </p>
-                <button
-                  onClick={() => { setEmailSent(false); setEmailInput(''); }}
-                  className="text-azure-400 hover:text-azure-300 text-sm underline"
-                >
-                  Use a different email
-                </button>
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    inputMode="numeric"
+                    autoComplete="one-time-code"
+                    maxLength={6}
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                    onKeyDown={(e) => e.key === 'Enter' && verifyOtpCode()}
+                    placeholder="Enter 6-digit code"
+                    className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-white/40 text-sm text-center tracking-[0.3em] font-mono focus:outline-none focus:border-azure-400 focus:ring-1 focus:ring-azure-400 transition-colors"
+                  />
+                  <button
+                    onClick={verifyOtpCode}
+                    disabled={otpVerifying || otpCode.length !== 6}
+                    className="px-5 py-3 bg-azure-500 hover:bg-azure-600 disabled:bg-azure-500/50 disabled:cursor-not-allowed text-white rounded-lg text-sm transition-colors duration-300 flex items-center space-x-2"
+                  >
+                    {otpVerifying ? (
+                      <Loader className="animate-spin" size={16} />
+                    ) : (
+                      <CheckCircle size={16} />
+                    )}
+                    <span>Verify</span>
+                  </button>
+                </div>
+                <div className="flex items-center justify-between">
+                  <p className="text-white/40 text-xs">Check your inbox for the 6-digit code.</p>
+                  <button
+                    onClick={() => { setEmailSent(false); setEmailInput(''); setOtpCode(''); }}
+                    className="text-azure-400 hover:text-azure-300 text-xs underline"
+                  >
+                    Change email
+                  </button>
+                </div>
               </div>
             ) : (
               <div className="w-full space-y-3">
@@ -847,11 +898,11 @@ const Admin: React.FC = () => {
                     ) : (
                       <Mail size={16} />
                     )}
-                    <span>Send</span>
+                    <span>Send Code</span>
                   </button>
                 </div>
                 <p className="text-white/40 text-xs">
-                  We&apos;ll send a magic link to your email — no password needed.
+                  We&apos;ll send a 6-digit code to your email — no password needed.
                 </p>
               </div>
             )}
