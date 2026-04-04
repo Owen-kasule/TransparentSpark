@@ -2,19 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { Menu, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { useContent } from '../../contexts/SiteContentContext';
 
 const Header: React.FC = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const [lastScrollY, setLastScrollY] = useState(0);
   const location = useLocation();
+  const { content } = useContent();
 
-  const mainNavItems = [
-    { name: 'HOME', path: '/' },
-    { name: 'ABOUT', path: '/about' },
-    { name: 'PROJECTS', path: '/projects' },
-    { name: 'CONTACT', path: '/contact' }
-  ];
+  const mainNavItems = content.header.navItems;
 
   const isActive = (path: string) => location.pathname === path;
 
@@ -60,7 +57,7 @@ const Header: React.FC = () => {
           {/* Logo */}
           <Link to="/" className="text-2xl font-bold text-white mr-12">
             <span className="bg-gradient-to-r from-azure-400 to-azure-600 bg-clip-text text-transparent">
-              O
+              {content.header.logoText}
             </span>
           </Link>
 

@@ -6,10 +6,13 @@ import Footer from './Footer';
 import MobileBottomNav from './MobileBottomNav';
 import SocialLinks from '../ui/SocialLinks';
 import { motion } from 'framer-motion';
+import { useContent } from '../../contexts/SiteContentContext';
 
 const Layout: React.FC = () => {
   const location = useLocation();
   const isHome = location.pathname === '/';
+  const { content } = useContent();
+  const theme = content.theme;
 
   // Smooth scroll to top on route change with minimal movement
   useEffect(() => {
@@ -32,7 +35,7 @@ const Layout: React.FC = () => {
         {/* Mobile background (small screens) */}
         <div className="absolute inset-0 lg:hidden">
           <ProgressiveImage
-            src="/mobilebg.png"
+            src={theme.heroMobile}
             alt="Mobile background"
             wrapperClassName="w-full h-full"
             className="object-cover"
@@ -45,7 +48,7 @@ const Layout: React.FC = () => {
         {/* Desktop backgrounds (lg and up) */}
         <div className="absolute inset-0 hidden lg:block dark:opacity-100 opacity-0 transition-opacity duration-500">
           <ProgressiveImage
-            src="/hero-dark.jpg"
+            src={theme.heroDesktopDark}
             alt="Dark background"
             wrapperClassName="w-full h-full"
             className="object-cover"
@@ -56,7 +59,7 @@ const Layout: React.FC = () => {
         </div>
         <div className="absolute inset-0 hidden lg:block dark:opacity-0 opacity-100 transition-opacity duration-500">
           <ProgressiveImage
-            src="/hero-light.jpg"
+            src={theme.heroDesktopLight}
             alt="Light background"
             wrapperClassName="w-full h-full"
             className="object-cover"

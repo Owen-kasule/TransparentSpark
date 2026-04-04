@@ -33,6 +33,7 @@ import {
 } from 'lucide-react';
 import { supabase, checkAdminAuthorization, getGitHubUserData } from '../lib/supabase';
 import EmailValidator from '../components/admin/EmailValidator';
+import ContentManager from '../components/admin/ContentManager';
 import GlassCard from '../components/ui/GlassCard';
 import toast from 'react-hot-toast';
 
@@ -1335,62 +1336,7 @@ const Admin: React.FC = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <GlassCard className="p-6">
-                <div className="flex items-center space-x-3 mb-6">
-                  <Edit className="text-azure-400" size={24} />
-                  <h2 className="text-xl font-bold text-white">Content Management</h2>
-                </div>
-                
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                  <div className="bg-white/5 p-4 rounded-lg">
-                    <h3 className="text-white font-semibold mb-2">Homepage</h3>
-                    <p className="text-white/70 text-sm mb-3">Edit hero section, about, and featured content</p>
-                    <button onClick={() => toast('Homepage editor coming soon!', { icon: '🚧' })} className="bg-azure-500 hover:bg-azure-600 text-white px-3 py-2 rounded text-sm transition-colors duration-300">
-                      Edit Homepage
-                    </button>
-                  </div>
-                  
-                  <div className="bg-white/5 p-4 rounded-lg">
-                    <h3 className="text-white font-semibold mb-2">About Page</h3>
-                    <p className="text-white/70 text-sm mb-3">Update bio, skills, and experience</p>
-                    <button onClick={() => toast('About editor coming soon!', { icon: '🚧' })} className="bg-azure-500 hover:bg-azure-600 text-white px-3 py-2 rounded text-sm transition-colors duration-300">
-                      Edit About
-                    </button>
-                  </div>
-                  
-                  <div className="bg-white/5 p-4 rounded-lg">
-                    <h3 className="text-white font-semibold mb-2">Projects</h3>
-                    <p className="text-white/70 text-sm mb-3">Manage portfolio projects and case studies</p>
-                    <button onClick={() => toast('Projects editor coming soon!', { icon: '🚧' })} className="bg-azure-500 hover:bg-azure-600 text-white px-3 py-2 rounded text-sm transition-colors duration-300">
-                      Edit Projects
-                    </button>
-                  </div>
-                  
-                  <div className="bg-white/5 p-4 rounded-lg">
-                    <h3 className="text-white font-semibold mb-2">Contact Info</h3>
-                    <p className="text-white/70 text-sm mb-3">Update contact details and social links</p>
-                    <button onClick={() => toast('Contact editor coming soon!', { icon: '🚧' })} className="bg-azure-500 hover:bg-azure-600 text-white px-3 py-2 rounded text-sm transition-colors duration-300">
-                      Edit Contact
-                    </button>
-                  </div>
-                  
-                  <div className="bg-white/5 p-4 rounded-lg">
-                    <h3 className="text-white font-semibold mb-2">SEO Settings</h3>
-                    <p className="text-white/70 text-sm mb-3">Meta tags, descriptions, and keywords</p>
-                    <button onClick={() => toast('SEO editor coming soon!', { icon: '🚧' })} className="bg-azure-500 hover:bg-azure-600 text-white px-3 py-2 rounded text-sm transition-colors duration-300">
-                      Edit SEO
-                    </button>
-                  </div>
-                  
-                  <div className="bg-white/5 p-4 rounded-lg">
-                    <h3 className="text-white font-semibold mb-2">Navigation</h3>
-                    <p className="text-white/70 text-sm mb-3">Customize menu items and structure</p>
-                    <button onClick={() => toast('Navigation editor coming soon!', { icon: '🚧' })} className="bg-azure-500 hover:bg-azure-600 text-white px-3 py-2 rounded text-sm transition-colors duration-300">
-                      Edit Navigation
-                    </button>
-                  </div>
-                </div>
-              </GlassCard>
+              <ContentManager />
             </motion.div>
           )}
 

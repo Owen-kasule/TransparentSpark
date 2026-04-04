@@ -7,6 +7,17 @@
 :root {
   --hero-bar-sm: 0px;
   --hero-bar-lg: 0px;
+  /* Dynamic azure palette — overridden at runtime by SiteContentProvider */
+  --azure-50: #f0f9ff;
+  --azure-100: #e0f2fe;
+  --azure-200: #bae6fd;
+  --azure-300: #7dd3fc;
+  --azure-400: #38bdf8;
+  --azure-500: #0ea5e9;
+  --azure-600: #0284c7;
+  --azure-700: #0369a1;
+  --azure-800: #075985;
+  --azure-900: #0c4a6e;
 }
 
 @layer base {

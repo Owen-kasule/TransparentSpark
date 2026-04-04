@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Link } from 'react-router-dom';
+import { useContent } from '../../contexts/SiteContentContext';
 
 const Footer: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const [lastModified, setLastModified] = useState<Date | null>(null);
+  const { content } = useContent();
+  const brandName = content.footer.brandName;
 
   useEffect(() => {
     // Get the last modified date from the document
@@ -57,11 +60,11 @@ const Footer: React.FC = () => {
                   Last modified: {formatDateTime(lastModified)}
                 </span>
               )}
-              <span className="font-medium text-xs text-white/60">TECHROOOT © {currentYear}</span>
+              <span className="font-medium text-xs text-white/60">{brandName} © {currentYear}</span>
             </div>
             {/* Desktop layout */}
             <div className="hidden md:flex items-center space-x-8 text-sm text-white/60">
-              <span className="font-medium">TECHROOOT © {currentYear}</span>
+              <span className="font-medium">{brandName} © {currentYear}</span>
               <Link 
                 to="/contact" 
                 className="hover:text-white/80 transition-colors duration-300"
