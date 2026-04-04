@@ -183,7 +183,7 @@ const About: React.FC = () => {
           </div>
         </motion.div>
 
-        <div className="grid lg:grid-cols-2 ui-grid-gap lg:gap-8 mb-12 lg:mb-16">
+        <div className="grid lg:grid-cols-2 ui-grid-gap lg:gap-8 mb-12">
           {/* Bio Section */}
           <GlassCard delay={0.2} className="p-6">
             <h2 className="ui-section-title text-center lg:text-left">{about.storyTitle}</h2>
@@ -287,7 +287,7 @@ const About: React.FC = () => {
           initial={{ opacity: 0, y: 50 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8, delay: 1 }}
-          className="mb-12"
+          className="mb-12 lg:pt-8"
         >
           <div className="text-center mb-4">
             <div className="flex flex-col md:flex-row md:flex-nowrap items-center justify-center gap-3 md:gap-3 mb-2">
