@@ -73,12 +73,13 @@ class AbstractEmailValidator {
       apiUrl: 'https://emailvalidation.abstractapi.com/v1/'
     };
 
-    // Log configuration status
-    if (this.isApiKeyConfigured()) {
-      console.log('✅ Abstract API Email Validation configured with key:', `${this.config.apiKey.substring(0, 8)}...`);
-      console.log('🌐 Using Abstract API endpoint:', this.config.apiUrl);
-    } else {
-      console.warn('⚠️ Abstract API key not configured - falling back to basic validation');
+    // Log configuration status in development only
+    if (import.meta.env.DEV) {
+      if (this.isApiKeyConfigured()) {
+        console.log('✅ Abstract API Email Validation configured');
+      } else {
+        console.warn('⚠️ Abstract API key not configured - falling back to basic validation');
+      }
     }
   }
 
