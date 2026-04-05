@@ -8,7 +8,9 @@ import SocialLinks from '../components/ui/SocialLinks';
 import { useAnalytics } from '../hooks/useAnalytics';
 import { useContent } from '../contexts/SiteContentContext';
 
-const skillIconMap: Record<string, React.FC<{ size?: number }>> = {
+import { LucideIcon } from 'lucide-react';
+
+const skillIconMap: Record<string, LucideIcon> = {
   code: Code, database: Database, globe: Globe, server: Server, smartphone: Smartphone, cloud: Cloud,
 };
 
@@ -148,8 +150,6 @@ const Home: React.FC = () => {
                         animate={{ width: barWidthLg }}
                         transition={{ duration: 0.8, ease: 'easeOut', delay: 0.5 }}
                         style={{ height: '1.125rem', minWidth: '2px' }}
-                        onAnimationStart={() => {}}
-                        onAnimationComplete={() => {}}
                       />
                     </div>
                     <h1 ref={fullNameRefLg} className="font-bold text-white leading-tight text-4xl">
@@ -184,8 +184,6 @@ const Home: React.FC = () => {
                             animate={{ width: barWidthSm }}
                             transition={{ duration: 0.8, ease: 'easeOut', delay: 0.5 }}
                             style={{ height: '1em', minWidth: '2px' }}
-                            onAnimationStart={() => {}}
-                            onAnimationComplete={() => {}}
                           />
                         </div>
                         <p className="text-azure-400 font-medium uppercase whitespace-nowrap tracking-[0.12em] text-[11px] sm:text-xs md:text-sm mt-1"><span ref={subtitleRefSm} className="inline-block">{home.heroSubtitle}</span></p>

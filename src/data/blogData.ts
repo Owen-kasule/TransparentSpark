@@ -5,21 +5,6 @@ export interface BlogPost extends DBBlogPost {
   comments: number;
 }
 
-// Kept for backward compatibility — returns [] since real comments come from Supabase
-interface Comment {
-  id: string;
-  author: string;
-  content: string;
-  date: string;
-  likes: number;
-  avatar?: string;
-  replies?: Comment[];
-}
-
-export const getCommentsForPost = (_postId: string): Comment[] => {
-  return [];
-};
-
 // Fetch real comment counts for a batch of post IDs
 async function getCommentCounts(postIds: string[]): Promise<Record<string, number>> {
   if (postIds.length === 0) return {};
@@ -135,5 +120,3 @@ export const getAllPosts = async (): Promise<BlogPost[]> => {
     return [];
   }
 };
-
-export type { Comment };

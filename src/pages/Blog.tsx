@@ -193,7 +193,7 @@ const Blog: React.FC = () => {
           table: 'blog_posts',
           filter: 'published=eq.true'
         }, 
-        (payload: any) => {
+        () => {
           // Reload data when posts are added, updated, or deleted
           loadBlogData();
         }
